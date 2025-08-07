@@ -6,8 +6,11 @@ jobs:
   lint_and_test:
     runs-on: windows-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Lint and test
-        uses: ./.github/actions/lint_and_test
+        uses: ./.github/actions/lint_and_test.yml
 
   build:
     needs: lint_and_test
