@@ -4,13 +4,7 @@ on: [push, pull_request]
 
 jobs:
   lint_and_test:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Lint and test
-        uses: ./.github/actions/lint_and_test.yml
+    uses: ./.github/workflows/lint_and_test.yaml
 
   build:
     needs: lint_and_test
