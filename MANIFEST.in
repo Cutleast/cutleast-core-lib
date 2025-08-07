@@ -1,1 +1,1 @@
-recursive-include src/res *
+recursive-include src/cutleast_core_lib/res *
