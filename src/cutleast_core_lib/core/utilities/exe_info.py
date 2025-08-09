@@ -15,7 +15,9 @@ def get_execution_info() -> tuple[list[str], bool]:
             whether it is a standalone built executable.
     """
 
-    compiled: bool = sys.argv[0].lower().endswith(".exe")
+    compiled: bool = sys.argv[0].lower().endswith(".exe") or getattr(
+        sys, "frozen", False
+    )
 
     if compiled:
         return sys.argv, compiled
