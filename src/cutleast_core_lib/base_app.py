@@ -4,10 +4,8 @@ Copyright (c) Cutleast
 
 import logging
 import platform
-import subprocess
-import sys
 import time
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from argparse import Namespace
 from pathlib import Path
 from typing import Optional, override
@@ -16,13 +14,13 @@ from PySide6.QtWidgets import QApplication, QMainWindow
 
 from .core.config.app_config import AppConfig
 from .core.utilities.exception_handler import ExceptionHandler
-from .core.utilities.exe_info import get_current_path
+from .core.utilities.exe_info import get_current_path, get_execution_info
 from .core.utilities.logger import Logger
 from .core.utilities.updater import Updater
 from .ui.utilities.stylesheet_processor import StylesheetProcessor
 
 
-class BaseApp(QApplication, metaclass=ABCMeta):
+class BaseApp(QApplication):
     """
     Abstract base class for the main application.
     """
@@ -89,6 +87,10 @@ class BaseApp(QApplication, metaclass=ABCMeta):
         - `main_window`: The main window of the application.
         """
 
+        self.setApplicationDisplayName(
+            f"{self.applicationName()} v{self.applicationVersion()}"
+        )
+
         log_file: Path = self.log_path / time.strftime(self.app_config.log_file_name)
         self.logger = Logger(
             log_file, self.app_config.log_format, self.app_config.log_date_format
@@ -111,7 +113,8 @@ class BaseApp(QApplication, metaclass=ABCMeta):
         log_title = f" {self.applicationName()} ".center(width, "=")
         self.log.info(f"\n{'=' * width}\n{log_title}\n{'=' * width}")
         self.log.info(f"Program Version: {self.applicationVersion()}")
-        self.log.info(f"Executed command: {subprocess.list2cmdline(sys.argv)}")
+        self.log.info(f"Executed command: {get_execution_info()[0]}")
+        self.log.info(f"Frozen/compiled: {get_execution_info()[1]}")
         self.log.info(f"Current Path: {self.cur_path}")
         self.log.info(f"Resource Path: {self.res_path}")
         self.log.info(f"Data Path: {self.data_path}")
@@ -186,24 +189,24 @@ class BaseApp(QApplication, metaclass=ABCMeta):
             self.app_config.log_num_of_files,
         )
 
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def get_repo_owner(cls) -> Optional[str]:
         """
         Returns:
             Optional[str]: GitHub repository owner.
         """
 
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def get_repo_name(cls) -> Optional[str]:
         """
         Returns:
             Optional[str]: GitHub repository name.
         """
 
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def get_repo_branch(cls) -> Optional[str]:
         """
         Returns:
