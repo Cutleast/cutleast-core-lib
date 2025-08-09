@@ -25,6 +25,15 @@ class Builder:
     backend: BuildBackend
     metadata: BuildMetadata
 
+    BASE_RES: dict[Path, Path] = {
+        Path(__file__).parent.parent / "res" / "path_limit.reg": (
+            Path("res") / "path_limit.reg"
+        ),
+        Path(__file__).parent.parent / "res" / "TaskbarLib.tlb": (
+            Path("res") / "TaskbarLib.tlb"
+        ),
+    }
+
     def __init__(self, config: BuildConfig, backend: BuildBackend) -> None:
         """
         Args:
@@ -195,7 +204,9 @@ class Builder:
             self.log.info(f"Copying '{backend_output}' to '{dist_folder}'...")
             shutil.copytree(backend_output, dist_folder)
 
-            external_resources: dict[Path, Path] = self.__load_external_resources()
+            external_resources: dict[Path, Path] = (
+                Builder.BASE_RES | self.__load_external_resources()
+            )
 
             self.log.info("Finalizing build...")
             self.__copy_external_resources(external_resources, dist_folder)
