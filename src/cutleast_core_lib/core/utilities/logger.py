@@ -11,10 +11,13 @@ from datetime import datetime
 from functools import wraps
 from io import TextIOWrapper
 from pathlib import Path
-from typing import Any, Callable, Optional, TextIO, override
+from typing import Any, Callable, Optional, ParamSpec, TextIO, TypeVar, override
 
 from .base_enum import BaseEnum
 from .datetime import datetime_format_to_regex
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 class Logger(logging.Logger):
@@ -203,7 +206,7 @@ class Logger(logging.Logger):
             logger.info(f"{key.rjust(indent)} = {value!r}")
 
     @classmethod
-    def timeit[**P, R](
+    def timeit(
         cls, *, logger_name: Optional[str] = None
     ) -> Callable[[Callable[P, R]], Callable[P, R]]:
         """
