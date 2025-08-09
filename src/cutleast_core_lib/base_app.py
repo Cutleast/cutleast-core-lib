@@ -10,7 +10,7 @@ import time
 from abc import ABCMeta, abstractmethod
 from argparse import Namespace
 from pathlib import Path
-from typing import override
+from typing import Optional, override
 
 from PySide6.QtWidgets import QApplication, QMainWindow
 
@@ -121,21 +121,31 @@ class BaseApp(QApplication, metaclass=ABCMeta):
             f"{platform.system()} {platform.version()} {platform.architecture()[0]}"
         )
 
+    def check_for_updates(self) -> None:
+        """
+        Runs the updater if `get_repo_name()`, `get_repo_branch()` and
+        `get_repo_owner()` do not return None.
+        """
+
+        repo_name: Optional[str] = self.get_repo_name()
+        repo_branch: Optional[str] = self.get_repo_branch()
+        repo_owner: Optional[str] = self.get_repo_owner()
+
+        if not repo_name or not repo_branch or not repo_owner:
+            return
+
+        try:
+            Updater(repo_name, repo_branch, repo_owner, self.applicationVersion()).run()
+        except Exception as ex:
+            self.log.warning(f"Failed to check for updates: {ex}", exc_info=ex)
+
     @override
     def exec(self) -> int:  # type: ignore
         """
         Executes application and shows main window.
         """
 
-        try:
-            Updater(
-                self.get_repo_name(),
-                self.get_repo_branch(),
-                self.get_repo_owner(),
-                self.applicationVersion(),
-            ).run()
-        except Exception as ex:
-            self.log.warning(f"Failed to check for updates: {ex}", exc_info=ex)
+        self.check_for_updates()
 
         self.main_window.show()
 
@@ -178,24 +188,24 @@ class BaseApp(QApplication, metaclass=ABCMeta):
 
     @abstractmethod
     @classmethod
-    def get_repo_owner(cls) -> str:
+    def get_repo_owner(cls) -> Optional[str]:
         """
         Returns:
-            str: GitHub repository owner.
+            Optional[str]: GitHub repository owner.
         """
 
     @abstractmethod
     @classmethod
-    def get_repo_name(cls) -> str:
+    def get_repo_name(cls) -> Optional[str]:
         """
         Returns:
-            str: GitHub repository name.
+            Optional[str]: GitHub repository name.
         """
 
     @abstractmethod
     @classmethod
-    def get_repo_branch(cls) -> str:
+    def get_repo_branch(cls) -> Optional[str]:
         """
         Returns:
-            str: GitHub repository branch.
+            Optional[str]: GitHub repository branch.
         """
