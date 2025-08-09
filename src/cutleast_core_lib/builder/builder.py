@@ -121,6 +121,7 @@ class Builder:
             src: Path = self.config.project_root / file
             dst: Path = dist_folder / dst
             self.log.info(f"Copying '{src}' to '{dst}'...")
+            dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(src, dst)
 
         self.log.info(
