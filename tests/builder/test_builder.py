@@ -91,6 +91,10 @@ class TestBuilder(BaseTest):
             ) -> Path:
                 raise NotImplementedError
 
+            @override
+            def clean(self, main_module: Path, exe_stem: str) -> None:
+                raise NotImplementedError
+
         backend = TestBackend()
         config = BuildConfig(exe_stem="test", project_root=data_folder / "test_project")
         builder = Builder(config, backend)

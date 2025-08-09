@@ -2,6 +2,7 @@
 Copyright (c) Cutleast
 """
 
+import shutil
 import sys
 from pathlib import Path
 from typing import Optional, override
@@ -93,3 +94,17 @@ class NuitkaBackend(BuildBackend):
             )
 
         return dist_folder
+
+    @override
+    def clean(self, main_module: Path, exe_stem: str) -> None:
+        build_folder = Path(main_module.stem + ".build")
+        dist_folder = Path(main_module.stem + ".dist")
+
+        shutil.rmtree(build_folder, ignore_errors=True)
+        shutil.rmtree(dist_folder, ignore_errors=True)
+
+        # Exclude from git in case the deletion fails
+        if build_folder.is_dir():
+            (build_folder / ".gitignore").write_text("*")
+        if dist_folder.is_dir():
+            (dist_folder / ".gitignore").write_text("*")

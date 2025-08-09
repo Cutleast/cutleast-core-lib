@@ -2,6 +2,7 @@
 Copyright (c) Cutleast
 """
 
+import shutil
 import sys
 from pathlib import Path
 from typing import Any, override
@@ -56,7 +57,7 @@ class CxFreezeBackend(BuildBackend):
     ) -> Path:
         from cx_Freeze import Executable, setup  # pyright: ignore[reportMissingImports]
 
-        outpath: Path = Path.cwd() / f"{exe_stem}.dist"
+        outpath: Path = Path.cwd() / f"{main_module.stem}.dist"
         build_options: dict[str, Any] = {
             "replace_paths": [("*", "")],
             "include_files": [],
@@ -108,3 +109,13 @@ class CxFreezeBackend(BuildBackend):
         )
 
         return outpath
+
+    @override
+    def clean(self, main_module: Path, exe_stem: str) -> None:
+        outpath: Path = Path.cwd() / f"{main_module.stem}.dist"
+
+        shutil.rmtree(outpath, ignore_errors=True)
+
+        # Exclude from git in case the deletion fails
+        if outpath.is_dir():
+            (outpath / ".gitignore").write_text("*")

@@ -175,44 +175,49 @@ class Builder:
         self.log.info(f"Preparing source in '{build_folder}'...")
         main_module: Path = self.__prepare_src(build_folder)
 
-        self.log.info("Running build backend...")
-        backend_output: Path = self.backend.build(
-            main_module=main_module,
-            exe_stem=self.config.exe_stem,
-            icon_path=self.config.icon_path,
-            metadata=self.metadata,
-        )
+        try:
+            self.log.info("Running build backend...")
+            backend_output: Path = self.backend.build(
+                main_module=main_module,
+                exe_stem=self.config.exe_stem,
+                icon_path=self.config.icon_path,
+                metadata=self.metadata,
+            )
 
-        dist_folder: Path = self.config.project_root / "dist" / self.config.exe_stem
-        if self.config.dist_dir is not None:
-            dist_folder = self.config.dist_dir
+            dist_folder: Path = self.config.project_root / "dist" / self.config.exe_stem
+            if self.config.dist_dir is not None:
+                dist_folder = self.config.dist_dir
 
-        if dist_folder.is_dir():
-            shutil.rmtree(dist_folder)
-            self.log.warning(f"Deleted existing '{dist_folder}'.")
+            if dist_folder.is_dir():
+                shutil.rmtree(dist_folder)
+                self.log.warning(f"Deleted existing '{dist_folder}'.")
 
-        dist_folder.mkdir(parents=True, exist_ok=True)
-        self.log.info(f"Copying '{backend_output}' to '{dist_folder}'...")
-        shutil.copy(backend_output, dist_folder)
+            self.log.info(f"Copying '{backend_output}' to '{dist_folder}'...")
+            shutil.copytree(backend_output, dist_folder)
 
-        external_resources: dict[Path, Path] = self.__load_external_resources()
+            external_resources: dict[Path, Path] = self.__load_external_resources()
 
-        self.log.info("Finalizing build...")
-        self.__copy_external_resources(external_resources, dist_folder)
-        self.__delete_unused_files(dist_folder)
+            self.log.info("Finalizing build...")
+            self.__copy_external_resources(external_resources, dist_folder)
+            self.__delete_unused_files(dist_folder)
 
-        output_archive: Path = (
-            self.config.project_root
-            / "dist"
-            / f"{self.metadata.display_name}_v{self.metadata.project_version}.zip"
-        )
-        if self.config.output_archive is not None:
-            output_archive = self.config.output_archive
+            output_archive: Path = (
+                self.config.project_root
+                / "dist"
+                / f"{self.metadata.display_name}_v{self.metadata.project_version}.zip"
+            )
+            if self.config.output_archive is not None:
+                output_archive = self.config.output_archive
 
-        self.__archive_dist(dist_folder, output_archive)
+            self.__archive_dist(dist_folder, output_archive)
 
-        self.log.info(
-            f"Build completed successfully in {time.time() - start:.2f} second(s)."
-        )
+            self.log.info(
+                f"Build completed successfully in {time.time() - start:.2f} second(s)."
+            )
+
+        finally:
+            shutil.rmtree(build_folder, ignore_errors=True)
+            self.backend.clean(main_module, self.config.exe_stem)
+            self.log.info("Cleaned build backend output.")
 
         return output_archive

@@ -63,3 +63,15 @@ class BuildBackend(metaclass=ABCMeta):
         Returns:
             Path: Path to the folder with the built executable and dependencies.
         """
+
+    @abstractmethod
+    def clean(self, main_module: Path, exe_stem: str) -> None:
+        """
+        Cleans the backend's output folder(s).
+
+        Args:
+            main_module (Path): Path to the built main.py.
+            exe_stem (str):
+                Stem (name without suffix) of the name of the final executable (e.g.
+                "SSE-AT").
+        """
