@@ -4,6 +4,16 @@ A core library used by my projects. Because of being quite specialized to my own
 
 However, given that it is under the MIT license, you are free to use it as you see fit.
 
+## Installation
+
+To install a specific version (recommended) (check [Tags](https://github.com/Cutleast/cutleast-core-lib/tags) for the latest tag):
+`uv add git+https://github.com/Cutleast/cutleast-core-lib --tag [version]`
+
+e.g. `uv add git+https://github.com/Cutleast/cutleast-core-lib --tag v1.1.0`
+
+Run this from the root of your project to add from the master branch to your dependencies (not recommended):
+`uv add git+https://github.com/Cutleast/cutleast-core-lib`
+
 ## Basic Usage
 
 ```py
