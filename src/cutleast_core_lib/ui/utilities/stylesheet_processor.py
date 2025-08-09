@@ -32,7 +32,10 @@ class StylesheetProcessor:
         self.app = app
         self.ui_mode = ui_mode
 
-        self.apply_app_stylesheet()
+        try:
+            self.apply_app_stylesheet()
+        except Exception as ex:
+            self.log.error(f"Failed to apply stylesheet: {ex}", exc_info=ex)
 
     def load_fonts(self, fonts: list[str]) -> None:
         """
