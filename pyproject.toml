@@ -1,6 +1,6 @@
 [project]
 name = "cutleast-core-lib"
-version = "1.0.1"
+version = "1.1.0"
 description = "A core library used by my projects"
 authors = [{ name = "cutleast", email = "cutleast@gmail.com" }]
 readme = "README.md"
