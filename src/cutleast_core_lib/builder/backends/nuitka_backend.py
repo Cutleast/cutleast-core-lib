@@ -83,7 +83,7 @@ class NuitkaBackend(BuildBackend):
 
         cmd.append(str(main_module))
         self.log.info(f"Running Nuitka command: '{' '.join(cmd)}'...")
-        run_process(cmd)
+        run_process(cmd, live_output=True)
 
         dist_folder = Path(main_module.stem + ".dist")
 

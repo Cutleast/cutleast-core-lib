@@ -4,16 +4,18 @@ Copyright (c) Cutleast
 
 import logging
 import subprocess
+import sys
 
 log: logging.Logger = logging.getLogger("ProcessRunner")
 
 
-def run_process(command: list[str]) -> None:
+def run_process(command: list[str], live_output: bool = False) -> None:
     """
     Executes an external command and logs its output in case of an error.
 
     Args:
         command (list[str]): Executable + arguments to run.
+        live_output (bool): Whether to print the stdout output in realtime.
 
     Raises:
         RuntimeError: When the process returns a non-zero exit code.
@@ -25,8 +27,8 @@ def run_process(command: list[str]) -> None:
         command,
         shell=True,
         stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE if not live_output else sys.stdout,
+        stderr=subprocess.PIPE if not live_output else sys.stderr,
         text=True,
         encoding="utf8",
         errors="ignore",
