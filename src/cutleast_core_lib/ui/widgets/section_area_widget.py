@@ -82,12 +82,8 @@ class SectionAreaWidget(QWidget):
         self.__content_widget = content
         self.__direction = direction
 
-        self.__chevron_down_icon = IconProvider.get_qta_icon_for_palette(
-            "mdi6.chevron-down", self.palette()
-        )
-        self.__chevron_up_icon = IconProvider.get_qta_icon_for_palette(
-            "mdi6.chevron-up", self.palette()
-        )
+        self.__chevron_down_icon = IconProvider.get_qta_icon("mdi6.chevron-down")
+        self.__chevron_up_icon = IconProvider.get_qta_icon("mdi6.chevron-up")
 
         self.__init_ui(toggle_position)
 

@@ -25,12 +25,8 @@ class KeyLineEdit(QLineEdit):
     def __init__(self, *args: Any, **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
 
-        self.__visible_icon = IconProvider.get_qta_icon_for_palette(
-            "mdi6.eye-off", self.palette()
-        )
-        self.__hidden_icon = IconProvider.get_qta_icon_for_palette(
-            "mdi6.eye", self.palette()
-        )
+        self.__visible_icon = IconProvider.get_qta_icon("mdi6.eye-off")
+        self.__hidden_icon = IconProvider.get_qta_icon("mdi6.eye")
 
         self.__init_ui()
 

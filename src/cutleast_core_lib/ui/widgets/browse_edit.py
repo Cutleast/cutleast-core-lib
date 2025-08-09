@@ -64,9 +64,7 @@ class BrowseLineEdit(QLineEdit):
         hlayout.addStretch()
 
         self.__browse_button = QPushButton()
-        self.__browse_button.setIcon(
-            IconProvider.get_qta_icon_for_palette("fa5s.folder-open", self.palette())
-        )
+        self.__browse_button.setIcon(IconProvider.get_qta_icon("fa5s.folder-open"))
         self.__browse_button.clicked.connect(self.__browse)
         self.__browse_button.setCursor(Qt.CursorShape.ArrowCursor)
         hlayout.addWidget(self.__browse_button)

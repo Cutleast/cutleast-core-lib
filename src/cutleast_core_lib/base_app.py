@@ -5,7 +5,7 @@ Copyright (c) Cutleast
 import logging
 import platform
 import time
-from abc import abstractmethod
+from abc import ABCMeta, abstractmethod
 from argparse import Namespace
 from pathlib import Path
 from typing import Optional, override
@@ -17,10 +17,16 @@ from .core.utilities.exception_handler import ExceptionHandler
 from .core.utilities.exe_info import get_current_path, get_execution_info
 from .core.utilities.logger import Logger
 from .core.utilities.updater import Updater
-from .ui.utilities.stylesheet_processor import StylesheetProcessor
+from .ui.utilities.theme_manager import ThemeManager
 
 
-class BaseApp(QApplication):
+class ABCQtMeta(type(QApplication), ABCMeta):  # pyright: ignore[reportGeneralTypeIssues]
+    """
+    Combined metaclass for ABC + PySide6 Qt types to avoid metaclass conflicts.
+    """
+
+
+class BaseApp(QApplication, metaclass=ABCQtMeta):
     """
     Abstract base class for the main application.
     """
@@ -58,8 +64,8 @@ class BaseApp(QApplication):
     main_window: QMainWindow
     """The main window of the application."""
 
-    stylesheet_processor: StylesheetProcessor
-    """The stylesheet processor."""
+    theme_manager: Optional[ThemeManager]
+    """The theme manager."""
 
     exception_handler: ExceptionHandler
     """The custom sys.excepthook handler redirecting exceptions to an ErrorDialog."""
@@ -74,35 +80,68 @@ class BaseApp(QApplication):
 
         self.args = args
 
+        self._init()
+
     @abstractmethod
-    def init(self) -> None:
+    def _init(self) -> None:
         """
         Initializes application.
 
         ### Implementations are required to set the following before calling this method:
 
-        - `app_config`: The application config.
         - `applicationName()`: The application name.
         - `applicationVersion()`: The application version.
-        - `main_window`: The main window of the application.
         """
 
         self.setApplicationDisplayName(
             f"{self.applicationName()} v{self.applicationVersion()}"
         )
 
+        self.app_config = self._load_app_config()
+
         log_file: Path = self.log_path / time.strftime(self.app_config.log_file_name)
         self.logger = Logger(
             log_file, self.app_config.log_format, self.app_config.log_date_format
         )
         self.logger.setLevel(self.app_config.log_level)
-
-        self.stylesheet_processor = StylesheetProcessor(self, self.app_config.ui_mode)
         self.exception_handler = ExceptionHandler(self)
+
+        self.theme_manager = self._get_theme_manager()
+        if self.theme_manager is not None:
+            self.theme_manager.apply_to_app(self)
+
+        self.main_window = self._init_main_window()
 
         self._log_basic_info()
         self.app_config.print_settings_to_log()
         self.log.info("App started.")
+
+    @abstractmethod
+    def _load_app_config(self) -> AppConfig:
+        """
+        Loads the application config.
+
+        Returns:
+            AppConfig: The application config.
+        """
+
+    @abstractmethod
+    def _get_theme_manager(self) -> Optional[ThemeManager]:
+        """
+        Gets the theme manager.
+
+        Returns:
+            Optional[ThemeManager]: The theme manager.
+        """
+
+    @abstractmethod
+    def _init_main_window(self) -> QMainWindow:
+        """
+        Initializes the main window of the application.
+
+        Returns:
+            QMainWindow: The main window of the application.
+        """
 
     def _log_basic_info(self) -> None:
         """

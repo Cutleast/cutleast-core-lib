@@ -40,7 +40,7 @@ class ColorLineEdit(QLineEdit):
         self.__choose_color_button = QPushButton()
         self.__choose_color_button.setIconSize(QSize(24, 24))
         self.__choose_color_button.setIcon(
-            IconProvider.get_qta_icon_for_palette("mdi6.square-rounded", self.palette())
+            IconProvider.get_qta_icon("mdi6.square-rounded")
         )
         self.__choose_color_button.clicked.connect(self.__choose_color)
         self.__choose_color_button.setCursor(Qt.CursorShape.ArrowCursor)

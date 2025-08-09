@@ -29,9 +29,7 @@ class UrlEdit(QLineEdit):
 
         self.__open_url_button = QPushButton()
         self.__open_url_button.setToolTip(self.tr("Open URL in default browser..."))
-        self.__open_url_button.setIcon(
-            IconProvider.get_qta_icon_for_palette("mdi6.open-in-new", self.palette())
-        )
+        self.__open_url_button.setIcon(IconProvider.get_qta_icon("mdi6.open-in-new"))
         self.__open_url_button.clicked.connect(self.__open_url)
         self.__open_url_button.setCursor(Qt.CursorShape.ArrowCursor)
         self.__open_url_button.setEnabled(bool(self.text().strip()))

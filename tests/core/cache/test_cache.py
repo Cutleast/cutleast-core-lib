@@ -100,5 +100,5 @@ class TestCache(BaseTest):
         Tests that instantiating multiple `Cache` instances raises an exception.
         """
 
-        with pytest.raises(ValueError, match="A cache instance already exists!"):
+        with pytest.raises(RuntimeError, match="Cache is already initialized!"):
             Cache(Path("test_cache"), "development")

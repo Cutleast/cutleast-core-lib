@@ -2,94 +2,99 @@
 Copyright (c) Cutleast
 """
 
+from __future__ import annotations
+
+from typing import Optional, TypeVar
+
 import qtawesome as qta
-from PySide6.QtGui import QIcon, QPalette
+from PySide6.QtCore import QFile
+from PySide6.QtGui import QIcon
+
+from cutleast_core_lib.core.utilities.singleton import Singleton
+from cutleast_core_lib.ui.utilities.ui_mode import UIMode
+
+T = TypeVar("T", bound="IconProvider")
 
 
-class IconProvider:
+class IconProvider(Singleton):
     """
-    Class for providing icons.
+    Singleton class for providing icons.
     """
 
-    @classmethod
-    def get_qta_icon_for_palette(cls, icon_name: str, palette: QPalette) -> QIcon:
+    __ui_mode: UIMode
+    __icon_color: str
+
+    def __init__(self, ui_mode: UIMode, icon_color: str) -> None:
         """
-        Gets the specified icon from qtawesome and returns it with the correct colors.
-
         Args:
-            icon_name (str): The name of the icon to get.
-            palette (QPalette): The palette to use for the icon.
+            ui_mode (UIMode): The current UI mode.
+            icon_color (str): The color to use for the icons.
 
-        Returns:
-            QIcon: The icon with the correct colors.
+        Raises:
+            RuntimeError: When the class is already initialized.
         """
 
-        return IconProvider.get_qta_icon(icon_name, palette.text().color().name())
+        super().__init__()
+
+        self.__ui_mode = ui_mode
+        self.__icon_color = icon_color
 
     @classmethod
     def get_qta_icon(
-        cls, icon_name: str, color: str, disabled_color: str = "#666666"
+        cls,
+        icon_name: str,
+        *,
+        color: Optional[str] = None,
+        disabled_color: str = "#666666",
     ) -> QIcon:
         """
         Gets the specified icon from qtawesome and returns it with the correct colors.
 
         Args:
             icon_name (str): The name of the icon to get.
-            color (str): The color to use for the icon.
+            color (Optional[str], optional):
+                The color to use for the icon. Defaults to None.
             disabled_color (str, optional):
                 The color to use for the disabled icon. Defaults to "#666666".
+
+        Raises:
+            RuntimeError: When the class is not initialized.
 
         Returns:
             QIcon: The icon with the correct colors.
         """
 
+        if color is None:
+            color = cls.get().__icon_color
+
         return qta.icon(icon_name, color=color, color_disabled=disabled_color)
 
     @classmethod
-    def get_icon_name_for_palette(cls, icon_name: str, palette: QPalette) -> str:
+    def get_icon(cls, icon_name: str) -> QIcon:
         """
-        Returns the icon name for the text color of the specified palette.
+        Provides an icon for the current UI mode.
 
         Args:
-            icon_name (str): Base name of the icon
-            palette (QPalette): Palette
+            icon_name (str): Base name of the icon (without suffix).
 
         Raises:
-            ValueError:
-                when text color of the specified palette is neither #000000 nor #FFFFFF
+            RuntimeError: When the class is not initialized.
+            FileNotFoundError: When the icon is not found.
 
         Returns:
-            str: Full icon name with file suffix
+            QIcon: Icon.
         """
 
-        text_color: str = palette.text().color().name().upper()
+        suffixes: list[str] = [".svg", ".png", ".jpg", ".jpeg", ".ico", ".gif"]
 
-        match text_color:
-            case "#000000":
-                return f"{icon_name}_dark.svg"
-            case "#FFFFFF":
-                return f"{icon_name}_light.svg"
-            case _:
-                raise ValueError(f"Unknown text color: {text_color}")
+        for suffix in suffixes:
+            full_icon_name: str = (
+                ":/icons/" + cls.get().__ui_mode.name.lower() + "/" + icon_name + suffix
+            )
 
-    @classmethod
-    def get_icon_for_palette(cls, icon_name: str, palette: QPalette) -> QIcon:
-        """
-        Provides an icon for the text color of the specified palette.
+            if QFile(full_icon_name).exists():
+                return QIcon(full_icon_name)
 
-        Args:
-            icon_name (str): Base name of the icon
-            palette (QPalette): Palette
-
-        Raises:
-            ValueError:
-                when text color of the specified palette is neither #000000 nor #FFFFFF
-
-        Returns:
-            QIcon: Icon
-        """
-
-        full_icon_name: str = ":/icons/" + IconProvider.get_icon_name_for_palette(
-            icon_name, palette
+        raise FileNotFoundError(
+            f"Could not find icon {icon_name} for mode {cls.get().__ui_mode.name}!"
         )
-        return QIcon(full_icon_name)

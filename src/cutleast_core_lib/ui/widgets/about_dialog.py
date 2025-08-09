@@ -61,9 +61,7 @@ class AboutDialog(QDialog):
         about_tab = QWidget()
         about_tab.setObjectName("transparent")
         tab_widget.addTab(about_tab, self.tr("About"))
-        tab_widget.setTabIcon(
-            0, IconProvider.get_qta_icon_for_palette("fa5s.info-circle", self.palette())
-        )
+        tab_widget.setTabIcon(0, IconProvider.get_qta_icon("fa5s.info-circle"))
 
         hlayout = QHBoxLayout()
         about_tab.setLayout(hlayout)
@@ -109,9 +107,7 @@ class AboutDialog(QDialog):
         tab_widget.addTab(licenses_tab, self.tr("Used Software"))
         tab_widget.setTabIcon(
             1,
-            IconProvider.get_qta_icon_for_palette(
-                "mdi6.script-text-outline", self.palette()
-            ),
+            IconProvider.get_qta_icon("mdi6.script-text-outline"),
         )
 
         licenses_tab.addItems(list(licenses.keys()))

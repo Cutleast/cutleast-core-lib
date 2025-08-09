@@ -40,7 +40,7 @@ class AppSettings(SettingsPage[AppConfig]):
     __clear_cache_button: QPushButton
 
     def __init__(self, initial_config: AppConfig) -> None:
-        self.cache = Cache.get()
+        self.cache = Cache.get_optional()
 
         super().__init__(initial_config)
 

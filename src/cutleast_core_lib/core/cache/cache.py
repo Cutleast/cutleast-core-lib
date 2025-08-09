@@ -15,6 +15,8 @@ from typing import Any, Callable, Optional, ParamSpec, TypeAlias, TypeVar
 
 from semantic_version import Version
 
+from cutleast_core_lib.core.utilities.singleton import Singleton
+
 from .function_cache import FunctionCache
 
 P = ParamSpec("P")
@@ -26,12 +28,9 @@ _Undefined = object()
 Undefined: TypeAlias = object
 
 
-class Cache:
+class Cache(Singleton):
     """
-    Class for application cache.
-
-    The class provides the singleton getter `Cache.get()` and can only be instantiated
-    once.
+    Singleton class for application cache.
     """
 
     path: Path
@@ -39,9 +38,6 @@ class Cache:
 
     __cache_version_file: Path
     """Path to the file specifying the cache's version."""
-
-    __instance: Optional[Cache] = None
-    """Singleton cache instance."""
 
     log: logging.Logger = logging.getLogger("Cache")
 
@@ -53,13 +49,10 @@ class Cache:
                 Application version, used for invalidating caches from older versions.
 
         Raises:
-            ValueError: If a cache instance already exists.
+            RuntimeError: If a cache instance already exists.
         """
 
-        if Cache.__instance is not None:
-            raise ValueError("A cache instance already exists!")
-
-        Cache.__instance = self
+        super().__init__()
 
         self.path = cache_path
         self.__cache_version_file = self.path / "version"
@@ -87,17 +80,6 @@ class Cache:
 
         shutil.rmtree(self.path, ignore_errors=True)
         self.log.info("Caches cleared.")
-
-    @classmethod
-    def get(cls: type[C]) -> Optional[C]:
-        """
-        Returns the singleton cache instance or `None` if it doesn't exist.
-
-        Returns:
-            Optional[C]: The singleton cache instance or `None` if it doesn't exist.
-        """
-
-        return cls.__instance  # pyright: ignore[reportReturnType]
 
     @classmethod
     @FunctionCache.cache
@@ -134,7 +116,7 @@ class Cache:
             Any: The deserialized content of the cache file.
         """
 
-        cache: Optional[Cache] = cls.get()
+        cache: Optional[Cache] = cls.get_optional()
         if cache is not None:
             cache_file_path = cache.path / cache_file_path
 
@@ -164,7 +146,7 @@ class Cache:
             data (Any): The data to serialize and save to the cache file.
         """
 
-        cache: Optional[Cache] = cls.get()
+        cache: Optional[Cache] = cls.get_optional()
         if cache is None:
             return
 

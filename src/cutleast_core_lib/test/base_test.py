@@ -13,10 +13,14 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 
 from cutleast_core_lib.core.cache.cache import Cache
 from cutleast_core_lib.core.config.app_config import AppConfig
+from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
+from cutleast_core_lib.ui.utilities.ui_mode import UIMode
 
 from .setup.clipboard_mock import ClipboardMock
 
 os.environ["QT_QPA_PLATFORM"] = "offscreen"  # render widgets off-screen
+
+IconProvider(UIMode.Dark, "#ffffff")  # make sure that the icon provider is initialized
 
 
 class BaseTest(metaclass=ABCMeta):
@@ -88,7 +92,7 @@ class BaseTest(metaclass=ABCMeta):
             Cache: The cache.
         """
 
-        return Cache.get() or Cache(Path("test_cache"), "development")
+        return Cache.get_optional() or Cache(Path("test_cache"), "development")
 
     @pytest.fixture
     def clipboard(self, monkeypatch: pytest.MonkeyPatch) -> ClipboardMock:

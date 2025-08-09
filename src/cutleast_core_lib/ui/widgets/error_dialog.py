@@ -111,9 +111,7 @@ class ErrorDialog(QDialog):
 
         copy_button = QPushButton()
         copy_button.setToolTip(self.tr("Copy error details..."))
-        copy_button.setIcon(
-            IconProvider.get_qta_icon_for_palette("mdi6.content-copy", self.palette())
-        )
+        copy_button.setIcon(IconProvider.get_qta_icon("mdi6.content-copy"))
         copy_button.clicked.connect(
             lambda: QApplication.clipboard().setText(self.__details)
         )
@@ -123,9 +121,7 @@ class ErrorDialog(QDialog):
             self.__toggle_details_button = QPushButton()
             self.__toggle_details_button.setToolTip(self.tr("Show details..."))
             self.__toggle_details_button.setIcon(
-                IconProvider.get_qta_icon_for_palette(
-                    "fa5s.chevron-down", self.palette()
-                )
+                IconProvider.get_qta_icon("fa5s.chevron-down")
             )
             self.__toggle_details_button.clicked.connect(self.__toggle_details)
             hlayout.addWidget(self.__toggle_details_button)
@@ -134,15 +130,13 @@ class ErrorDialog(QDialog):
         if not self.__details_box.isVisible():
             self.__details_box.show()
             self.__toggle_details_button.setIcon(
-                IconProvider.get_qta_icon_for_palette("fa5s.chevron-up", self.palette())
+                IconProvider.get_qta_icon("fa5s.chevron-up")
             )
             self.__toggle_details_button.setToolTip(self.tr("Hide details..."))
         else:
             self.__details_box.hide()
             self.__toggle_details_button.setIcon(
-                IconProvider.get_qta_icon_for_palette(
-                    "fa5s.chevron-down", self.palette()
-                )
+                IconProvider.get_qta_icon("fa5s.chevron-down")
             )
             self.__toggle_details_button.setToolTip(self.tr("Show details..."))
 

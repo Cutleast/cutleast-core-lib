@@ -32,9 +32,7 @@ class SearchBar(QLineEdit):
         super().__init__(*args, **kwargs)
 
         self.addAction(
-            IconProvider.get_qta_icon_for_palette(
-                "fa6s.magnifying-glass", self.palette()
-            ),
+            IconProvider.get_qta_icon("fa6s.magnifying-glass"),
             QLineEdit.ActionPosition.LeadingPosition,
         )
         self.setPlaceholderText(self.tr("Search..."))
@@ -47,11 +45,7 @@ class SearchBar(QLineEdit):
 
         self.__cs_toggle = QPushButton()
         self.__cs_toggle.setCursor(Qt.CursorShape.ArrowCursor)
-        self.__cs_toggle.setIcon(
-            IconProvider.get_qta_icon_for_palette(
-                "mdi6.format-letter-case", self.palette()
-            )
-        )
+        self.__cs_toggle.setIcon(IconProvider.get_qta_icon("mdi6.format-letter-case"))
         self.__cs_toggle.setCheckable(True)
         self.__cs_toggle.clicked.connect(self.setFocus)
         self.__cs_toggle.clicked.connect(self.__on_search_change)
@@ -61,9 +55,7 @@ class SearchBar(QLineEdit):
 
         self.__clear_button = QPushButton()
         self.__clear_button.setCursor(Qt.CursorShape.ArrowCursor)
-        self.__clear_button.setIcon(
-            IconProvider.get_qta_icon_for_palette("mdi6.close", self.palette())
-        )
+        self.__clear_button.setIcon(IconProvider.get_qta_icon("mdi6.close"))
         self.__clear_button.clicked.connect(lambda: self.setText(""))
         self.__clear_button.clicked.connect(self.setFocus)
         self.__clear_button.clicked.connect(self.returnPressed.emit)
