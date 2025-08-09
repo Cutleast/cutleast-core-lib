@@ -59,6 +59,10 @@ class Builder:
             Path: Path to the main module in the temp build folder.
         """
 
+        if build_folder.is_dir():
+            shutil.rmtree(build_folder)
+            self.log.warning(f"Deleted existing '{build_folder}'.")
+
         self.log.info(f"Copying source code to '{build_folder}'...")
         shutil.copytree(self.config.project_root / self.config.src_dir, build_folder)
 
