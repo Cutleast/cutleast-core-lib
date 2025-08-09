@@ -2,6 +2,7 @@
 name = "cutleast-core-lib"
 version = "1.0.1"
 description = "A core library used by my projects"
+authors = [{ name = "cutleast", email = "cutleast@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
