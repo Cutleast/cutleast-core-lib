@@ -8,9 +8,9 @@ import pytest
 from PySide6.QtWidgets import QComboBox
 from pytestqt.qtbot import QtBot
 
-from test.base_test import BaseTest
-from test.utils import Utils
-from ui.widgets.enum_dropdown import EnumDropdown
+from cutleast_core_lib.test.base_test import BaseTest
+from cutleast_core_lib.test.utils import Utils
+from cutleast_core_lib.ui.widgets.enum_dropdown import EnumDropdown
 
 
 class TestEnumDropdown(BaseTest):

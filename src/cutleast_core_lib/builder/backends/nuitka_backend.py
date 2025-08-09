@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Optional, override
 
-from core.utilities.process_runner import run_process
+from cutleast_core_lib.core.utilities.process_runner import run_process
 
 from ..build_backend import BuildBackend
 from ..build_metadata import BuildMetadata

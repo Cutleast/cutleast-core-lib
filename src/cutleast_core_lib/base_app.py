@@ -14,12 +14,12 @@ from typing import Optional, override
 
 from PySide6.QtWidgets import QApplication, QMainWindow
 
-from core.config.app_config import AppConfig
-from core.utilities.exception_handler import ExceptionHandler
-from core.utilities.exe_info import get_current_path
-from core.utilities.logger import Logger
-from core.utilities.updater import Updater
-from ui.utilities.stylesheet_processor import StylesheetProcessor
+from .core.config.app_config import AppConfig
+from .core.utilities.exception_handler import ExceptionHandler
+from .core.utilities.exe_info import get_current_path
+from .core.utilities.logger import Logger
+from .core.utilities.updater import Updater
+from .ui.utilities.stylesheet_processor import StylesheetProcessor
 
 
 class BaseApp(QApplication, metaclass=ABCMeta):

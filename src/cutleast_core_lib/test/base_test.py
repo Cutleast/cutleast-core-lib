@@ -11,8 +11,8 @@ from pathlib import Path
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem
 
-from core.cache.cache import Cache
-from core.config.app_config import AppConfig
+from cutleast_core_lib.core.cache.cache import Cache
+from cutleast_core_lib.core.config.app_config import AppConfig
 
 from .setup.clipboard_mock import ClipboardMock
 

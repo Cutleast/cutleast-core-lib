@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from core.cache.cache import Cache
-from test.base_test import BaseTest
+from cutleast_core_lib.core.cache.cache import Cache
+from cutleast_core_lib.test.base_test import BaseTest
 
 
 class TestCache(BaseTest):

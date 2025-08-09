@@ -10,7 +10,7 @@ import requests
 import semantic_version as semver
 from PySide6.QtCore import QObject
 
-from ui.widgets.updater_dialog import UpdaterDialog
+from cutleast_core_lib.ui.widgets.updater_dialog import UpdaterDialog
 
 from .exceptions import format_exception
 from .web_utils import get_raw_web_content

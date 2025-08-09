@@ -11,7 +11,7 @@ from winsound import MessageBeep as alert
 from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QApplication
 
-from ui.widgets.error_dialog import ErrorDialog
+from cutleast_core_lib.ui.widgets.error_dialog import ErrorDialog
 
 from .exceptions import LocalizedException, format_exception
 

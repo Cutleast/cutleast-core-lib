@@ -5,15 +5,16 @@ Copyright (c) Cutleast
 from pathlib import Path
 from typing import Optional, override
 
-from builder.backends.nuitka_backend import NuitkaBackend
-from builder.build_backend import BuildBackend
-from builder.build_config import BuildConfig
-from builder.build_metadata import BuildMetadata
-from builder.builder import Builder
 from pyfakefs.fake_filesystem import FakeFilesystem
 from semantic_version import Version
-from test.base_test import BaseTest
-from test.utils import Utils
+
+from cutleast_core_lib.builder.backends.nuitka_backend import NuitkaBackend
+from cutleast_core_lib.builder.build_backend import BuildBackend
+from cutleast_core_lib.builder.build_config import BuildConfig
+from cutleast_core_lib.builder.build_metadata import BuildMetadata
+from cutleast_core_lib.builder.builder import Builder
+from cutleast_core_lib.test.base_test import BaseTest
+from cutleast_core_lib.test.utils import Utils
 
 
 class TestBuilder(BaseTest):

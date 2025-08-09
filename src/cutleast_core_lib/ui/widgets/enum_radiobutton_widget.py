@@ -7,7 +7,7 @@ from typing import Optional, override
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout, QRadioButton, QVBoxLayout, QWidget
 
-from core.utilities.localized_enum import LocalizedEnum
+from cutleast_core_lib.core.utilities.localized_enum import LocalizedEnum
 
 from .enum_selector import E, EnumSelector
 

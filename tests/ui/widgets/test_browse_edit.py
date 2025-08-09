@@ -8,9 +8,9 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from PySide6.QtWidgets import QFileDialog, QPushButton
 from pytestqt.qtbot import QtBot
 
-from test.base_test import BaseTest
-from test.utils import Utils
-from ui.widgets.browse_edit import BrowseLineEdit
+from cutleast_core_lib.test.base_test import BaseTest
+from cutleast_core_lib.test.utils import Utils
+from cutleast_core_lib.ui.widgets.browse_edit import BrowseLineEdit
 
 
 class TestBrowseLineEdit(BaseTest):

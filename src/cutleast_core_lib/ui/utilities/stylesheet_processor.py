@@ -9,7 +9,10 @@ import darkdetect
 from PySide6.QtGui import QFontDatabase, QPalette
 from PySide6.QtWidgets import QApplication
 
-from core.utilities.qt_res_provider import load_json_resource, read_resource
+from cutleast_core_lib.core.utilities.qt_res_provider import (
+    load_json_resource,
+    read_resource,
+)
 
 from .ui_mode import UIMode
 

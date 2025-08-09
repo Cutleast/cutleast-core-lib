@@ -8,9 +8,9 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QLabel, QPushButton, QWidget
 from pytestqt.qtbot import QtBot
 
-from test.base_test import BaseTest
-from test.utils import Utils
-from ui.widgets.section_area_widget import SectionAreaWidget
+from cutleast_core_lib.test.base_test import BaseTest
+from cutleast_core_lib.test.utils import Utils
+from cutleast_core_lib.ui.widgets.section_area_widget import SectionAreaWidget
 
 
 class TestSectionAreaWidget(BaseTest):

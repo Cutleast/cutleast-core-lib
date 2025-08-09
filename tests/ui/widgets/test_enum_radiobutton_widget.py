@@ -8,9 +8,9 @@ import pytest
 from PySide6.QtWidgets import QRadioButton
 from pytestqt.qtbot import QtBot
 
-from test.base_test import BaseTest
-from test.utils import Utils
-from ui.widgets.enum_radiobutton_widget import EnumRadiobuttonsWidget
+from cutleast_core_lib.test.base_test import BaseTest
+from cutleast_core_lib.test.utils import Utils
+from cutleast_core_lib.ui.widgets.enum_radiobutton_widget import EnumRadiobuttonsWidget
 
 
 class TestEnumRadiobuttonsWidget(BaseTest):

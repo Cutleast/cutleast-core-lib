@@ -9,7 +9,7 @@ from PySide6.QtCore import QEvent, QObject, Signal
 from PySide6.QtGui import QWheelEvent
 from PySide6.QtWidgets import QComboBox, QDoubleSpinBox, QSpinBox
 
-from core.config.base_config import BaseConfig
+from cutleast_core_lib.core.config.base_config import BaseConfig
 
 from ..widgets.smooth_scroll_area import SmoothScrollArea
 

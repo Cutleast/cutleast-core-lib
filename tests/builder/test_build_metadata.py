@@ -4,10 +4,11 @@ Copyright (c) Cutleast
 
 from pathlib import Path
 
-from builder.build_metadata import BuildMetadata
 from pyfakefs.fake_filesystem import FakeFilesystem
 from semantic_version import Version
-from test.base_test import BaseTest
+
+from cutleast_core_lib.builder.build_metadata import BuildMetadata
+from cutleast_core_lib.test.base_test import BaseTest
 
 
 class TestBuildMetadata(BaseTest):

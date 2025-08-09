@@ -20,9 +20,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from core.utilities.datetime import get_diff
-from core.utilities.thread import Thread
-from core.utilities.truncate import TruncateMode, truncate_string
+from cutleast_core_lib.core.utilities.datetime import get_diff
+from cutleast_core_lib.core.utilities.thread import Thread
+from cutleast_core_lib.core.utilities.truncate import TruncateMode, truncate_string
 
 # TODO: Wrap this in a try-except block
 cc.GetModule("res/TaskbarLib.tlb")

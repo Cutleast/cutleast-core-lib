@@ -7,7 +7,7 @@ from typing import override
 
 import pytest
 
-from core.utilities.reference_dict import ReferenceDict
+from cutleast_core_lib.core.utilities.reference_dict import ReferenceDict
 
 
 class TestReferenceDict:

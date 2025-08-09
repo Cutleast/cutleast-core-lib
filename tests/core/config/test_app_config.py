@@ -10,9 +10,9 @@ import pytest
 from pydantic_core import ValidationError
 from pyfakefs.fake_filesystem import FakeFilesystem
 
-from core.config.app_config import AppConfig
-from core.utilities.logger import Logger
-from test.base_test import BaseTest
+from cutleast_core_lib.core.config.app_config import AppConfig
+from cutleast_core_lib.core.utilities.logger import Logger
+from cutleast_core_lib.test.base_test import BaseTest
 
 
 class TestAppConfig(BaseTest):

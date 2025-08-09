@@ -6,7 +6,7 @@ from typing import override
 
 from PySide6.QtWidgets import QApplication
 
-from core.utilities.localized_enum import LocalizedEnum
+from cutleast_core_lib.core.utilities.localized_enum import LocalizedEnum
 
 
 class UIMode(LocalizedEnum):

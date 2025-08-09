@@ -4,7 +4,7 @@ Copyright (c) Cutleast
 
 from typing import TypeVar
 
-from core.utilities.filesystem import str_glob
+from cutleast_core_lib.core.utilities.filesystem import str_glob
 
 T = TypeVar("T")
 

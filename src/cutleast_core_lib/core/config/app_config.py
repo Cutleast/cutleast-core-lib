@@ -6,7 +6,7 @@ from typing import Annotated, override
 
 from pydantic import Field
 
-from ui.utilities.ui_mode import UIMode
+from cutleast_core_lib.ui.utilities.ui_mode import UIMode
 
 from ..utilities.logger import Logger
 from .base_config import BaseConfig
