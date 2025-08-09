@@ -1,0 +1,23 @@
+[project]
+name = "test-project"
+version = "1.0.0-alpha-1"
+description = "A test project for testing the build system"
+license = { file = "LICENSE" }
+authors = [{ name = "Cutleast", email = "cutleast@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "cutleast_core_lib",
+]
+
+[dependency-groups]
+dev = [
+    "nuitka",
+    "pyfakefs",
+    "pyright",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-qt",
+    "ruff",
+]
