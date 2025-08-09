@@ -4,6 +4,7 @@ Copyright (c) Cutleast
 
 import shutil
 import sys
+from enum import Enum
 from pathlib import Path
 from typing import Optional, override
 
@@ -31,6 +32,37 @@ class NuitkaBackend(BuildBackend):
         "--nofollow-import-to=tkinter",
     ]
     """A list of base arguments passed to Nuitka."""
+
+    class ConsoleMode(Enum):
+        """Enum for Nuitka's supported console modes."""
+
+        Disabled = "disable"
+        """This disables the console window entirely."""
+
+        Attach = "attach"
+        """
+        This will attach to an existing console window (if any) but it won't open a new
+        one.
+        """
+
+        Force = "force"
+        """This will create a new console window or use the existing one."""
+
+        Hide = "hide"
+        """This will use an existing console window or creates and minimizes one."""
+
+    console_mode: ConsoleMode
+
+    def __init__(self, console_mode: ConsoleMode = ConsoleMode.Hide) -> None:
+        """
+        Args:
+            console_mode (ConsoleMode, optional):
+                Console mode that is passed to Nuitka. Defaults to ConsoleMode.Hide.
+        """
+
+        super().__init__()
+
+        self.console_mode = console_mode
 
     def get_additional_args(
         self,
@@ -70,6 +102,7 @@ class NuitkaBackend(BuildBackend):
         cmd = NuitkaBackend.BASE_ARGS
         cmd += self.get_additional_args(main_module, exe_stem, icon_path, metadata)
         cmd += [
+            f"--windows-console-mode={self.console_mode.value}",
             f"--company-name={metadata.project_author}",
             f"--copyright={metadata.project_license}",
             f"--product-name={metadata.display_name}",
