@@ -21,17 +21,23 @@ from PySide6.QtWidgets import (
 )
 
 from cutleast_core_lib.core.utilities.datetime import get_diff
+from cutleast_core_lib.core.utilities.exceptions import format_exception
+from cutleast_core_lib.core.utilities.exe_info import get_current_path
 from cutleast_core_lib.core.utilities.thread import Thread
 from cutleast_core_lib.core.utilities.truncate import TruncateMode, truncate_string
 
-# TODO: Wrap this in a try-except block
-cc.GetModule("res/TaskbarLib.tlb")
+try:
+    cc.GetModule(f"{get_current_path()}/res/TaskbarLib.tlb")
 
-import comtypes.gen.TaskbarLib as tbl  # type: ignore # noqa: E402
+    import comtypes.gen.TaskbarLib as tbl  # type: ignore # noqa: E402
 
-taskbar = cc.CreateObject(
-    "{56FDF344-FD6D-11d0-958A-006097C9A090}", interface=tbl.ITaskbarList3
-)
+    taskbar = cc.CreateObject(
+        "{56FDF344-FD6D-11d0-958A-006097C9A090}", interface=tbl.ITaskbarList3
+    )
+except Exception as ex:
+    print(format_exception(ex))
+    print("WARNING: No taskbar progress API available: see exception above")
+    taskbar = None
 
 T = TypeVar("T")
 V = TypeVar("V")
@@ -120,7 +126,7 @@ class LoadingDialog(QDialog, Generic[T]):
         )
 
         # Set up Taskbar Progress API
-        if parent is not None:
+        if parent is not None and taskbar is not None:
             self.parent_hwnd = parent.winId()
             taskbar.ActivateTab(self.parent_hwnd)
 
@@ -237,7 +243,7 @@ class LoadingDialog(QDialog, Generic[T]):
             self.label3.setText(truncate_string(text3, 90, TruncateMode.Middle))
 
         # Update Taskbar Progress
-        if self.parent_hwnd is not None:
+        if self.parent_hwnd is not None and taskbar is not None:
             if self.pbar1.maximum() == 0:
                 taskbar.SetProgressState(self.parent_hwnd, 0x1)  # Indeterminate
             else:
@@ -281,7 +287,7 @@ class LoadingDialog(QDialog, Generic[T]):
         self.log.debug(f"Time: {get_diff(self.starttime, time.strftime('%H:%M:%S'))}")
 
         # Clear taskbar state
-        if self.parent_hwnd is not None:
+        if self.parent_hwnd is not None and taskbar is not None:
             taskbar.SetProgressState(self.parent_hwnd, 0x0)
 
         # if self._thread.exception is not None:
