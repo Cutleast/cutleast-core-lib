@@ -164,7 +164,7 @@ class Builder:
             base_name=str(output_path.with_suffix("")),
             format="zip",
             root_dir=dist_folder.parent,
-            base_dir=dist_folder,
+            base_dir=dist_folder.name,
         )
         self.log.info(f"Created archive from '{dist_folder}' at '{output_path}'.")
 
