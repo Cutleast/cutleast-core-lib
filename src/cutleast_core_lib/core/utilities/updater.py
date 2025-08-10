@@ -8,15 +8,15 @@ from typing import Optional
 import jstyleson as json
 import requests
 import semantic_version as semver
-from PySide6.QtCore import QObject
 
 from cutleast_core_lib.ui.widgets.updater_dialog import UpdaterDialog
 
 from .exceptions import format_exception
+from .singleton import Singleton
 from .web_utils import get_raw_web_content
 
 
-class Updater(QObject):
+class Updater(Singleton):
     """
     Class for updating application.
     """
