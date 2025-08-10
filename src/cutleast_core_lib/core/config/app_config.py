@@ -15,6 +15,15 @@ from .base_config import BaseConfig
 class AppConfig(BaseConfig):
     """
     Class for managing application settings.
+
+    Subclasses can override default values by decorating classmethods with
+    `@default_factory(field_name)`, e.g.
+    ```
+        @default_factory("accent_color")
+        @classmethod
+        def get_default_accent_color(cls) -> str:
+            return "#8b89c0"
+    ```
     """
 
     log_level: Annotated[Logger.Level, Field(alias="log.level")] = Logger.Level.Debug
@@ -44,13 +53,7 @@ class AppConfig(BaseConfig):
     main window.
     """
 
-    accent_color: Annotated[
-        str,
-        Field(
-            default_factory=lambda: AppConfig.get_default_accent_color(),
-            alias="ui.accent_color",
-        ),
-    ]
+    accent_color: Annotated[str, Field(alias="ui.accent_color")] = "#00ffff"
     """Accent color"""
 
     ui_mode: Annotated[UIMode, Field(alias="ui.mode")] = UIMode.System
@@ -60,12 +63,3 @@ class AppConfig(BaseConfig):
     @staticmethod
     def get_config_name() -> str:
         return "app.json"
-
-    @classmethod
-    def get_default_accent_color(cls) -> str:
-        """
-        Returns:
-            str: Default accent color
-        """
-
-        return "#00ffff"

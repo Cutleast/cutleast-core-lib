@@ -5,22 +5,23 @@ Copyright (c) Cutleast
 from __future__ import annotations
 
 import logging
-from abc import abstractmethod
+from abc import ABCMeta, abstractmethod
 from enum import Enum, auto
 from pathlib import Path
 from typing import Any, TypeVar, get_origin, get_type_hints
 
 import jstyleson as json
-from pydantic import BaseModel, ConfigDict
+from pydantic import ConfigDict
 from pydantic.fields import FieldInfo
 
 from ..cache.function_cache import FunctionCache
+from ..utilities.dynamic_default_model import DynamicDefaultModel
 
 T = TypeVar("T", bound="BaseConfig")
 V = TypeVar("V")
 
 
-class BaseConfig(BaseModel):
+class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
     """
     Base class for app configurations.
     """
@@ -161,12 +162,11 @@ class BaseConfig(BaseModel):
             V: Default value of the field.
         """
 
-        if field_name not in cls.__pydantic_fields__:
+        if field_name not in cls.model_fields:
             raise AttributeError(f"Field '{field_name}' does not exist.")
 
-        field: FieldInfo = cls.__pydantic_fields__[field_name]
-
-        default_value: Any = field.get_default()
+        field: FieldInfo = cls.model_fields[field_name]
+        default_value: Any = field.get_default(call_default_factory=True)
 
         if not isinstance(default_value, get_origin(expected_type) or expected_type):
             raise TypeError(
@@ -184,8 +184,8 @@ class BaseConfig(BaseModel):
         keys: list[str] = list(
             filter(
                 lambda f: BaseConfig.PropertyMarker.ExcludeFromLogging
-                not in self.get_property_markers(f),
-                self.__pydantic_fields__.keys(),
+                not in self.__class__.get_property_markers(f),
+                self.__class__.model_fields.keys(),
             )
         )
         indent: int = max(len(key) + 1 for key in keys)
