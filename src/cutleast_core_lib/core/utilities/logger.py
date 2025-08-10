@@ -15,14 +15,15 @@ from typing import Any, Callable, Optional, ParamSpec, TextIO, TypeVar, override
 
 from .base_enum import BaseEnum
 from .datetime import datetime_format_to_regex
+from .singleton import Singleton
 
 P = ParamSpec("P")
 R = TypeVar("R")
 
 
-class Logger(logging.Logger):
+class Logger(logging.Logger, Singleton):
     """
-    Class for application logging. Copies all logging messages from
+    Singleton class for application logging. Copies all logging messages from
     `sys.stdout` and `sys.stderr` to a file and executes a callback with the new message.
     """
 
@@ -59,7 +60,8 @@ class Logger(logging.Logger):
     def __init__(
         self, log_file: Path, fmt: str | None = None, date_fmt: str | None = None
     ) -> None:
-        super().__init__("Logger")
+        logging.Logger.__init__(self, "Logger")
+        Singleton.__init__(self)
 
         # Create log folder if it doesn't exist
         os.makedirs(log_file.parent, exist_ok=True)
