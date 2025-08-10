@@ -5,10 +5,11 @@ Copyright (c) Cutleast
 from typing import override
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QComboBox, QWidget
+from PySide6.QtWidgets import QWidget
 
 from cutleast_core_lib.core.utilities.localized_enum import LocalizedEnum
 
+from .dropdown import Dropdown
 from .enum_selector import E, EnumSelector
 
 
@@ -17,11 +18,11 @@ class EnumDropdown(EnumSelector[E]):
     QComboBox specialized for enums. Has support for localized enums.
     """
 
-    __dropdown: QComboBox
+    __dropdown: Dropdown
 
     @override
     def _init_ui(self, initial_value: E) -> QWidget:
-        self.__dropdown = QComboBox()
+        self.__dropdown = Dropdown()
 
         if issubclass(self._enum_type, LocalizedEnum):
             for i, e in enumerate(self._enum_type):
