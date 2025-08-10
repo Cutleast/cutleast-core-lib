@@ -79,3 +79,20 @@ def truncate_string(
         case TruncateMode.Middle:
             half: int = remaining // 2
             return s[:half] + placeholder + s[-(remaining - half) :]
+
+
+def raw_string(text: str, max_length: int = 100) -> str:
+    """
+    Returns raw representation (for eg. "\\n" instead of a line break) of a text
+    trimmed to a specified number of characters.
+    Appends "..." suffix if the text was longer than the specified length.
+
+    Args:
+        text (str): String to trim.
+        max_length (int, optional): Maximum length of trimmed string. Defaults to 100.
+
+    Returns:
+        str: Trimmed string
+    """
+
+    return truncate_string(f"{text!r}"[1:-1], max_length)
