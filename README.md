@@ -6,6 +6,8 @@ However, given that it is under the MIT license, you are free to use it as you s
 
 ## Installation
 
+### As Static Dependency
+
 To install a specific version (recommended) (check [Tags](https://github.com/Cutleast/cutleast-core-lib/tags) for the latest tag):
 `uv add git+https://github.com/Cutleast/cutleast-core-lib --tag [version]`
 
@@ -13,6 +15,13 @@ e.g. `uv add git+https://github.com/Cutleast/cutleast-core-lib --tag v1.1.0`
 
 Run this from the root of your project to add from the master branch to your dependencies (not recommended):
 `uv add git+https://github.com/Cutleast/cutleast-core-lib`
+
+### As Git Submodule
+
+1. Add this repository as a [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) to `<project root>/core-lib` with this command:
+    `git submodule add -b master https://github.com/Cutleast/cutleast-core-lib.git core-lib`.
+2. Add the lib from the submodule as editable dependency with `uv`:
+    `uv add ./core-lib --editable`
 
 ## Basic Usage
 
