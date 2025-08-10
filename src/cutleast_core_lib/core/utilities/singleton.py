@@ -22,7 +22,7 @@ class Singleton(metaclass=ABCMeta):
         """
 
         cls = type(self)
-        if cls.__instance is not None:
+        if cls.__instance is not None and self is not cls.__instance:
             raise RuntimeError(f"{cls.__name__} is already initialized!")
 
         cls.__instance = self
