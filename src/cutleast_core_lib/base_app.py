@@ -12,6 +12,9 @@ from typing import Optional, override
 
 from PySide6.QtWidgets import QApplication, QMainWindow
 
+from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
+from cutleast_core_lib.ui.utilities.ui_mode import UIMode
+
 from .core.config.app_config import AppConfig
 from .core.utilities.exception_handler import ExceptionHandler
 from .core.utilities.exe_info import get_current_path, get_execution_info
@@ -109,6 +112,13 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):
         self.theme_manager = self._get_theme_manager()
         if self.theme_manager is not None:
             self.theme_manager.apply_to_app(self)
+        # Make sure that the icon provider is initialized without a theme manager
+        else:
+            ui_mode = self.app_config.ui_mode
+            if ui_mode == UIMode.System:
+                ui_mode = ThemeManager.detect_system_ui_mode()
+
+            IconProvider(ui_mode, "#ffffff" if ui_mode == UIMode.Dark else "#000000")
 
         self.main_window = self._init_main_window()
 
