@@ -116,7 +116,7 @@ class AppSettings(SettingsPage[AppConfig]):
         self._basic_flayout.addRow(self.__log_visible)
 
         self.__accent_color_entry = ColorLineEdit(
-            [AppConfig.get_default_value("accent_color", str)]
+            [self._initial_config.__class__.get_default_value("accent_color", str)]
         )
         self.__accent_color_entry.setText(self._initial_config.accent_color)
         self._basic_flayout.addRow(
