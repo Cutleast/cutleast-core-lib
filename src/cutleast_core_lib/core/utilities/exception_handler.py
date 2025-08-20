@@ -84,6 +84,7 @@ class ExceptionHandler(QObject):
             title=self.tr("Error"),
             text=error_message,
             details=detailed_msg,
+            yesno=not isinstance(exc_value, LocalizedException),
         )
 
         # Play system alarm sound
