@@ -48,8 +48,8 @@ class BaseTest(metaclass=ABCMeta):
 
         return Path.cwd()
 
-    @pytest.fixture
-    def test_fs(
+    @pytest.fixture(name="test_fs")
+    def _base_test_fs(
         self, real_cwd: Path, data_folder: Path, fs: FakeFilesystem
     ) -> FakeFilesystem:
         """
