@@ -36,7 +36,7 @@ class AppSettings(SettingsPage[AppConfig]):
 
     cache: Optional[Cache]
 
-    __vlayout: QVBoxLayout
+    _vlayout: QVBoxLayout
     _basic_flayout: QFormLayout
     __logs_num_box: QSpinBox
     __log_level_box: EnumDropdown[Logger.Level]
@@ -86,14 +86,14 @@ class AppSettings(SettingsPage[AppConfig]):
         scroll_widget.setObjectName("transparent")
         self.setWidget(scroll_widget)
 
-        self.__vlayout = QVBoxLayout()
-        scroll_widget.setLayout(self.__vlayout)
+        self._vlayout = QVBoxLayout()
+        scroll_widget.setLayout(self._vlayout)
 
         self.__init_basic_settings()
 
     def __init_basic_settings(self) -> None:
         basic_group = QGroupBox(self.tr("Basic App Settings"))
-        self.__vlayout.addWidget(basic_group)
+        self._vlayout.addWidget(basic_group)
         self._basic_flayout = QFormLayout()
         basic_group.setLayout(self._basic_flayout)
 
