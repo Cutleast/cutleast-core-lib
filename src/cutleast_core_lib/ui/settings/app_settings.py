@@ -4,6 +4,7 @@ Copyright (c) Cutleast
 
 from typing import Optional, override
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QCheckBox,
     QFormLayout,
@@ -87,6 +88,7 @@ class AppSettings(SettingsPage[AppConfig]):
         self.setWidget(scroll_widget)
 
         self._vlayout = QVBoxLayout()
+        self._vlayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         scroll_widget.setLayout(self._vlayout)
 
         self.__init_basic_settings()
@@ -109,11 +111,12 @@ class AppSettings(SettingsPage[AppConfig]):
         )
         self._basic_flayout.addRow("*" + self.tr("Log Level"), self.__log_level_box)
 
-        self.__log_visible = QCheckBox(
-            "*" + self.tr("Display log at the bottom of the main window")
-        )
+        self.__log_visible = QCheckBox()
         self.__log_visible.setChecked(self._initial_config.log_visible)
-        self._basic_flayout.addRow(self.__log_visible)
+        self._basic_flayout.addRow(
+            "*" + self.tr("Display log at the bottom of the main window"),
+            self.__log_visible,
+        )
 
         self.__accent_color_entry = ColorLineEdit(
             [self._initial_config.__class__.get_default_value("accent_color", str)]
