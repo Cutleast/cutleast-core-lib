@@ -32,6 +32,7 @@ class AboutDialog(QDialog):
         app_icon: QIcon,
         app_license: str,
         licenses: dict[str, str],
+        text: Optional[str] = None,
         parent: Optional[QWidget] = None,
     ) -> None:
         """
@@ -42,6 +43,7 @@ class AboutDialog(QDialog):
             app_license (str): Name of the app's license.
             licenses (dict[str, str]):
                 Dictionary of used libraries and URL to their license.
+            text (Optional[str], optional): Custom text. Defaults to None.
             parent (Optional[QWidget], optional): Parent widget. Defaults to None.
         """
 
@@ -84,17 +86,18 @@ class AboutDialog(QDialog):
         title_label.setObjectName("h1")
         vlayout.addWidget(title_label)
 
-        text: str = self.tr(
-            "Created by Cutleast (<a href='https://www.nexusmods.com/users/65733731'>"
-            "NexusMods</a> | <a href='https://github.com/cutleast'>GitHub</a> "
-            "| <a href='https://ko-fi.com/cutleast'>Ko-Fi</a>)<br><br>Licensed under "
-        )
-        text += app_license
+        if text is None:
+            text = self.tr(
+                "Created by Cutleast (<a href='https://www.nexusmods.com/users/65733731'>"
+                "NexusMods</a> | <a href='https://github.com/cutleast'>GitHub</a> "
+                "| <a href='https://ko-fi.com/cutleast'>Ko-Fi</a>)<br><br>Licensed under "
+            )
+            text += app_license
 
-        # Add translator credit if available
-        translator_info: str = self.tr("<<Put your translator information here.>>")
-        if translator_info != "<<Put your translator information here.>>":
-            text += translator_info
+            # Add translator credit if available
+            translator_info: str = self.tr("<<Put your translator information here.>>")
+            if translator_info != "<<Put your translator information here.>>":
+                text += translator_info
 
         credits_label = QLabel(text)
         credits_label.setTextFormat(Qt.TextFormat.RichText)
