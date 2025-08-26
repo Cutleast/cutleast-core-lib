@@ -4,22 +4,26 @@ Copyright (c) Cutleast
 
 import logging
 import os
-from abc import abstractmethod
-from fnmatch import fnmatch
+from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
-from ..utilities.filesystem import str_glob
+from virtual_glob import InMemoryPath, glob
+
 from ..utilities.process_runner import run_process
 
 
-class Archive:
+class Archive(metaclass=ABCMeta):
     """
     Base class for archives.
 
-    #### Do not instantiate directly, use Archive.load_archive() instead!
+    **Requires the 7-zip executable to be present at `res/7-zip/7z.exe`!**
+
+    **Do not instantiate directly, use Archive.load_archive() instead!**
     """
 
-    log = logging.getLogger("Archiver")
+    _bin_path = Path("res") / "7-zip" / "7z.exe"
+
+    log: logging.Logger = logging.getLogger("Archive")
 
     def __init__(self, path: Path) -> None:
         self.path = path
@@ -28,25 +32,37 @@ class Archive:
     @abstractmethod
     def files(self) -> list[str]:
         """
-        Returns a list of filenames in archive.
-        """
+        Gets a list of files in the archive.
 
-        raise NotImplementedError
+        Returns:
+            list[str]: List of filenames, relative to archive root.
+        """
 
     def get_files(self) -> list[str]:
         """
-        Alias method for `files` property.
+        Alias method for `Archive.files` property.
+
+        Returns:
+            list[str]: List of filenames, relative to archive root.
         """
 
         return self.files
 
     def extract_all(self, dest: Path, full_paths: bool = True) -> None:
         """
-        Extracts all files to `dest`.
+        Extracts archive content.
+
+        Args:
+            dest (Path): Folder to extract archive content to.
+            full_paths (bool, optional):
+                Toggles whether paths within archive are retained. Defaults to True.
+
+        Raises:
+            RuntimeError: When the 7-zip commandline returns a non-zero exit code.
         """
 
-        cmd = [
-            "7z.exe",
+        cmd: list[str] = [
+            str(Archive._bin_path),
             "x" if full_paths else "e",
             str(self.path),
             f"-o{dest}",
@@ -54,18 +70,24 @@ class Archive:
             "-y",
         ]
 
-        try:
-            run_process(cmd)
-        except RuntimeError:
-            raise Exception("Unpacking command failed!")
+        run_process(cmd)
 
     def extract(self, filename: str, dest: Path, full_paths: bool = True) -> None:
         """
-        Extracts `filename` from archive to `dest`.
+        Extracts a single file.
+
+        Args:
+            filename (str): Filename of file to extract.
+            dest (Path): Folder to extract file to.
+            full_paths (bool, optional):
+                Toggles whether path within archives is retained. Defaults to True.
+
+        Raises:
+            RuntimeError: When the 7-zip commandline returns a non-zero exit code.
         """
 
-        cmd = [
-            "7z.exe",
+        cmd: list[str] = [
+            str(Archive._bin_path),
             "x" if full_paths else "e",
             f"-o{dest}",
             "-aoa",
@@ -75,23 +97,29 @@ class Archive:
             filename,
         ]
 
-        try:
-            run_process(cmd)
-        except RuntimeError:
-            raise Exception("Unpacking command failed!")
+        run_process(cmd)
 
     def extract_files(
         self, filenames: list[str], dest: Path, full_paths: bool = True
     ) -> None:
         """
-        Extracts `filenames` from archive to `dest`.
+        Extracts multiple files.
+
+        Args:
+            filenames (list[str]): List of filenames to extract.
+            dest (Path): Folder to extract files to.
+            full_paths (bool, optional):
+                Toggles whether paths within archive are retained. Defaults to True.
+
+        Raises:
+            RuntimeError: When the 7-zip commandline returns a non-zero exit code.
         """
 
         if not len(filenames):
             return
 
-        cmd = [
-            "7z.exe",
+        cmd: list[str] = [
+            str(Archive._bin_path),
             "x" if full_paths else "e",
             f"-o{dest}",
             "-aoa",
@@ -108,71 +136,43 @@ class Archive:
         try:
             run_process(cmd)
         except RuntimeError:
-            raise Exception("Unpacking command failed!")
-        else:
             os.remove(filenames_txt)
+            raise
 
-    def add_files(self, files: list[Path]) -> None:
+    def glob(self, pattern: str) -> list[str]:
         """
-        Adds `files` to archive.
-        """
-
-        if not len(files):
-            return
-
-        cmd: list[str] = [
-            "7z.exe",
-            "a",
-            str(self.path),
-        ]
-
-        # Write filenames to a txt file to workaround commandline length limit
-        filenames_txt_path: Path = self.path.with_suffix(".txt")
-        with filenames_txt_path.open("w", encoding="utf8") as filenames_txt_file:
-            filenames_txt_file.write("\n".join([str(f) for f in files]))
-        cmd.append(f"@{filenames_txt_path}")
-
-        try:
-            run_process(cmd)
-        except RuntimeError:
-            raise Exception("Packing command failed!")
-        else:
-            os.remove(filenames_txt_path)
-
-    def find(self, pattern: str) -> list[str]:
-        """
-        Returns all files in archive that match `pattern` (wildcard).
-        """
-
-        result = [file for file in self.get_files() if fnmatch(file, pattern)]
-
-        if not result:
-            raise FileNotFoundError(
-                f"Found no file for pattern {pattern!r} in archive."
-            )
-
-        return result
-
-    def glob(self, pattern: str, case_sensitive: bool = False) -> list[str]:
-        """
-        Returns a list of file paths that match a specified glob pattern.
+        Gets a list of file paths that match a specified pattern.
 
         Args:
-            pattern (str): Glob pattern.
-            case_sensitive (bool, optional): Case sensitive. Defaults to False.
+            pattern (str): Pattern that matches everything that fnmatch supports
 
         Returns:
-            list[str]: List of matching filenames
+            list: List of matching filenames.
         """
 
-        return str_glob(pattern, self.files, case_sensitive)
+        # Workaround case-sensitivity
+        files: dict[str, str] = {file.lower(): file for file in self.files}
+
+        fs: InMemoryPath = InMemoryPath.from_list(list(files.keys()))
+        matches: list[str] = [files[p.path] for p in glob(fs, pattern)]
+
+        return matches
 
     @staticmethod
     def load_archive(archive_path: Path) -> "Archive":
         """
-        Returns Archive object suitable for `archive_path`'s format.
+        Loads archive with fitting handler class.
 
-        Raises `NotImplementedError` if archive format is not supported.
+        Currently supported archive types: RAR, 7z, ZIP
+
+        Args:
+            archive_path (Path): Path to archive file.
+
+        Raises:
+            NotImplementedError: When the archive type is not supported.
+
+        Returns:
+            Archive: Correct initialized handler class to use.
         """
 
         from .rar import RARArchive
