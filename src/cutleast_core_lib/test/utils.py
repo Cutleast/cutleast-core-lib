@@ -67,6 +67,35 @@ class Utils:
             T: The field value.
         """
 
+        value: Optional[T] = Utils.get_private_field_optional(
+            obj, field_name, field_type
+        )
+
+        if value is None:
+            raise AttributeError(f"Field {field_name!r} is None!")
+
+        return value
+
+    @staticmethod
+    def get_private_field_optional[T](
+        obj: object, field_name: str, field_type: type[T]
+    ) -> Optional[T]:
+        """
+        Gets a private field from an object that can be None.
+
+        Args:
+            obj (object): The object to get the field from.
+            field_name (str): The name of the field.
+            field_type (type[T]): The non-None type of the field.
+
+        Raises:
+            AttributeError: when the field is not found.
+            TypeError: when the field is not None and not of the specified type.
+
+        Returns:
+            Optional[T]: The field value.
+        """
+
         field_name = f"_{obj.__class__.__name__}__{field_name}"
 
         if not hasattr(obj, field_name):
@@ -74,7 +103,9 @@ class Utils:
 
         field: Optional[Any] = getattr(obj, field_name, None)
 
-        if not isinstance(field, get_origin(field_type) or field_type):
+        if field is not None and not isinstance(
+            field, get_origin(field_type) or field_type
+        ):
             raise TypeError(f"{field_name!r} ({type(field)}) is not a {field_type}!")
 
         return field  # type: ignore
