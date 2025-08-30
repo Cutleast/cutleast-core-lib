@@ -61,10 +61,8 @@ class BaseTest(metaclass=ABCMeta):
 
         fs.add_real_directory(data_folder)
 
-        # Add qtawesome fonts
-        fs.add_real_directory(
-            real_cwd / ".venv" / "lib" / "site-packages" / "qtawesome" / "fonts"
-        )
+        # Add venv
+        fs.add_real_directory(real_cwd / ".venv")
 
         return fs
 
