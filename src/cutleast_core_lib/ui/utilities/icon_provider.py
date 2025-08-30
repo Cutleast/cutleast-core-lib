@@ -88,12 +88,15 @@ class IconProvider(Singleton):
         suffixes: list[str] = [".svg", ".png", ".jpg", ".jpeg", ".ico", ".gif"]
 
         for suffix in suffixes:
-            full_icon_name: str = (
+            mode_spec_icon_name: str = (
                 ":/icons/" + cls.get().__ui_mode.name.lower() + "/" + icon_name + suffix
             )
+            general_icon_name: str = ":/icons/" + icon_name + suffix
 
-            if QFile(full_icon_name).exists():
-                return QIcon(full_icon_name)
+            if QFile(mode_spec_icon_name).exists():
+                return QIcon(mode_spec_icon_name)
+            elif QFile(general_icon_name).exists():
+                return QIcon(general_icon_name)
 
         raise FileNotFoundError(
             f"Could not find icon {icon_name} for mode {cls.get().__ui_mode.name}!"
