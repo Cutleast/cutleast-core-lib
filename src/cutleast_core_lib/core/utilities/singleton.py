@@ -5,6 +5,8 @@ Copyright (c) Cutleast
 from abc import ABCMeta
 from typing import ClassVar, Optional, Self, final
 
+from PySide6.QtCore import QObject
+
 
 class Singleton(metaclass=ABCMeta):
     """
@@ -15,14 +17,24 @@ class Singleton(metaclass=ABCMeta):
 
     __instance: ClassVar[Optional[Self]] = None
 
-    def __init__(self) -> None:
+    def __init__(self, *, replace_existing_instance: bool = False) -> None:
         """
+        Args:
+            replace_existing_instance (bool, optional):
+                Toggles whether to replace any existing instance. Defaults to False.
+
         Raises:
-            RuntimeError: When the class is already initialized.
+            RuntimeError:
+                When the class is already initialized and `replace_existing_instance` is
+                `False`.
         """
 
         cls = type(self)
-        if cls.__instance is not None and self is not cls.__instance:
+        if (
+            cls.__instance is not None
+            and self is not cls.__instance
+            and not replace_existing_instance
+        ):
             raise RuntimeError(f"{cls.__name__} is already initialized!")
 
         cls.__instance = self
@@ -66,3 +78,15 @@ class Singleton(metaclass=ABCMeta):
             raise RuntimeError(f"{cls.__name__} is not initialized!")
 
         return cls.__instance
+
+
+class SingletonQtMeta(type(QObject), type(Singleton)):  # pyright: ignore[reportGeneralTypeIssues]
+    """
+    Combined metaclass for Singleton + PySide6 Qt types to avoid metaclass conflicts.
+    """
+
+
+class SingletonQObject(QObject, Singleton, metaclass=SingletonQtMeta):
+    """
+    Base class for all QObjects subclasses that should be singletons.
+    """
