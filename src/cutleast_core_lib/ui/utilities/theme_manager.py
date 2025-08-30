@@ -27,6 +27,7 @@ class ThemeManager(Singleton, metaclass=ABCMeta):
     _ui_mode: UIMode
     _fonts: list[str]
     _icon_provider: IconProvider
+    _stylesheet: Optional[str] = None
 
     def __init__(
         self, accent_color: str, ui_mode: UIMode, fonts: list[str] = []
@@ -118,7 +119,8 @@ class ThemeManager(Singleton, metaclass=ABCMeta):
             app (QApplication): The QApplication to apply the theme to.
         """
 
-        app.setStyleSheet(self._get_stylesheet())
+        self._stylesheet = self._get_stylesheet()
+        app.setStyleSheet(self._stylesheet)
 
         palette = app.palette()
         self._apply_to_palette(palette)
@@ -163,3 +165,13 @@ class ThemeManager(Singleton, metaclass=ABCMeta):
                 cls.log.warning(f"Unknown system UI mode {unknown!r}!")
 
         return UIMode.Dark
+
+    @classmethod
+    def get_stylesheet(cls) -> Optional[str]:
+        """
+        Returns:
+            Optional[str]: Current stylesheet or None if the class is not initialized.
+        """
+
+        if cls.has_instance():
+            return cls.get()._stylesheet
