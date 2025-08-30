@@ -66,8 +66,8 @@ class BaseTest(metaclass=ABCMeta):
 
         return fs
 
-    @pytest.fixture
-    def app_config(self, data_folder: Path) -> AppConfig:
+    @pytest.fixture(name="app_config")
+    def _base_app_config(self, data_folder: Path) -> AppConfig:
         """
         Returns the application config for the tests.
 
