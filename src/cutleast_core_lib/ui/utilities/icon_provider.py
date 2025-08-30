@@ -34,7 +34,7 @@ class IconProvider(Singleton):
             RuntimeError: When the class is already initialized.
         """
 
-        super().__init__()
+        super().__init__(replace_existing_instance=True)
 
         self.__ui_mode = ui_mode
         self.__icon_color = icon_color
