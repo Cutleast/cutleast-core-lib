@@ -93,7 +93,6 @@ class LoadingDialog(QDialog, Generic[T]):
         vlayout.addWidget(self.label1)
         self.pbar1 = QProgressBar()
         self.pbar1.setTextVisible(False)
-        self.pbar1.setFixedHeight(3)
         vlayout.addWidget(self.pbar1)
 
         # Set up second label and progressbar
@@ -103,7 +102,6 @@ class LoadingDialog(QDialog, Generic[T]):
         vlayout.addWidget(self.label2)
         self.pbar2 = QProgressBar()
         self.pbar2.setTextVisible(False)
-        self.pbar2.setFixedHeight(3)
         self.pbar2.hide()
         vlayout.addWidget(self.pbar2)
 
@@ -114,7 +112,6 @@ class LoadingDialog(QDialog, Generic[T]):
         vlayout.addWidget(self.label3)
         self.pbar3 = QProgressBar()
         self.pbar3.setTextVisible(False)
-        self.pbar3.setFixedHeight(3)
         self.pbar3.hide()
         vlayout.addWidget(self.pbar3)
 
