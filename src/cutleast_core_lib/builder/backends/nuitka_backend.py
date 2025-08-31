@@ -108,7 +108,7 @@ class NuitkaBackend(BuildBackend):
             f"--product-name={metadata.display_name}",
             f"--file-description={metadata.display_name}",
             f"--file-version={metadata.file_version}",
-            f"--product-version={metadata.project_version}",
+            f"--product-version={metadata.file_version}",
             f"--output-filename={exe_stem}.exe",
         ]
 
