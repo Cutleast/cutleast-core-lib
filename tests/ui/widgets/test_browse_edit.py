@@ -3,6 +3,7 @@ Copyright (c) Cutleast
 """
 
 from pathlib import Path
+from typing import Optional
 
 from pyfakefs.fake_filesystem import FakeFilesystem
 from PySide6.QtWidgets import QFileDialog, QPushButton
@@ -21,8 +22,14 @@ class TestBrowseLineEdit(BaseTest):
     BROWSE_BUTTON: tuple[str, type[QPushButton]] = "browse_button", QPushButton
     """Identifier for accessing the private browse_button field."""
 
-    FILE_DIALOG: tuple[str, type[QFileDialog]] = "file_dialog", QFileDialog
-    """Identifier for accessing the private file_dialog field."""
+    FILE_MODE: tuple[str, type[QFileDialog.FileMode]] = (
+        "file_mode",
+        QFileDialog.FileMode,
+    )
+    """Identifier for accessing the private file_mode field."""
+
+    FILTERS: tuple[str, type[list[str]]] = "filters", list[str]
+    """Identifier for accessing the private filters field."""
 
     def test_initial_state(self, qtbot: QtBot) -> None:
         """
@@ -34,8 +41,11 @@ class TestBrowseLineEdit(BaseTest):
         browse_button: QPushButton = Utils.get_private_field(
             widget, *TestBrowseLineEdit.BROWSE_BUTTON
         )
-        file_dialog: QFileDialog = Utils.get_private_field(
-            widget, *TestBrowseLineEdit.FILE_DIALOG
+        file_mode: QFileDialog.FileMode = Utils.get_private_field(
+            widget, *TestBrowseLineEdit.FILE_MODE
+        )
+        filters: Optional[list[str]] = Utils.get_private_field_optional(
+            widget, *TestBrowseLineEdit.FILTERS
         )
         qtbot.addWidget(widget)
 
@@ -47,8 +57,8 @@ class TestBrowseLineEdit(BaseTest):
         assert widget.getPath() == Path()
         assert browse_button.isVisible()
         assert browse_button.isEnabled()
-        assert file_dialog.fileMode() == QFileDialog.FileMode.AnyFile
-        assert file_dialog.nameFilters() == ["All Files (*)"]
+        assert file_mode == QFileDialog.FileMode.AnyFile
+        assert filters is None
 
     def test_set_path_with_base_path(
         self, test_fs: FakeFilesystem, qtbot: QtBot
