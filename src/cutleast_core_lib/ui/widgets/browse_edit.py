@@ -18,7 +18,8 @@ class BrowseLineEdit(QLineEdit):
 
     __base_path: Optional[Path]
     __browse_button: QPushButton
-    __file_dialog: QFileDialog
+    __file_mode: QFileDialog.FileMode = QFileDialog.FileMode.AnyFile
+    __filters: Optional[list[str]] = None
 
     pathChanged = Signal(Path, Path)
     """
@@ -55,8 +56,6 @@ class BrowseLineEdit(QLineEdit):
             self.setPath(initial_path)
 
     def __init_ui(self) -> None:
-        self.__file_dialog = QFileDialog()
-
         hlayout: QHBoxLayout = QHBoxLayout(self)
         hlayout.setContentsMargins(0, 0, 0, 0)
 
@@ -69,13 +68,6 @@ class BrowseLineEdit(QLineEdit):
         self.__browse_button.setCursor(Qt.CursorShape.ArrowCursor)
         hlayout.addWidget(self.__browse_button)
 
-    def configureFileDialog(self, *args: Any, **kwargs: dict[str, Any]) -> None:
-        """
-        Redirects `args` and `kwargs` to constructor of `QFileDialog`.
-        """
-
-        self.__file_dialog = QFileDialog(*args, **kwargs)
-
     def setFileMode(self, mode: QFileDialog.FileMode) -> None:
         """
         Sets the file mode of the file dialog.
@@ -84,7 +76,7 @@ class BrowseLineEdit(QLineEdit):
             mode (QFileDialog.FileMode): File mode.
         """
 
-        self.__file_dialog.setFileMode(mode)
+        self.__file_mode = mode
 
     def setNameFilters(self, filters: list[str]) -> None:
         """
@@ -94,7 +86,7 @@ class BrowseLineEdit(QLineEdit):
             filters (list[str]): Name filters.
         """
 
-        self.__file_dialog.setNameFilters(filters)
+        self.__filters = filters
 
     def getPath(self, absolute: bool = False) -> Path:
         """
@@ -133,13 +125,18 @@ class BrowseLineEdit(QLineEdit):
     def __browse(self) -> None:
         current_text: str = self.text().strip()
 
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(self.__file_mode)
+        if self.__filters is not None:
+            file_dialog.setNameFilters(self.__filters)
+
         if current_text:
             current_path: Path = self.getPath(absolute=True)
-            self.__file_dialog.setDirectory(str(current_path.parent))
-            self.__file_dialog.selectFile(current_path.name)
+            file_dialog.setDirectory(str(current_path.parent))
+            file_dialog.selectFile(current_path.name)
 
-        if self.__file_dialog.exec():
-            selected_files: list[str] = self.__file_dialog.selectedFiles()
+        if file_dialog.exec():
+            selected_files: list[str] = file_dialog.selectedFiles()
 
             if selected_files:
                 file: Path = Path(selected_files.pop())
