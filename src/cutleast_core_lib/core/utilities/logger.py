@@ -172,6 +172,9 @@ class Logger(logging.Logger, Singleton):
 
         self.__log_file.flush()
 
+    def fileno(self) -> int:
+        return self.__stdout.fileno()
+
     def get_content(self) -> str:
         """
         Returns content of current log as string.
