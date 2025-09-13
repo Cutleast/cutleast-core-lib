@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..utilities.icon_provider import IconProvider
+from .copy_button import CopyButton
 
 
 class ErrorDialog(QDialog):
@@ -109,9 +110,8 @@ class ErrorDialog(QDialog):
             ok_button.clicked.connect(self.reject)
             hlayout.addWidget(ok_button)
 
-        copy_button = QPushButton()
+        copy_button = CopyButton()
         copy_button.setToolTip(self.tr("Copy error details..."))
-        copy_button.setIcon(IconProvider.get_qta_icon("mdi6.content-copy"))
         copy_button.clicked.connect(
             lambda: QApplication.clipboard().setText(self.__details)
         )
