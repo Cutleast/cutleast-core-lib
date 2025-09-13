@@ -7,7 +7,7 @@ import os
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
-from virtual_glob import InMemoryPath, glob
+from cutleast_core_lib.core.utilities.filesystem import str_glob
 
 from ..utilities.process_runner import run_process
 
@@ -150,12 +150,7 @@ class Archive(metaclass=ABCMeta):
             list: List of matching filenames.
         """
 
-        # Workaround case-sensitivity
-        files: dict[str, str] = {file.lower(): file for file in self.files}
-
-        fs: InMemoryPath = InMemoryPath.from_list(list(files.keys()))
-        matches: list[str] = [files[p.path] for p in glob(fs, pattern)]
-
+        matches: list[str] = str_glob(pattern, list(self.files))
         return matches
 
     @staticmethod
