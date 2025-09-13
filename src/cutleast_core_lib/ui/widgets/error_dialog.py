@@ -26,6 +26,9 @@ class ErrorDialog(QDialog):
     Custom error dialog.
     """
 
+    MAX_INITIAL_LABEL_WIDTH: int = 800
+    """The maximum width the label may have initially."""
+
     __text: str
     __details: str
     __yesno: bool
@@ -80,8 +83,15 @@ class ErrorDialog(QDialog):
         hlayout.addWidget(icon_label)
 
         text_label = QLabel(self.__text)
-        text_label.setWordWrap(True)
         hlayout.addWidget(text_label, stretch=1)
+        # calculate the required width of the label without word wrap
+        # and set it as the initial minimum width (limited by MAX_INITIAL_LABEL_WIDTH)
+        text_label.adjustSize()
+        width_hint: int = min(
+            ErrorDialog.MAX_INITIAL_LABEL_WIDTH, text_label.sizeHint().width()
+        )
+        text_label.setWordWrap(True)
+        text_label.setMinimumWidth(width_hint)
 
         self.__details_box = QPlainTextEdit(self.__details)
         self.__details_box.setObjectName("protocol")
