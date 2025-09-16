@@ -5,6 +5,8 @@ Copyright (c) Cutleast
 from collections.abc import Callable
 from typing import Any, Optional, get_origin
 
+from cutleast_core_lib.core.utilities.singleton import Singleton
+
 
 class Utils:
     """
@@ -12,6 +14,9 @@ class Utils:
 
     **DO NOT USE IN PRODUCTION CODE!**
     """
+
+    SINGLETON_INSTANCE: tuple[str, type[Singleton]] = "instance", Singleton
+    """Identifier for accessing the private instance field of singleton classes."""
 
     @staticmethod
     def get_private_method[**P, R](
@@ -139,3 +144,17 @@ class Utils:
             raise TypeError(f"{field_name!r} ({type(field)}) is not a {field_type}!")
 
         return field  # type: ignore
+
+    @staticmethod
+    def reset_singleton[S: Singleton](singleton_cls: type[S]) -> None:
+        """
+        Resets a singleton class by deleting its instance.
+
+        Args:
+            singleton_cls (type[S]): The singleton class to reset.
+        """
+
+        field_name = f"_Singleton__{Utils.SINGLETON_INSTANCE[0]}"
+        setattr(singleton_cls, field_name, None)
+
+        assert not singleton_cls.has_instance()
