@@ -13,7 +13,7 @@ from cutleast_core_lib.ui.widgets.updater_dialog import UpdaterDialog
 
 from .exceptions import format_exception
 from .singleton import Singleton
-from .web_utils import get_raw_web_content
+from .web_utils import get_raw_web_content_uncached
 
 
 class Updater(Singleton):
@@ -103,7 +103,7 @@ class Updater(Singleton):
         """
 
         try:
-            response = get_raw_web_content(self.update_url)
+            response = get_raw_web_content_uncached(self.update_url)
 
             latest_version_json: str = response.decode(encoding="utf8", errors="ignore")
             latest_version_data: dict[str, str] = json.loads(latest_version_json)
@@ -124,6 +124,6 @@ class Updater(Singleton):
         """
 
         try:
-            return get_raw_web_content(self.changelog_url).decode("utf-8")
+            return get_raw_web_content_uncached(self.changelog_url).decode("utf-8")
         except Exception as ex:
             return format_exception(ex)

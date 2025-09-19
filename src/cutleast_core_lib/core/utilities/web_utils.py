@@ -30,6 +30,23 @@ def get_raw_web_content(url: str) -> bytes:
         bytes: Raw content of the URL.
     """
 
+    return get_raw_web_content_uncached(url)
+
+
+def get_raw_web_content_uncached(url: str) -> bytes:
+    """
+    Fetches raw content from the given URL. The result is not cached.
+
+    Args:
+        url (str): URL to fetch content from.
+
+    Raises:
+        Non200HttpError: If the status code is not 200.
+
+    Returns:
+        bytes: Raw content of the URL.
+    """
+
     res: Response = get(url)
 
     if res.status_code != 200:
