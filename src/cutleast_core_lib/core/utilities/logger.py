@@ -173,7 +173,7 @@ class Logger(logging.Logger, Singleton):
         self.__log_file.flush()
 
     def fileno(self) -> int:
-        return self.__stdout.fileno()
+        return (self.__stdout or sys.stdout).fileno()
 
     def get_content(self) -> str:
         """
