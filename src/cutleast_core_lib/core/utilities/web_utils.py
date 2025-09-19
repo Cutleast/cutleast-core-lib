@@ -12,7 +12,7 @@ from .exceptions import Non200HttpError
 
 @Cache.persistent_cache(
     cache_subfolder=Path("web_cache"),
-    id_generator=lambda url: str(hash(url)),
+    id_generator=lambda url: hex(hash(url))[2:10],
     max_age=60 * 60 * 24,
 )
 def get_raw_web_content(url: str) -> bytes:
