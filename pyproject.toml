@@ -28,6 +28,7 @@ dev = [
     "pytest-cov",
     "pytest-mock",
     "pytest-qt",
+    "requests-mock",
     "ruff",
     "types-requests",
 ]
