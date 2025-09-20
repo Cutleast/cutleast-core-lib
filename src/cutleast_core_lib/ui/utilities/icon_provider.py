@@ -91,12 +91,20 @@ class IconProvider(Singleton):
             mode_spec_icon_name: str = (
                 ":/icons/" + cls.get().__ui_mode.name.lower() + "/" + icon_name + suffix
             )
+            disabled_icon_name: str = ":/icons/disabled/" + icon_name + suffix
             general_icon_name: str = ":/icons/" + icon_name + suffix
 
+            icon: Optional[QIcon] = None
             if QFile(mode_spec_icon_name).exists():
-                return QIcon(mode_spec_icon_name)
+                icon = QIcon(mode_spec_icon_name)
             elif QFile(general_icon_name).exists():
-                return QIcon(general_icon_name)
+                icon = QIcon(general_icon_name)
+
+            if icon is not None:
+                if QFile(disabled_icon_name).exists():
+                    icon.addFile(disabled_icon_name, mode=QIcon.Mode.Disabled)
+
+                return icon
 
         raise FileNotFoundError(
             f"Could not find icon {icon_name} for mode {cls.get().__ui_mode.name}!"
