@@ -61,7 +61,7 @@ class LoadingDialog(QDialog, Generic[T]):
 
     log = logging.getLogger("LoadingDialog")
 
-    parent_hwnd: Optional[int] = None
+    tbprogress_hwnd: Optional[int] = None
 
     def __init__(
         self, parent: Optional[QWidget], func: Callable[["LoadingDialog[T]"], T]
@@ -122,10 +122,14 @@ class LoadingDialog(QDialog, Generic[T]):
             self.setProgress, type=Qt.ConnectionType.QueuedConnection
         )
 
-        # Set up Taskbar Progress API
+        # Set up Taskbar Progress API either for a parent if specified or the dialog
+        # itself
         if parent is not None and taskbar is not None:
-            self.parent_hwnd = parent.winId()
-            taskbar.ActivateTab(self.parent_hwnd)
+            self.tbprogress_hwnd = parent.winId()
+            taskbar.ActivateTab(self.tbprogress_hwnd)
+        elif taskbar is not None:
+            self.tbprogress_hwnd = self.winId()
+            taskbar.ActivateTab(self.tbprogress_hwnd)
 
         self.setFixedWidth(600)
 
@@ -240,13 +244,13 @@ class LoadingDialog(QDialog, Generic[T]):
             self.label3.setText(truncate_string(text3, 90, TruncateMode.Middle))
 
         # Update Taskbar Progress
-        if self.parent_hwnd is not None and taskbar is not None:
+        if self.tbprogress_hwnd is not None and taskbar is not None:
             if self.pbar1.maximum() == 0:
-                taskbar.SetProgressState(self.parent_hwnd, 0x1)  # Indeterminate
+                taskbar.SetProgressState(self.tbprogress_hwnd, 0x1)  # Indeterminate
             else:
-                taskbar.SetProgressState(self.parent_hwnd, 0x2)  # Determinate
+                taskbar.SetProgressState(self.tbprogress_hwnd, 0x2)  # Determinate
                 taskbar.SetProgressValue(
-                    self.parent_hwnd, self.pbar1.value(), self.pbar1.maximum()
+                    self.tbprogress_hwnd, self.pbar1.value(), self.pbar1.maximum()
                 )
 
     @override
@@ -284,8 +288,8 @@ class LoadingDialog(QDialog, Generic[T]):
         self.log.debug(f"Time: {get_diff(self.starttime, time.strftime('%H:%M:%S'))}")
 
         # Clear taskbar state
-        if self.parent_hwnd is not None and taskbar is not None:
-            taskbar.SetProgressState(self.parent_hwnd, 0x0)
+        if self.tbprogress_hwnd is not None and taskbar is not None:
+            taskbar.SetProgressState(self.tbprogress_hwnd, 0x0)
 
         # if self._thread.exception is not None:
         #     # Set taskbar state to error
