@@ -37,12 +37,14 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
     _config_path: Path
 
     @classmethod
-    def load(cls: type[T], user_config_path: Path) -> T:
+    def load(cls: type[T], user_config_path: Path, log_settings: bool = True) -> T:
         """
         Loads configuration.
 
         Args:
             user_config_path (Path): Path to folder with user configuration.
+            log_settings (bool, optional):
+                Whether to print loaded config to log. Defaults to True.
 
         Returns:
             T: Loaded configuration.
@@ -69,7 +71,9 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
         config._config_path = user_config_path
 
         cls._get_logger().info("Configuration loaded.")
-        config.print_settings_to_log()
+
+        if log_settings:
+            config.print_settings_to_log()
 
         return config
 
