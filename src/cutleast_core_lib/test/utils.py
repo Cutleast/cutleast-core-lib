@@ -40,7 +40,11 @@ class Utils:
             Callable[P, R]: The method.
         """
 
-        method_name = f"_{obj.__class__.__name__}__{method_name}"
+        method_name: str
+        if isinstance(obj, type):
+            method_name = f"_{obj.__name__}__{method_name}"
+        else:
+            method_name = f"_{obj.__class__.__name__}__{method_name}"
 
         if not hasattr(obj, method_name):
             raise AttributeError(f"Method {method_name!r} not found!")
