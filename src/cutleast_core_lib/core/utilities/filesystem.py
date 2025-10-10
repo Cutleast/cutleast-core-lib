@@ -26,40 +26,22 @@ def create_folder_list(folder: Path) -> list[Path]:
     return [item.relative_to(folder) for item in folder.glob("**/*") if item.is_file()]
 
 
-def get_file_identifier(file_path: os.PathLike, block_size: int = 1024 * 1024) -> str:
+def get_file_identifier(file_path: os.PathLike) -> str:
     """
-    Creates a sha256 hash of the first and last block with `block_size`
-    and returns first 8 characters of the hash.
+    Creates a blake2b hash of the file path and last modification timestamp and returns
+    first 8 characters of the hash.
 
     Args:
         file_path (os.PathLike): Path to file to hash.
-        block_size (int, optional): Size of block to hash. Defaults to 1MB.
 
     Returns:
         str: First 8 characters of hash.
     """
 
-    hasher = hashlib.sha256()
-    file_size = os.path.getsize(file_path)
-
-    with open(file_path, "rb") as f:
-        if file_size <= block_size:
-            # File is smaller than block_size, hash the entire file
-            chunk = f.read()
-            hasher.update(chunk)
-        else:
-            # Hash the first block
-            chunk = f.read(block_size)
-            if chunk:
-                hasher.update(chunk)
-
-            # Move to the end and hash the last block
-            f.seek(-block_size, os.SEEK_END)
-            chunk = f.read(block_size)
-            if chunk:
-                hasher.update(chunk)
-
-    return hasher.hexdigest()[:8]
+    mtime = os.path.getmtime(file_path)
+    data = f"{file_path}-{mtime}".encode("utf-8")
+    digest = hashlib.blake2b(data, digest_size=8).hexdigest()
+    return digest[:8]
 
 
 def get_folder_size(folder: Path) -> int:
