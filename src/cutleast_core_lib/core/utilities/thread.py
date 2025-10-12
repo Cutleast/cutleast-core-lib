@@ -7,6 +7,8 @@ from typing import Callable, Generic, TypeVar, override
 from PySide6.QtCore import QThread
 from PySide6.QtWidgets import QWidget
 
+from .exceptions import ProcessIncompleteError
+
 T = TypeVar("T")
 
 
@@ -46,8 +48,16 @@ class Thread(QThread, Generic[T]):
         """
         Returns the return value of the target function or an exception.
 
+        Raises:
+            ProcessIncompleteError:
+                If the result of the thread was requested before the thread was finished
+                or when it was terminated.
+
         Returns:
             T | Exception: Return value of the target function or an exception
         """
 
-        return self.__return_result
+        try:
+            return self.__return_result
+        except AttributeError:
+            raise ProcessIncompleteError from AttributeError

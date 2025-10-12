@@ -102,3 +102,16 @@ class Non200HttpError(RequestError):
         return QApplication.translate(
             "exceptions", "Request to '{0}' failed with status code {1}!"
         )
+
+
+class ProcessIncompleteError(LocalizedException):
+    """
+    Exception when the result of a thread was requested before the thread was finished
+    or when it was terminated.
+    """
+
+    @override
+    def getLocalizedMessage(self) -> str:
+        return QApplication.translate(
+            "exceptions", "The process is incomplete and has no result!"
+        )
