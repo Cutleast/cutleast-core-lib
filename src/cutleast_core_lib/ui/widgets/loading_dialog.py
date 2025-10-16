@@ -49,6 +49,8 @@ class LoadingDialog(QDialog, Generic[T]):
 
     Use updateProgress to update bars.
 
+    **THIS IS DEPRECATED AND WILL EVENTUALLY BE REMOVED! Use ProgressDialog instead.**
+
     Parameters:
         parent: Optional[QWidget]
         func: function or method that is called in a background thread
