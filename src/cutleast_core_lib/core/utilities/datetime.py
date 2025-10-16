@@ -62,6 +62,27 @@ def get_diff(start_time: str, end_time: str, str_format: str = "%H:%M:%S") -> st
     )
 
 
+def format_duration(seconds: int) -> str:
+    """
+    Converts a number of seconds into a string formatted as "HH:mm:ss".
+
+    Args:
+        seconds (int): The total number of seconds.
+
+    Returns:
+        str: Time formatted as "HH:mm:ss".
+    """
+
+    if seconds < 0:
+        raise ValueError("Seconds cannot be negative.")
+
+    hours: int = seconds // 3600
+    minutes: int = (seconds % 3600) // 60
+    secs: int = seconds % 60
+
+    return f"{hours:02d}:{minutes:02d}:{secs:02d}"
+
+
 def fmt_timestamp(timestamp: int | float, fmt: str = "%d.%m.%Y %H:%M:%S") -> str:
     """
     Creates a time string from a UNIX timestamp.
