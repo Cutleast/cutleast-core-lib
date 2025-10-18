@@ -364,7 +364,7 @@ class LoadingDialog(QDialog, Generic[T]):
             message_box.setStandardButtons(
                 QMessageBox.StandardButton.No | QMessageBox.StandardButton.Yes
             )
-            message_box.setDefaultButton(QMessageBox.StandardButton.Yes)
+            message_box.setDefaultButton(QMessageBox.StandardButton.No)
             message_box.button(QMessageBox.StandardButton.No).setText(self.tr("No"))
             message_box.button(QMessageBox.StandardButton.Yes).setText(self.tr("Yes"))
 
