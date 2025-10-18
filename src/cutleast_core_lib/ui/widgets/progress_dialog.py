@@ -53,6 +53,21 @@ T = TypeVar("T")
 V = TypeVar("V")
 
 
+def update(
+    update_callback: Optional[UpdateCallback], arg: ProgressDialog.UpdatePayload
+) -> None:
+    """
+    Function to call a update callback or do nothing if it is None.
+
+    Args:
+        update_callback (Optional[UpdateCallback]): Update callback to call or None.
+        arg (ProgressDialog.UpdatePayload): Argument to pass to update callback.
+    """
+
+    if update_callback is not None:
+        update_callback(arg)
+
+
 class ProgressDialog(QDialog, Generic[T]):
     """
     Custom QProgressDialog featuring a main progress bar and a collapsible section for
