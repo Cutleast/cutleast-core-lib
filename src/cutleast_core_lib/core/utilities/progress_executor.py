@@ -13,7 +13,7 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-class ProgressThreadPoolExecutor(ThreadPoolExecutor):
+class ProgressExecutor(ThreadPoolExecutor):
     """
     A custom ThreadPoolExecutor that displays progress in a ProgressDialog.
     Each worker thread gets its own progress bar that displays the progress
@@ -25,7 +25,7 @@ class ProgressThreadPoolExecutor(ThreadPoolExecutor):
     callback function as their first positional argument.**
     """
 
-    __dialog: ProgressDialog
+    __dialog: Optional[ProgressDialog] = None
     __lock: Lock
     __completed_tasks: int
     __total_tasks: int
@@ -37,11 +37,19 @@ class ProgressThreadPoolExecutor(ThreadPoolExecutor):
 
     def __init__(
         self,
-        dialog: ProgressDialog,
+        dialog: Optional[ProgressDialog] = None,
         max_workers: Optional[int] = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:
+        """
+        Args:
+            dialog (Optional[ProgressDialog], optional):
+                Progress dialog, may be None. Defaults to None.
+            max_workers (Optional[int], optional):
+                Maximum number of workers. Defaults to None.
+        """
+
         super().__init__(max_workers=max_workers, *args, **kwargs)
 
         self.__dialog = dialog
@@ -52,6 +60,14 @@ class ProgressThreadPoolExecutor(ThreadPoolExecutor):
         self.__main_progress_text = ""
 
     def set_main_progress_text(self, text: str) -> None:
+        """
+        Sets the text of the main progress. This method is required to use as the
+        executor will modify the text and add the total number of tasks completed.
+
+        Args:
+            text (str): Base text to display.
+        """
+
         self.__main_progress_text = text
 
     @override
@@ -63,7 +79,7 @@ class ProgressThreadPoolExecutor(ThreadPoolExecutor):
         a Future instance representing the execution of the callable.
 
         **The callable must accept a progress callback function as its first positional
-        argument.**
+        argument. The callback function is None-safe.**
 
         Args:
             fn (Callable[..., T]): The callable to be executed.
@@ -84,7 +100,8 @@ class ProgressThreadPoolExecutor(ThreadPoolExecutor):
                 )
 
             def update_callback(payload: ProgressDialog.UpdatePayload) -> None:
-                self.__dialog.updateProgress(worker_id, payload)
+                if self.__dialog is not None:
+                    self.__dialog.updateProgress(worker_id, payload)
 
             try:
                 result: T = fn(update_callback, *_args, **_kwargs)
@@ -94,16 +111,17 @@ class ProgressThreadPoolExecutor(ThreadPoolExecutor):
                 with self.__lock:
                     self.__completed_tasks += 1
 
-                self.__dialog.updateMainProgress(
-                    ProgressDialog.UpdatePayload(
-                        status_text=(
-                            f"{self.__main_progress_text} ({self.__completed_tasks} / "
-                            f"{self.__total_tasks})"
-                        ),
-                        progress_value=self.__completed_tasks,
-                        progress_max=self.__total_tasks,
+                if self.__dialog is not None:
+                    self.__dialog.updateMainProgress(
+                        ProgressDialog.UpdatePayload(
+                            status_text=(
+                                f"{self.__main_progress_text} ({self.__completed_tasks} "
+                                f"/ {self.__total_tasks})"
+                            ),
+                            progress_value=self.__completed_tasks,
+                            progress_max=self.__total_tasks,
+                        )
                     )
-                )
 
         return super().submit(worker_fn, *args, **kwargs)
 
@@ -148,7 +166,7 @@ if __name__ == "__main__":
             )
         )
 
-        with ProgressThreadPoolExecutor(dialog, max_workers=4) as executor:
+        with ProgressExecutor(dialog, max_workers=4) as executor:
             executor.set_main_progress_text("Running tasks...")
 
             futures: list[Future] = []
