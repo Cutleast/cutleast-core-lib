@@ -5,12 +5,16 @@ Copyright (c) Cutleast
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from threading import Lock, current_thread
-from typing import Any, Optional, ParamSpec, TypeVar, override
+from typing import Any, Optional, TypeAlias, TypeVar, override
 
-from cutleast_core_lib.ui.widgets.progress_dialog import ProgressDialog
+from cutleast_core_lib.ui.widgets.progress_dialog import ProgressDialog, UpdateCallback
 
-P = ParamSpec("P")
 T = TypeVar("T")
+
+WorkerFunction: TypeAlias = Callable[[UpdateCallback, ...], T]
+"""
+A callable that accepts a progress callback function as its first positional argument.
+"""
 
 
 class ProgressExecutor(ThreadPoolExecutor):
@@ -71,7 +75,7 @@ class ProgressExecutor(ThreadPoolExecutor):
         self.__main_progress_text = text
 
     @override
-    def submit(self, fn: Callable[..., T], *args: Any, **kwargs: Any) -> Future[T]:
+    def submit(self, fn: WorkerFunction[T], *args: Any, **kwargs: Any) -> Future[T]:
         """
         Submits a callable to be executed with the given arguments.
 
@@ -82,7 +86,7 @@ class ProgressExecutor(ThreadPoolExecutor):
         argument. The callback function is None-safe.**
 
         Args:
-            fn (Callable[..., T]): The callable to be executed.
+            fn (WorkerFunction[T]): The callable to be executed.
 
         Returns:
             A Future representing the given call.
