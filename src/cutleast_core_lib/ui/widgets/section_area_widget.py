@@ -7,7 +7,7 @@ from typing import Optional
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QHBoxLayout, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QGridLayout, QPushButton, QWidget
 
 from ..utilities.icon_provider import IconProvider
 
@@ -25,16 +25,16 @@ class SectionAreaWidget(QWidget):
         Left = 0
         """The toggle button is placed to the left of the header widget."""
 
-        Right = 1
+        Right = 2
         """The toggle button is placed to the right of the header widget."""
 
     class Direction(Enum):
         """Enum for the possible directions of the collapsible section."""
 
-        Up = 0
+        Up = 2
         """The content appears above the header."""
 
-        Down = 1
+        Down = 0
         """The content appears below the header."""
 
     toggled = Signal(bool)
@@ -48,11 +48,12 @@ class SectionAreaWidget(QWidget):
     __header_widget: QWidget
     __content_widget: QWidget
     __direction: Direction
+    __stretch_content: bool
 
     __chevron_down_icon: QIcon
     __chevron_up_icon: QIcon
 
-    __vlayout: QVBoxLayout
+    __glayout: QGridLayout
     __toggle_button: QPushButton
 
     def __init__(
@@ -61,6 +62,7 @@ class SectionAreaWidget(QWidget):
         content: QWidget,
         toggle_position: TogglePosition = TogglePosition.Left,
         direction: Direction = Direction.Down,
+        stretch_content: bool = True,
         parent: Optional[QWidget] = None,
     ) -> None:
         """
@@ -73,6 +75,9 @@ class SectionAreaWidget(QWidget):
                 TogglePosition.Left.
             direction (Direction, optional):
                 The direction of the collapsible section. Defaults to Direction.Down.
+            stretch_content (bool, optional):
+                Whether the content area should stretch over the entire width or should
+                have the same width as the header. Defaults to True.
             parent (Optional[QWidget], optional): Parent widget. Defaults to None.
         """
 
@@ -81,6 +86,7 @@ class SectionAreaWidget(QWidget):
         self.__header_widget = header
         self.__content_widget = content
         self.__direction = direction
+        self.__stretch_content = stretch_content
 
         self.__chevron_down_icon = IconProvider.get_qta_icon("mdi6.chevron-down")
         self.__chevron_up_icon = IconProvider.get_qta_icon("mdi6.chevron-up")
@@ -90,22 +96,20 @@ class SectionAreaWidget(QWidget):
         self.__toggle_button.toggled.connect(self.__toggle)
 
     def __init_ui(self, toggle_position: TogglePosition) -> None:
-        self.__vlayout = QVBoxLayout()
+        self.__glayout = QGridLayout()
         if self.__direction == SectionAreaWidget.Direction.Down:
-            self.__vlayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+            self.__glayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         else:
-            self.__vlayout.setAlignment(Qt.AlignmentFlag.AlignBottom)
+            self.__glayout.setAlignment(Qt.AlignmentFlag.AlignBottom)
 
-        self.setLayout(self.__vlayout)
+        self.setLayout(self.__glayout)
 
         self.__init_header(toggle_position)
         self.__init_content_widget()
 
     def __init_header(self, toggle_position: TogglePosition) -> None:
-        hlayout = QHBoxLayout()
-        self.__vlayout.addLayout(hlayout)
-
-        hlayout.addWidget(self.__header_widget, stretch=1)
+        self.__glayout.setColumnStretch(1, 1)
+        self.__glayout.addWidget(self.__header_widget, self.__direction.value, 1)
 
         self.__toggle_button = QPushButton()
         self.__toggle_button.setObjectName("toggle_button")
@@ -116,10 +120,16 @@ class SectionAreaWidget(QWidget):
         )
         self.__toggle_button.setCheckable(True)
         self.__toggle_button.setChecked(False)
-        hlayout.insertWidget(toggle_position.value, self.__toggle_button)
+        self.__glayout.addWidget(
+            self.__toggle_button, self.__direction.value, toggle_position.value
+        )
 
     def __init_content_widget(self) -> None:
-        self.__vlayout.insertWidget(self.__direction.value, self.__content_widget)
+        if self.__stretch_content:
+            self.__glayout.addWidget(self.__content_widget, 1, 0, 1, 3)
+        else:
+            self.__glayout.addWidget(self.__content_widget, 1, 1)
+        self.__glayout.setRowStretch(1, 1)
         self.__content_widget.hide()
 
     def __toggle(self, expanded: bool) -> None:

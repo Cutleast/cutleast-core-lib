@@ -74,12 +74,6 @@ class ProgressDialog(QDialog, Generic[T]):
     additional progress bars (e.g. for worker threads).
     """
 
-    MAX_DISPLAYED_PROGRESS_BARS: int = 5
-    """
-    The number of additional progress bars that are visible when expanded until a scroll
-    bar appears.
-    """
-
     @dataclass(frozen=True)
     class UpdatePayload:
         """
@@ -120,7 +114,7 @@ class ProgressDialog(QDialog, Generic[T]):
         def __init_ui(self) -> None:
             self.setContentsMargins(0, 0, 0, 0)
 
-            self.__vlayout = QVBoxLayout(self)
+            self.__vlayout = QVBoxLayout()
             self.__vlayout.setContentsMargins(0, 0, 0, 0)
             self.setLayout(self.__vlayout)
 
@@ -174,6 +168,8 @@ class ProgressDialog(QDialog, Generic[T]):
     __main_progress: ProgressWidget
     __progress_widgets: dict[int, ProgressWidget]
 
+    __max_height: Optional[int] = None
+
     log: logging.Logger = logging.getLogger("ProgressDialog")
 
     def __init__(
@@ -193,9 +189,12 @@ class ProgressDialog(QDialog, Generic[T]):
         self.__update_signal.connect(self.__update_progress)
         self.__section_area.toggled.connect(self.__on_section_toggled)
 
+        self.__on_section_toggled(False)
+
     def __init_ui(self) -> None:
         self.setContentsMargins(0, 0, 0, 0)
         self.setFixedWidth(600)
+        self.setMaximumHeight(400)
 
         self.__vlayout = QVBoxLayout(self)
         self.__vlayout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -214,18 +213,30 @@ class ProgressDialog(QDialog, Generic[T]):
         additional_progress_widget.setLayout(self.__additional_progress_vlayout)
         scroll_area.setWidget(additional_progress_widget)
 
-        self.__section_area = SectionAreaWidget(self.__main_progress, scroll_area)
+        self.__section_area = SectionAreaWidget(
+            self.__main_progress,
+            scroll_area,
+            toggle_position=SectionAreaWidget.TogglePosition.Right,
+            stretch_content=False,
+        )
         self.__vlayout.addWidget(self.__section_area)
 
         self.__progress_widgets = {}
 
     def __on_section_toggled(self, toggled: bool) -> None:
         self.__section_area.adjustSize()
-        max_height: int = (ProgressDialog.MAX_DISPLAYED_PROGRESS_BARS + 1) * (
-            self.__main_progress.sizeHint().height() + 15
-        )
-        self.setFixedHeight(min(self.__section_area.sizeHint().height(), max_height))
-        print(self.__section_area.sizeHint().height(), max_height)
+
+        new_height: int
+        if self.__max_height is not None:
+            new_height = min(self.__max_height, self.__section_area.sizeHint().height())
+        else:
+            new_height = self.__section_area.sizeHint().height()
+
+        self.setFixedHeight(new_height)
+
+    @override
+    def setMaximumHeight(self, maxh: int) -> None:
+        self.__max_height = maxh
 
     def updateMainProgress(self, payload: UpdatePayload) -> None:
         """
@@ -379,7 +390,7 @@ if __name__ == "__main__":
     IconProvider(UIMode.Dark, "#ffffff")
 
     def process(pdialog: ProgressDialog[int]) -> int:
-        total = 100
+        total = 10
         pdialog.updateMainProgress(
             ProgressDialog.UpdatePayload(
                 status_text="Starting main process...", progress_value=0, progress_max=0
@@ -387,7 +398,7 @@ if __name__ == "__main__":
         )
 
         workers: dict[int, Thread[None]] = {}
-        for i in range(30):
+        for i in range(3):
             wid = i + 1
 
             def worker_func(wid: int) -> None:
