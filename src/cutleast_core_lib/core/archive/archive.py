@@ -135,9 +135,8 @@ class Archive(metaclass=ABCMeta):
 
         try:
             run_process(cmd)
-        except RuntimeError:
+        finally:
             os.remove(filenames_txt)
-            raise
 
     def glob(self, pattern: str) -> list[str]:
         """
