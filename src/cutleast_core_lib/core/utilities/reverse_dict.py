@@ -2,10 +2,15 @@
 Copyright (c) Cutleast
 """
 
+from typing import TypeVar
+
 from .reference_dict import ReferenceDict
 
+K = TypeVar("K")
+V = TypeVar("V")
 
-def reverse_dict[K, V](d: dict[K, V] | ReferenceDict[K, V], /) -> dict[V, K]:
+
+def reverse_dict(d: dict[K, V] | ReferenceDict[K, V], /) -> dict[V, K]:
     """
     Swaps the keys and values of a dictionary.
 
