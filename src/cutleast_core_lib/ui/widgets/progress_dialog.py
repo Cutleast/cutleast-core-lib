@@ -177,6 +177,8 @@ class ProgressDialog(QDialog, Generic[T]):
     ) -> None:
         super().__init__(parent)
 
+        self.__tbprogress_hwnd = self.winId()
+
         # force focus
         self.setModal(True)
 
