@@ -47,6 +47,10 @@ class ThemeManager(Singleton, metaclass=ABCMeta):
         self._accent_color = accent_color
         self._ui_mode = ui_mode
         self._fonts = fonts
+
+        self._init()
+
+    def _init(self) -> None:
         self._icon_provider = self._init_icon_provider()
 
     def _load_fonts(self) -> None:
@@ -118,6 +122,8 @@ class ThemeManager(Singleton, metaclass=ABCMeta):
         Args:
             app (QApplication): The QApplication to apply the theme to.
         """
+
+        app.setStyle("windowsvista")
 
         self._stylesheet = self._get_stylesheet()
         app.setStyleSheet(self._stylesheet)

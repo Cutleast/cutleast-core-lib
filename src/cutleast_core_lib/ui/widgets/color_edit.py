@@ -38,7 +38,7 @@ class ColorLineEdit(QLineEdit):
         hlayout.addStretch()
 
         self.__choose_color_button = QPushButton()
-        self.__choose_color_button.setIconSize(QSize(24, 24))
+        self.__choose_color_button.setIconSize(QSize(22, 22))
         self.__choose_color_button.setIcon(
             IconProvider.get_qta_icon("mdi6.square-rounded")
         )

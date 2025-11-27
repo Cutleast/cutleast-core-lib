@@ -14,7 +14,7 @@ class LogWidget(QPlainTextEdit):
     def __init__(self, initial_text: str = "") -> None:
         super().__init__()
 
-        self.setObjectName("protocol")
+        self.setObjectName("monospace")
         self.setReadOnly(True)
         self.setPlainText(initial_text.removesuffix("\n"))
         self.moveCursor(QTextCursor.MoveOperation.End)
