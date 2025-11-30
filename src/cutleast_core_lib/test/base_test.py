@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem
+from pyfakefs.fake_pathlib import FakePath
 
 from cutleast_core_lib.core.cache.cache import Cache
 from cutleast_core_lib.core.config.app_config import AppConfig
@@ -21,6 +22,24 @@ from .setup.clipboard_mock import ClipboardMock
 os.environ["QT_QPA_PLATFORM"] = "offscreen"  # render widgets off-screen
 
 IconProvider(UIMode.Dark, "#ffffff")  # make sure that the icon provider is initialized
+
+# Snippet from https://github.com/pytest-dev/pyfakefs/discussions/604#discussioncomment-774354
+# monkeypatch Path.__eq__ so that pyfakefs FakePaths compare equal to real pathlib.Paths
+# Path somehow gets monkeypatched during testing, so in order to have access to the
+# original class we'll simply create an instance of it
+PATH = object.__new__(Path)
+
+
+def path_eq(self, other) -> bool:
+    Path = type(PATH)
+
+    if isinstance(other, (Path, FakePath)):
+        return str(self) == str(other)
+
+    return super(Path, self).__eq__(other)
+
+
+Path.__eq__ = path_eq
 
 
 class BaseTest(metaclass=ABCMeta):
