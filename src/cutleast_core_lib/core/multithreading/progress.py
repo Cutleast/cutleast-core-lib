@@ -24,7 +24,7 @@ def update(update_callback: Optional[UpdateCallback], arg: "ProgressUpdate") -> 
 
 class ProgressUpdate(BaseModel, frozen=True):
     """
-    Payload for updating progress the progress of a single thread.
+    Payload for updating the progress of a single thread.
     """
 
     status_text: Optional[str] = None
