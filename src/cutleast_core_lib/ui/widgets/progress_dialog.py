@@ -9,7 +9,6 @@ import time
 from typing import Callable, Generic, Optional, TypeVar, override
 
 import comtypes.client as cc
-from pydantic.dataclasses import dataclass
 from PySide6.QtCore import QCoreApplication, Qt, QTimerEvent, Signal
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
@@ -22,6 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
 from cutleast_core_lib.core.utilities.datetime import format_duration
 from cutleast_core_lib.core.utilities.exceptions import format_exception
 from cutleast_core_lib.core.utilities.exe_info import get_current_path
@@ -47,25 +47,8 @@ except Exception as ex:
 TBL_DETERMINATE: int = 0x1
 TBL_INDETERMINATE: int = 0x2
 
-UpdateCallback = Callable[["ProgressDialog.UpdatePayload"], None]
-
 T = TypeVar("T")
 V = TypeVar("V")
-
-
-def update(
-    update_callback: Optional[UpdateCallback], arg: ProgressDialog.UpdatePayload
-) -> None:
-    """
-    Function to call a update callback or do nothing if it is None.
-
-    Args:
-        update_callback (Optional[UpdateCallback]): Update callback to call or None.
-        arg (ProgressDialog.UpdatePayload): Argument to pass to update callback.
-    """
-
-    if update_callback is not None:
-        update_callback(arg)
 
 
 class ProgressDialog(QDialog, Generic[T]):
@@ -73,29 +56,6 @@ class ProgressDialog(QDialog, Generic[T]):
     Custom QProgressDialog featuring a main progress bar and a collapsible section for
     additional progress bars (e.g. for worker threads).
     """
-
-    @dataclass(frozen=True)
-    class UpdatePayload:
-        """
-        Payload for updating progress bars in the dialog.
-        """
-
-        status_text: Optional[str] = None
-        """
-        Status text to display above the progress bar. Overwrites the previous text if
-        specified.
-        """
-
-        progress_value: Optional[int] = None
-        """
-        Value to set the progress bar to. Overwrites the previous value if specified.
-        """
-
-        progress_max: Optional[int] = None
-        """
-        Maximum value for the progress bar. Overwrites the previous maximum if specified.
-        If the value is 0, the progress bar is set to indeterminate mode.
-        """
 
     class ProgressWidget(QWidget):
         """
@@ -126,12 +86,12 @@ class ProgressDialog(QDialog, Generic[T]):
             self.__pbar.setTextVisible(False)
             self.__vlayout.addWidget(self.__pbar)
 
-        def updateProgress(self, payload: ProgressDialog.UpdatePayload) -> None:
+        def updateProgress(self, payload: ProgressUpdate) -> None:
             """
             Updates the progress bar and label with the given payload.
 
             Args:
-                payload (ProgressDialog.UpdatePayload):
+                payload (ProgressUpdate):
                     The payload containing the updated display values.
             """
 
@@ -140,11 +100,11 @@ class ProgressDialog(QDialog, Generic[T]):
                     truncate_string(payload.status_text, 90, TruncateMode.Middle)
                 )
 
-            if payload.progress_max is not None:
-                self.__pbar.setMaximum(payload.progress_max)
+            if payload.maximum is not None:
+                self.__pbar.setMaximum(payload.maximum)
 
-            if payload.progress_value is not None:
-                self.__pbar.setValue(payload.progress_value)
+            if payload.value is not None:
+                self.__pbar.setValue(payload.value)
 
         def currentValue(self) -> int:
             return self.__pbar.value()
@@ -152,8 +112,8 @@ class ProgressDialog(QDialog, Generic[T]):
         def currentMax(self) -> int:
             return self.__pbar.maximum()
 
-    __update_signal = Signal(int, UpdatePayload)
-    __update_main_signal = Signal(UpdatePayload)
+    __update_signal = Signal(int, ProgressUpdate)
+    __update_main_signal = Signal(ProgressUpdate)
 
     __start_time: Optional[float] = None
     __timer_id: Optional[int] = None
@@ -240,18 +200,18 @@ class ProgressDialog(QDialog, Generic[T]):
     def setMaximumHeight(self, maxh: int) -> None:
         self.__max_height = maxh
 
-    def updateMainProgress(self, payload: UpdatePayload) -> None:
+    def updateMainProgress(self, payload: ProgressUpdate) -> None:
         """
         Updates the main progress bar with the given payload. This method is thread-safe.
 
         Args:
-            payload (ProgressDialog.UpdatePayload):
+            payload (ProgressUpdate):
                 The payload containing the updated display values.
         """
 
         self.__update_main_signal.emit(payload)
 
-    def __update_main_progress(self, payload: UpdatePayload) -> None:
+    def __update_main_progress(self, payload: ProgressUpdate) -> None:
         self.__main_progress.updateProgress(payload)
 
         if taskbar is not None and self.__tbprogress_hwnd is not None:
@@ -265,7 +225,7 @@ class ProgressDialog(QDialog, Generic[T]):
                     self.__main_progress.currentMax(),
                 )
 
-    def updateProgress(self, progress_id: int, payload: UpdatePayload) -> None:
+    def updateProgress(self, progress_id: int, payload: ProgressUpdate) -> None:
         """
         Updates the progress bar for a specific progress ID with the given payload.
         This method is thread-safe.
@@ -274,13 +234,13 @@ class ProgressDialog(QDialog, Generic[T]):
             progress_id (int):
                 ID of the progress to update the progress bar for. If there is no
                 progress bar for the specified ID yet, a new one will be created.
-            payload (ProgressDialog.UpdatePayload):
+            payload (ProgressUpdate):
                 The payload containing the updated display values.
         """
 
         self.__update_signal.emit(progress_id, payload)
 
-    def __update_progress(self, progress_id: int, payload: UpdatePayload) -> None:
+    def __update_progress(self, progress_id: int, payload: ProgressUpdate) -> None:
         if progress_id not in self.__progress_widgets:
             pwidget = ProgressDialog.ProgressWidget()
             self.__additional_progress_vlayout.addWidget(pwidget)
@@ -394,9 +354,7 @@ if __name__ == "__main__":
     def process(pdialog: ProgressDialog[int]) -> int:
         total = 10
         pdialog.updateMainProgress(
-            ProgressDialog.UpdatePayload(
-                status_text="Starting main process...", progress_value=0, progress_max=0
-            )
+            ProgressUpdate(status_text="Starting main process...", value=0, maximum=0)
         )
 
         workers: dict[int, Thread[None]] = {}
@@ -408,19 +366,17 @@ if __name__ == "__main__":
                     time.sleep(random.randint(5, 20) / 10)
                     pdialog.updateProgress(
                         wid,
-                        ProgressDialog.UpdatePayload(
+                        ProgressUpdate(
                             status_text=f"Worker {wid}: Step {j + 1}/{total}",
-                            progress_value=j + 1,
-                            progress_max=total,
+                            value=j + 1,
+                            maximum=total,
                         ),
                     )
 
             pdialog.updateProgress(
                 wid,
-                ProgressDialog.UpdatePayload(
-                    status_text=f"Worker {wid}: Starting...",
-                    progress_value=0,
-                    progress_max=0,
+                ProgressUpdate(
+                    status_text=f"Worker {wid}: Starting...", value=0, maximum=0
                 ),
             )
 
@@ -431,10 +387,10 @@ if __name__ == "__main__":
         for i in range(total):
             time.sleep(1)
             pdialog.updateMainProgress(
-                ProgressDialog.UpdatePayload(
+                ProgressUpdate(
                     status_text=f"Main process: Step {i + 1}/{total}",
-                    progress_value=i + 1,
-                    progress_max=total,
+                    value=i + 1,
+                    maximum=total,
                 )
             )
 
@@ -444,18 +400,16 @@ if __name__ == "__main__":
         for wid in workers:
             pdialog.updateProgress(
                 wid,
-                ProgressDialog.UpdatePayload(
+                ProgressUpdate(
                     status_text=f"Worker {wid}: Finalizing...",
-                    progress_value=total,
-                    progress_max=total,
+                    value=total,
+                    maximum=total,
                 ),
             )
 
         pdialog.updateMainProgress(
-            ProgressDialog.UpdatePayload(
-                status_text="Finalizing main process...",
-                progress_value=total,
-                progress_max=total,
+            ProgressUpdate(
+                status_text="Finalizing main process...", value=total, maximum=total
             )
         )
 

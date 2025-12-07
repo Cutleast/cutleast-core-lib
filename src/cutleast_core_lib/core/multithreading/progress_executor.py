@@ -7,7 +7,9 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from threading import Lock, current_thread
 from typing import Any, Optional, TypeAlias, TypeVar, override
 
-from cutleast_core_lib.ui.widgets.progress_dialog import ProgressDialog, UpdateCallback
+from cutleast_core_lib.ui.widgets.progress_dialog import ProgressDialog
+
+from .progress import ProgressUpdate, UpdateCallback
 
 T = TypeVar("T")
 
@@ -103,7 +105,7 @@ class ProgressExecutor(ThreadPoolExecutor):
                     thread_name, len(self.__worker_ids) + 1
                 )
 
-            def update_callback(payload: ProgressDialog.UpdatePayload) -> None:
+            def update_callback(payload: ProgressUpdate) -> None:
                 if self.__dialog is not None:
                     self.__dialog.updateProgress(worker_id, payload)
 
@@ -117,13 +119,13 @@ class ProgressExecutor(ThreadPoolExecutor):
 
                 if self.__dialog is not None:
                     self.__dialog.updateMainProgress(
-                        ProgressDialog.UpdatePayload(
+                        ProgressUpdate(
                             status_text=(
                                 f"{self.__main_progress_text} ({self.__completed_tasks} "
                                 f"/ {self.__total_tasks})"
                             ),
-                            progress_value=self.__completed_tasks,
-                            progress_max=self.__total_tasks,
+                            value=self.__completed_tasks,
+                            maximum=self.__total_tasks,
                         )
                     )
 
@@ -144,17 +146,15 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     IconProvider(UIMode.Dark, "#ffffff")
 
-    def example_task(
-        update: Callable[[ProgressDialog.UpdatePayload], None], task_id: int
-    ) -> None:
+    def example_task(update: Callable[[ProgressUpdate], None], task_id: int) -> None:
         """Simulate a long-running task with progress updates."""
 
         for i in range(0, 101, 10):
             time.sleep(random.uniform(0.05, 0.2))
             update(
-                ProgressDialog.UpdatePayload(
-                    progress_value=i,
-                    progress_max=100,
+                ProgressUpdate(
+                    value=i,
+                    maximum=100,
                     status_text=f"Processing task {task_id + 1}... ({i} %)",
                 )
             )
@@ -163,10 +163,10 @@ if __name__ == "__main__":
         """Executes multiple tasks in parallel using 4 worker threads."""
 
         dialog.updateMainProgress(
-            ProgressDialog.UpdatePayload(
+            ProgressUpdate(
                 status_text="Running tasks...",
-                progress_value=0,
-                progress_max=0,
+                value=0,
+                maximum=0,
             )
         )
 
