@@ -7,8 +7,7 @@ import os
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
-from cutleast_core_lib.core.utilities.filesystem import str_glob
-
+from ..filesystem.utils import str_glob
 from ..utilities.process_runner import run_process
 
 
