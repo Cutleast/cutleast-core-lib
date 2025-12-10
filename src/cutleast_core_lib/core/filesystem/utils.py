@@ -44,26 +44,6 @@ def get_file_identifier(file_path: os.PathLike) -> str:
     return digest[:8]
 
 
-def get_folder_size(folder: Path) -> int:
-    """
-    Returns folder size in bytes.
-
-    Args:
-        folder (Path): Folder to get size of.
-
-    Returns:
-        int: Folder size in bytes.
-    """
-
-    total_size = 0
-
-    for path in folder.rglob("*"):
-        if path.is_file():
-            total_size += path.stat().st_size
-
-    return total_size
-
-
 def clean_fs_name(folder_or_file_name: str) -> str:
     """
     Cleans a folder or file name of illegal characters like ":".

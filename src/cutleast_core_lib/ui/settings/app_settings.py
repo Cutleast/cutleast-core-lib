@@ -19,7 +19,7 @@ from cutleast_core_lib.core.cache.cache import Cache
 from cutleast_core_lib.core.config.app_config import AppConfig
 from cutleast_core_lib.core.config.exceptions import ConfigValidationError
 from cutleast_core_lib.core.config.validation_utils import ValidationUtils
-from cutleast_core_lib.core.utilities.filesystem import get_folder_size
+from cutleast_core_lib.core.filesystem.scanner import DirectoryScanner
 from cutleast_core_lib.core.utilities.logger import Logger
 from cutleast_core_lib.core.utilities.scale import scale_value
 from cutleast_core_lib.ui.utilities.ui_mode import UIMode
@@ -136,7 +136,7 @@ class AppSettings(SettingsPage[AppConfig]):
         if self.cache is not None and self.cache.path.is_dir():
             self.__clear_cache_button.setText(
                 self.__clear_cache_button.text()
-                + f" ({scale_value(get_folder_size(self.cache.path))})"
+                + f" ({scale_value(DirectoryScanner.get_folder_size(self.cache.path))})"
             )
         self._basic_flayout.addRow(self.__clear_cache_button)
 

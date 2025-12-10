@@ -4,14 +4,14 @@ Copyright (c) Cutleast
 
 from typing import TypeVar
 
-from cutleast_core_lib.core.utilities.filesystem import str_glob
+from cutleast_core_lib.core.filesystem.utils import str_glob
 
 T = TypeVar("T")
 
 
-class TestFilesystem:
+class TestFilesystemUtils:
     """
-    Tests `core.utilities.filesystem`.
+    Tests `core.filesystem.utils`.
     """
 
     @staticmethod
@@ -31,7 +31,7 @@ class TestFilesystem:
 
     def test_glob_flat(self) -> None:
         """
-        Tests `core.utilities.filesystem.glob()` with a flat list.
+        Tests `glob()` with a flat list.
         """
 
         # given
@@ -43,11 +43,11 @@ class TestFilesystem:
         real_output: list[str] = str_glob(pattern, files)
 
         # then
-        assert TestFilesystem.compare_lists(real_output, expected_output)
+        assert TestFilesystemUtils.compare_lists(real_output, expected_output)
 
     def test_glob_nested(self) -> None:
         """
-        Tests `core.utilities.filesystem.glob()` with a single-level folder structure.
+        Tests `glob()` with a single-level folder structure.
         """
 
         # given
@@ -59,11 +59,11 @@ class TestFilesystem:
         real_output: list[str] = str_glob(pattern, files)
 
         # then
-        assert TestFilesystem.compare_lists(real_output, expected_output)
+        assert TestFilesystemUtils.compare_lists(real_output, expected_output)
 
     def test_glob_deep(self) -> None:
         """
-        Tests `core.utilities.filesystem.glob()` with a deep folder structure.
+        Tests `glob()` with a deep folder structure.
         """
 
         # given
@@ -75,4 +75,4 @@ class TestFilesystem:
         real_output: list[str] = str_glob(pattern, files)
 
         # then
-        assert TestFilesystem.compare_lists(real_output, expected_output)
+        assert TestFilesystemUtils.compare_lists(real_output, expected_output)
