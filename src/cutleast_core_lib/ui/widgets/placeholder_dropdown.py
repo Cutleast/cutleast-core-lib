@@ -9,7 +9,8 @@ from PySide6.QtWidgets import QComboBox
 
 class PlaceholderDropdown(QComboBox):
     """
-    A dropdown with a placeholder item.
+    A dropdown with a placeholder item. Note that the signals still include the
+    placeholder item.
     """
 
     __placeholder_text: str
