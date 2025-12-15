@@ -40,7 +40,6 @@ class Utils:
             Callable[P, R]: The method.
         """
 
-        method_name: str
         if isinstance(obj, type):
             method_name = f"_{obj.__name__}__{method_name}"
         else:
