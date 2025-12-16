@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 """
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QPushButton
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton
 
 from ..utilities.icon_provider import IconProvider
 
@@ -27,6 +27,7 @@ class SearchBar(QLineEdit):
 
     __cs_toggle: QPushButton
     __clear_button: QPushButton
+    __search_hint_label: QLabel
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
         super().__init__(*args, **kwargs)
@@ -38,10 +39,21 @@ class SearchBar(QLineEdit):
         self.setPlaceholderText(self.tr("Search..."))
 
         hlayout = QHBoxLayout()
-        hlayout.setContentsMargins(0, 0, 0, 0)
+        hlayout.setContentsMargins(0, 0, 5, 0)
         self.setLayout(hlayout)
 
         hlayout.addStretch()
+
+        self.__search_hint_label = QLabel()
+        self.__search_hint_label.setCursor(Qt.CursorShape.ArrowCursor)
+        self.__search_hint_label.setPixmap(
+            IconProvider.get_qta_icon("mdi6.alert-outline").pixmap(20, 20)
+        )
+        self.__search_hint_label.setToolTip(
+            self.tr("Live search disabled. Press Enter to search.")
+        )
+        self.__search_hint_label.hide()
+        hlayout.addWidget(self.__search_hint_label)
 
         self.__cs_toggle = QPushButton()
         self.__cs_toggle.setCursor(Qt.CursorShape.ArrowCursor)
@@ -88,6 +100,7 @@ class SearchBar(QLineEdit):
         """
 
         self.__live_mode = live_mode
+        self.__search_hint_label.setVisible(not live_mode)
 
     def getCaseSensitivity(self) -> bool:
         """
