@@ -94,7 +94,7 @@ class ErrorDialog(QDialog):
         text_label.setMinimumWidth(width_hint)
 
         self.__details_box = QPlainTextEdit(self.__details)
-        self.__details_box.setObjectName("protocol")
+        self.__details_box.setObjectName("monospace")
         self.__details_box.setMinimumHeight(50)
         self.__details_box.setReadOnly(True)
         self.__vlayout.addWidget(self.__details_box, stretch=1)
