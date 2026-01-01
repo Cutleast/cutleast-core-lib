@@ -106,3 +106,17 @@ def calculate_required_width(widget: QTreeWidget, column: int) -> int:
 
     texts: list[str] = [item.text(column) for item in iter_all_items(widget)]
     return measure_text_width(widget, max(texts, key=len))
+
+
+def get_visible_top_level_item_count(widget: QTreeWidget) -> int:
+    """
+    Gets the count of all top level items in a tree widget that are currently visible.
+
+    Args:
+        widget (QTreeWidget): Tree widget.
+
+    Returns:
+        int: Number of visible top level items.
+    """
+
+    return len([item for item in iter_toplevel_items(widget) if not item.isHidden()])
