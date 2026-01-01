@@ -8,13 +8,11 @@ import tomllib
 from pathlib import Path
 from typing import Any, Optional
 
-from pydantic import ConfigDict
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 from semantic_version import Version
 
 
-@dataclass(kw_only=True, frozen=True, config=ConfigDict(arbitrary_types_allowed=True))
-class BuildMetadata:
+class BuildMetadata(BaseModel, frozen=True, arbitrary_types_allowed=True):
     """
     Dataclass for build metadata, like author, license, version, etc.
     """

@@ -2,15 +2,13 @@
 Copyright (c) Cutleast
 """
 
-from dataclasses import field
 from pathlib import Path
 from typing import Optional
 
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel, Field
 
 
-@dataclass(kw_only=True, frozen=True)
-class BuildConfig:
+class BuildConfig(BaseModel, frozen=True):
     """
     Dataclass for the build configuration.
     """
@@ -27,7 +25,7 @@ class BuildConfig:
     src_dir: Path = Path("src")
     """Path to the source directory, relative to the project root (defaults to `src`)."""
 
-    project_root: Path = field(default_factory=Path.cwd)
+    project_root: Path = Field(default_factory=Path.cwd)
     """Project root (defaults to the current working directory)."""
 
     icon_path: Optional[Path] = None
@@ -39,7 +37,7 @@ class BuildConfig:
     relative to project root.
     """
 
-    delete_list: list[Path] = field(default_factory=list)
+    delete_list: list[Path] = Field(default_factory=list)
     """List of paths to remove from final bundle."""
 
     build_dir: Optional[Path] = None
