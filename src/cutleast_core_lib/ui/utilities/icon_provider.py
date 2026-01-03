@@ -4,6 +4,7 @@ Copyright (c) Cutleast
 
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import Optional, TypeVar
 
 import qtawesome as qta
@@ -14,6 +15,60 @@ from cutleast_core_lib.core.utilities.singleton import Singleton
 from cutleast_core_lib.ui.utilities.ui_mode import UIMode
 
 T = TypeVar("T", bound="IconProvider")
+
+
+class Md6Icon(StrEnum):
+    """Enum for Material Design 6 icons from QtAwesome."""
+
+    Actions = "mdi6.lightning-bolt"
+    ArrowCollapseVertical = "mdi6.arrow-collapse-vertical"
+    ArrowExpandVertical = "mdi6.arrow-expand-vertical"
+    BookAdd = "mdi6.book-plus"
+    BookAlert = "mdi6.book-alert"
+    BookEdit = "mdi6.book-edit"
+    BookOpen = "mdi6.book-open"
+    BugCheck = "mdi6.bug-check"
+    Build = "mdi6.export-variant"
+    Check = "mdi6.check"
+    ChevronLeft = "mdi6.chevron-left"
+    ChevronRight = "mdi6.chevron-right"
+    Close = "mdi6.close"
+    CloseThick = "mdi6.close-thick"
+    Copy = "mdi6.content-copy"
+    DatabaseApply = "mdi6.database-arrow-right"
+    DatabaseImport = "mdi6.database-import"
+    Delete = "mdi6.delete"
+    Disk = "mdi6.harddisk"
+    Document = "mdi6.note-text"
+    Download = "mdi6.download"
+    DownloadMultiple = "mdi6.download-multiple"
+    Export = "mdi6.export"
+    File = "mdi6.file"
+    Filter = "mdi6.filter"
+    Folder = "mdi6.folder"
+    GitHub = "mdi6.github"
+    Help = "mdi6.help"
+    IgnoreList = "mdi6.playlist-remove"
+    Import = "mdi6.import"
+    ImportLegacy = "mdi6.archive-arrow-down"
+    Information = "mdi6.information"
+    Link = "mdi6.link-variant"
+    LinkOff = "mdi6.link-variant-off"
+    OpenExternal = "mdi6.open-in-new"
+    OpenInBrowser = "mdi6.open-in-app"
+    Paste = "mdi6.content-paste"
+    Pause = "mdi6.pause"
+    Play = "mdi6.play"
+    Refresh = "mdi6.refresh"
+    Rename = "mdi6.rename"
+    Revert = "mdi6.arrow-u-left-top"
+    Save = "mdi6.content-save"
+    Scan = "mdi6.line-scan"
+    SearchDatabase = "mdi6.database-search"
+    SearchMods = "mdi6.layers-search"
+    Settings = "mdi6.cog"
+    SquareRounded = "mdi6.square-rounded"
+    Translate = "mdi6.translate"
 
 
 class IconProvider(Singleton):
