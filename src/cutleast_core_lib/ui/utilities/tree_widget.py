@@ -120,3 +120,17 @@ def get_visible_top_level_item_count(widget: QTreeWidget) -> int:
     """
 
     return len([item for item in iter_toplevel_items(widget) if not item.isHidden()])
+
+
+def get_item_text(item: QTreeWidgetItem) -> str:
+    """
+    Gets the texts of all columns of a tree item.
+
+    Args:
+        item (QTreeWidgetItem): Tree item
+
+    Returns:
+        str: Text of the tree item
+    """
+
+    return " ".join(item.text(i) for i in range(item.columnCount()))
