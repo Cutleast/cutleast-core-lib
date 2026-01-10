@@ -56,3 +56,6 @@ class EnumDropdown(EnumSelector[E]):
             self.__dropdown.setCurrentText(value.get_localized_name())
         else:
             self.__dropdown.setCurrentText(value.name)
+
+    def setCurrentIndex(self, index: int) -> None:
+        self.__dropdown.setCurrentIndex(index)
