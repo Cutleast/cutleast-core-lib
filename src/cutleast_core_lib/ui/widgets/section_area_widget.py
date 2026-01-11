@@ -168,6 +168,16 @@ class SectionAreaWidget(QWidget):
 
         self.__toggle_button.toggle()
 
+    def setToggleButtonVisible(self, visible: bool) -> None:
+        """
+        Sets the visibility of the toggle button.
+
+        Args:
+            visible (bool): `True` if the button should be visible, `False` otherwise.
+        """
+
+        self.__toggle_button.setVisible(visible)
+
 
 if __name__ == "__main__":
     from PySide6.QtWidgets import QApplication, QPlainTextEdit
