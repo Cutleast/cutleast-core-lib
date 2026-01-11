@@ -13,6 +13,8 @@ import requests as req
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QApplication
 
+from cutleast_core_lib.core.utilities.scale import scale_value
+
 from .multithreading.progress import ProgressUpdate, UpdateCallback, update
 
 
@@ -121,7 +123,15 @@ class Downloader(QObject):
 
                     update(
                         progress_callback,
-                        ProgressUpdate(value=current_size, maximum=total_size),
+                        ProgressUpdate(
+                            status_text=(
+                                self.tr("Downloading '{0}'...").format(file_name)
+                                + f" ({scale_value(current_size)} / "
+                                + f"{scale_value(total_size)})"
+                            ),
+                            value=current_size,
+                            maximum=total_size,
+                        ),
                     )
 
         if self.__running and current_size == total_size:
