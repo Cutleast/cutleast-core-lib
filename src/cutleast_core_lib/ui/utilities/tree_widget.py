@@ -5,6 +5,7 @@ Copyright (c) Cutleast
 from collections.abc import Generator
 from typing import Optional
 
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
 
 from .text_width import measure_text_width
@@ -134,3 +135,16 @@ def get_item_text(item: QTreeWidgetItem) -> str:
     """
 
     return " ".join(item.text(i) for i in range(item.columnCount()))
+
+
+def set_item_foreground(item: QTreeWidgetItem, color: QColor) -> None:
+    """
+    Sets the foreground color of all columns of a tree item.
+
+    Args:
+        item (QTreeWidgetItem): Tree item
+        color (QColor): Color
+    """
+
+    for i in range(item.columnCount()):
+        item.setForeground(i, color)
