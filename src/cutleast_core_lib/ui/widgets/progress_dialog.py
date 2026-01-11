@@ -114,6 +114,7 @@ class ProgressDialog(QDialog, Generic[T]):
 
     __update_signal = Signal(int, ProgressUpdate)
     __update_main_signal = Signal(ProgressUpdate)
+    __remove_signal = Signal(int)
 
     __start_time: Optional[float] = None
     __timer_id: Optional[int] = None
@@ -149,6 +150,7 @@ class ProgressDialog(QDialog, Generic[T]):
 
         self.__update_main_signal.connect(self.__update_main_progress)
         self.__update_signal.connect(self.__update_progress)
+        self.__remove_signal.connect(self.__remove_progress)
         self.__section_area.toggled.connect(self.__on_section_toggled)
 
         self.__on_section_toggled(False)
@@ -247,6 +249,26 @@ class ProgressDialog(QDialog, Generic[T]):
             self.__progress_widgets[progress_id] = pwidget
 
         self.__progress_widgets[progress_id].updateProgress(payload)
+
+    def removeProgress(self, progress_id: int) -> None:
+        """
+        Removes a progress bar by its progress ID from the dialog. Does nothing if there
+        is no progress bar for the specified ID. This method is thread-safe.
+
+        Args:
+            progress_id (int): ID of the progress to remove.
+        """
+
+        self.__remove_signal.emit(progress_id)
+
+    def __remove_progress(self, progress_id: int) -> None:
+        if progress_id in self.__progress_widgets:
+            widget: ProgressDialog.ProgressWidget = self.__progress_widgets.pop(
+                progress_id
+            )
+            widget.hide()
+            self.__additional_progress_vlayout.removeWidget(widget)
+            widget.deleteLater()
 
     @override
     def timerEvent(self, event: QTimerEvent) -> None:
@@ -372,6 +394,8 @@ if __name__ == "__main__":
                             maximum=total,
                         ),
                     )
+
+                pdialog.removeProgress(wid)
 
             pdialog.updateProgress(
                 wid,
