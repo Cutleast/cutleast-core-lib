@@ -151,9 +151,9 @@ class ProgressDialog(QDialog, Generic[T]):
         self.__update_main_signal.connect(self.__update_main_progress)
         self.__update_signal.connect(self.__update_progress)
         self.__remove_signal.connect(self.__remove_progress)
-        self.__section_area.toggled.connect(self.__on_section_toggled)
+        self.__section_area.toggled.connect(lambda _: self.__update_size())
 
-        self.__on_section_toggled(False)
+        self.__update_size()
 
     def __init_ui(self) -> None:
         self.setContentsMargins(0, 0, 0, 0)
@@ -183,18 +183,23 @@ class ProgressDialog(QDialog, Generic[T]):
             toggle_position=SectionAreaWidget.TogglePosition.Right,
             stretch_content=False,
         )
+        self.__section_area.setToggleButtonVisible(False)
         self.__vlayout.addWidget(self.__section_area)
 
         self.__progress_widgets = {}
 
-    def __on_section_toggled(self, toggled: bool) -> None:
+    def __update_size(self) -> None:
         self.__section_area.adjustSize()
 
-        new_height: int
-        if self.__max_height is not None:
-            new_height = min(self.__max_height, self.__section_area.sizeHint().height())
+        new_height: int = self.__main_progress.sizeHint().height() + 15
+
+        if self.__section_area.isExpanded():
+            new_height += new_height * len(self.__progress_widgets)
         else:
-            new_height = self.__section_area.sizeHint().height()
+            new_height += 5
+
+        if self.__max_height is not None:
+            new_height = min(self.__max_height, new_height)
 
         self.setFixedHeight(new_height)
 
@@ -247,6 +252,11 @@ class ProgressDialog(QDialog, Generic[T]):
             pwidget = ProgressDialog.ProgressWidget()
             self.__additional_progress_vlayout.addWidget(pwidget)
             self.__progress_widgets[progress_id] = pwidget
+            self.__section_area.setToggleButtonVisible(True)
+            if self.__section_area.isExpanded():
+                self.__update_size()
+            else:
+                self.__section_area.setExpanded(True)
 
         self.__progress_widgets[progress_id].updateProgress(payload)
 
@@ -269,6 +279,10 @@ class ProgressDialog(QDialog, Generic[T]):
             widget.hide()
             self.__additional_progress_vlayout.removeWidget(widget)
             widget.deleteLater()
+            self.__section_area.setToggleButtonVisible(len(self.__progress_widgets) > 0)
+            if self.__section_area.isExpanded():
+                self.__update_size()
+                self.__section_area.setExpanded(len(self.__progress_widgets) > 0)
 
     @override
     def timerEvent(self, event: QTimerEvent) -> None:
