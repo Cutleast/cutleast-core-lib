@@ -67,9 +67,9 @@ class LocalizedEnum(BaseEnum):
         summary: str = ""
         for member in cls:
             if member.get_localized_description() == member.get_localized_name():
-                summary = f"{member.get_localized_name()}"
+                summary += f"{member.get_localized_name()}"
             else:
-                summary = f"{member.get_localized_name()}: {member.get_localized_description()}"
+                summary += f"{member.get_localized_name()}: {member.get_localized_description()}"
             summary += "\n"
 
         return summary.strip("\n ")
