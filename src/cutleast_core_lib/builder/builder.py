@@ -95,6 +95,7 @@ class Builder:
             )
             for item in raw_resources
             for i in res_folder.glob(item)
+            if i.is_file()
         }
 
         self.log.info(
