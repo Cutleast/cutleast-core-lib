@@ -8,6 +8,7 @@ from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
 from ..filesystem.utils import str_glob
+from ..utilities.exe_info import get_current_path
 from ..utilities.process_runner import run_process
 
 
@@ -20,7 +21,7 @@ class Archive(metaclass=ABCMeta):
     **Do not instantiate directly, use Archive.load_archive() instead!**
     """
 
-    _bin_path = Path("res") / "7-zip" / "7z.exe"
+    _bin_path: Path = get_current_path() / "res" / "7-zip" / "7z.exe"
 
     log: logging.Logger = logging.getLogger("Archive")
 
