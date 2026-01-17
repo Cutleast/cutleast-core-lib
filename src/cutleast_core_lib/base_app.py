@@ -192,14 +192,22 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):
             self.log.warning(f"Failed to check for updates: {ex}", exc_info=ex)
 
     @override
-    def exec(self) -> int:  # type: ignore
+    def exec(self, show_main_window: bool = True) -> int:  # type: ignore
         """
         Executes application and shows main window.
+
+        Args:
+            show_main_window (bool, optional):
+                Whether to show the main window. Defaults to True.
+
+        Returns:
+            int: Application return code.
         """
 
         self.check_for_updates()
 
-        self.main_window.show()
+        if show_main_window:
+            self.main_window.show()
 
         retcode: int = super().exec()
 
