@@ -59,6 +59,11 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
         config_data: dict[str, Any] = {}
         if user_config_file_path.is_file():
             config_data = json.loads(user_config_file_path.read_text(encoding="utf8"))
+        else:
+            cls._get_logger().info(
+                f"No config file at '{user_config_file_path}'. Falling back to "
+                "default configuration..."
+            )
 
         try:
             config: T = cls.model_validate(config_data)
