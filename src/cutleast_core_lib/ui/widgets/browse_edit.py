@@ -122,6 +122,14 @@ class BrowseLineEdit(QLineEdit):
 
         self.pathChanged.emit(Path(current_text), path)
 
+    def isEmpty(self) -> bool:
+        """
+        Returns:
+            bool: If the line edit is empty.
+        """
+
+        return self.text().strip() == ""
+
     def __browse(self) -> None:
         current_text: str = self.text().strip()
 
