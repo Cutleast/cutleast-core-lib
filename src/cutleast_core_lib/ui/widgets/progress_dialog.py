@@ -289,7 +289,7 @@ class ProgressDialog(QDialog, Generic[T]):
         Removes all progress bars but the main progress bar from the dialog.
         """
 
-        for progress_id in self.__progress_widgets:
+        for progress_id in self.__progress_widgets.copy():
             self.removeProgress(progress_id)
 
     @override
