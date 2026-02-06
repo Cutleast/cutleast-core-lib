@@ -35,6 +35,7 @@ class ProgressExecutor(ThreadPoolExecutor):
     __dialog: Optional[ProgressDialog] = None
     __lock: Lock
     __completed_tasks: int
+    __pending_tasks: int
     __total_tasks: int
 
     __main_progress_text: str
@@ -62,6 +63,7 @@ class ProgressExecutor(ThreadPoolExecutor):
         self.__dialog = dialog
         self.__lock = Lock()
         self.__completed_tasks = 0
+        self.__pending_tasks = 0
         self.__total_tasks = 0
         self.__worker_ids = {}
         self.__main_progress_text = ""
@@ -97,6 +99,7 @@ class ProgressExecutor(ThreadPoolExecutor):
 
         with self.__lock:
             self.__total_tasks += 1
+            self.__pending_tasks += 1
 
         def worker_fn(*_args: P.args, **_kwargs: P.kwargs) -> T:
             thread_name: str = current_thread().name
@@ -105,6 +108,7 @@ class ProgressExecutor(ThreadPoolExecutor):
                 worker_id: int = self.__worker_ids.setdefault(
                     thread_name, len(self.__worker_ids) + 1
                 )
+                self.__pending_tasks -= 1
 
             def update_callback(payload: ProgressUpdate) -> None:
                 if self.__dialog is not None:
@@ -117,6 +121,9 @@ class ProgressExecutor(ThreadPoolExecutor):
             finally:
                 with self.__lock:
                     self.__completed_tasks += 1
+
+                    if self.__pending_tasks < 1 and self.__dialog is not None:
+                        self.__dialog.removeProgress(worker_id)
 
                 if self.__dialog is not None:
                     self.__dialog.updateMainProgress(
@@ -131,6 +138,12 @@ class ProgressExecutor(ThreadPoolExecutor):
                     )
 
         return super().submit(worker_fn, *args, **kwargs)
+
+    def shutdown(self, wait: bool = True, *, cancel_futures: bool = False) -> None:
+        super().shutdown(wait, cancel_futures=cancel_futures)
+
+        if self.__dialog is not None:
+            self.__dialog.clearProgressWidgets()  # ensure that there are no progress bars left
 
 
 if __name__ == "__main__":
