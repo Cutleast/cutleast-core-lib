@@ -284,6 +284,14 @@ class ProgressDialog(QDialog, Generic[T]):
                 self.__update_size()
                 self.__section_area.setExpanded(len(self.__progress_widgets) > 0)
 
+    def clearProgressWidgets(self) -> None:
+        """
+        Removes all progress bars but the main progress bar from the dialog.
+        """
+
+        for progress_id in self.__progress_widgets:
+            self.removeProgress(progress_id)
+
     @override
     def timerEvent(self, event: QTimerEvent) -> None:
         """
