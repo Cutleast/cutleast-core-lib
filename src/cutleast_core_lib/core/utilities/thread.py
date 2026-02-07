@@ -12,6 +12,26 @@ from .exceptions import ProcessIncompleteError
 T = TypeVar("T")
 
 
+def process_result(result: T | Exception) -> T:
+    """
+    Processes a thread result by raising it if it is an exception.
+
+    Args:
+        result (T | Exception): The result to process.
+
+    Raises:
+        Exception: If the result is an exception.
+
+    Returns:
+        T: The processed result.
+    """
+
+    if isinstance(result, Exception):
+        raise result
+
+    return result
+
+
 class Thread(QThread, Generic[T]):
     """
     Adapted QThread with a generic return type.
