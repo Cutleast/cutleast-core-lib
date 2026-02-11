@@ -33,7 +33,8 @@ class AppConfig(BaseConfig):
     """Number of newest log files to keep"""
 
     log_format: Annotated[str, Field(alias="log.format")] = (
-        "[%(asctime)s.%(msecs)03d][%(levelname)s][%(name)s.%(funcName)s]: %(message)s"
+        "[%(asctime)s.%(msecs)03d][%(levelname)s][%(threadName)s][%(name)s.%(funcName)s]: "
+        "%(message)s"
     )
     """Log format"""
 
