@@ -145,18 +145,14 @@ def glob(pattern: str, files: list[Path], case_sensitive: bool = False) -> list[
 
 def open_in_explorer(path: Path) -> None:
     """
-    Opens the specified path in the Windows Explorer.
-    Opens the parent folder and selects the item if the specified path
-    is a file otherwise it just opens the folder.
+    Opens the specified path in the Windows Explorer by opening the parent folder and
+    selecting the item.
 
     Args:
         path (Path): The path to open.
     """
 
-    if path.is_dir():
-        os.startfile(path)
-    else:
-        os.system(f'explorer.exe /select,"{path}"')
+    os.system(f'explorer.exe /select,"{path}"')
 
 
 def add_suffix(path: Path, suffix: str) -> Path:
