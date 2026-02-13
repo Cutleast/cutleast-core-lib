@@ -17,6 +17,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from cutleast_core_lib.core.utilities.truncate import truncate_string
+
 from ..utilities.icon_provider import IconProvider
 from .copy_button import CopyButton
 
@@ -82,7 +84,7 @@ class ErrorDialog(QDialog):
         )
         hlayout.addWidget(icon_label)
 
-        text_label = QLabel(self.__text)
+        text_label = QLabel(truncate_string(self.__text, 1_000))
         hlayout.addWidget(text_label, stretch=1)
         # calculate the required width of the label without word wrap
         # and set it as the initial minimum width (limited by MAX_INITIAL_LABEL_WIDTH)
