@@ -139,6 +139,7 @@ class ProgressExecutor(ThreadPoolExecutor):
 
         return super().submit(worker_fn, *args, **kwargs)
 
+    @override
     def shutdown(self, wait: bool = True, *, cancel_futures: bool = False) -> None:
         super().shutdown(wait, cancel_futures=cancel_futures)
 
