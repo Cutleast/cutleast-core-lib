@@ -30,6 +30,7 @@ class NuitkaBackend(BuildBackend):
         "--remove-output",
         "--enable-plugin=pyside6",
         "--nofollow-import-to=tkinter",
+        "--assume-yes-for-downloads",
     ]
     """A list of base arguments passed to Nuitka."""
 
