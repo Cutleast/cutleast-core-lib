@@ -34,7 +34,13 @@ class Downloader(QObject):
 
     user_agent: str
 
-    def __init__(self) -> None:
+    def __init__(self, user_agent: Optional[str] = None) -> None:
+        """
+        Args:
+            user_agent (Optional[str], optional):
+                The user agent to use for the download requests. Defaults to None.
+        """
+
         super().__init__()
 
         self.__stop_signal.connect(self.__stop_download)
@@ -42,13 +48,16 @@ class Downloader(QObject):
         app_name: str = QApplication.applicationName()
         app_version: str = QApplication.applicationVersion()
 
-        self.user_agent = f"\
+        if user_agent is None:
+            self.user_agent = f"\
 {app_name}/{app_version} \
 (\
 {platform.system()} \
 {platform.version()}; \
 {platform.architecture()[0]}\
 )"
+        else:
+            self.user_agent = user_agent
 
     def download(
         self,
@@ -93,7 +102,7 @@ class Downloader(QObject):
             dl_path = dest_folder / file_name
 
             self.log.info(
-                f"Downloading {file_name!r} from {download_url!r} to {str(dest_folder)!r}..."
+                f"Downloading '{file_name}' from '{download_url}' to '{dest_folder}'..."
             )
 
             if total_size == 0:
@@ -107,9 +116,7 @@ class Downloader(QObject):
                     return dl_path
                 else:
                     os.remove(dl_path)
-                    self.log.warning(
-                        f"Removed already existing file from {str(dl_path)!r}!"
-                    )
+                    self.log.warning(f"Removed already existing file from '{dl_path}'!")
 
             self.__running = True
             current_size: int = 0
