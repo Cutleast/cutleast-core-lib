@@ -115,3 +115,13 @@ class ProcessIncompleteError(LocalizedException):
         return QApplication.translate(
             "exceptions", "The process is incomplete and has no result!"
         )
+
+
+class TaskCancelledError(LocalizedException, RuntimeError):
+    """
+    Exception when a task was cancelled.
+    """
+
+    @override
+    def getLocalizedMessage(self) -> str:
+        return QApplication.translate("exceptions", "The task was cancelled!")

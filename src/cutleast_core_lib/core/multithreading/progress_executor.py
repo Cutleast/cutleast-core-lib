@@ -4,9 +4,10 @@ Copyright (c) Cutleast
 
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
-from threading import Lock, current_thread
+from threading import Event, Lock, current_thread
 from typing import Any, Concatenate, Optional, ParamSpec, TypeAlias, TypeVar, override
 
+from cutleast_core_lib.core.utilities.exceptions import TaskCancelledError
 from cutleast_core_lib.ui.widgets.progress_dialog import ProgressDialog
 
 from .progress import ProgressUpdate, UpdateCallback
@@ -37,6 +38,7 @@ class ProgressExecutor(ThreadPoolExecutor):
     __completed_tasks: int
     __pending_tasks: int
     __total_tasks: int
+    __cancelled_event: Event
 
     __main_progress_text: str
 
@@ -65,8 +67,14 @@ class ProgressExecutor(ThreadPoolExecutor):
         self.__completed_tasks = 0
         self.__pending_tasks = 0
         self.__total_tasks = 0
+        self.__cancelled_event = Event()
         self.__worker_ids = {}
         self.__main_progress_text = ""
+
+        if dialog is not None:
+            dialog.cancel_requested.connect(
+                lambda: self.shutdown(wait=False, cancel_futures=True)
+            )
 
     def set_main_progress_text(self, text: str) -> None:
         """
@@ -111,6 +119,9 @@ class ProgressExecutor(ThreadPoolExecutor):
                 self.__pending_tasks -= 1
 
             def update_callback(payload: ProgressUpdate) -> None:
+                if self.__cancelled_event.is_set():
+                    raise TaskCancelledError
+
                 if self.__dialog is not None:
                     self.__dialog.updateProgress(worker_id, payload)
 
@@ -141,6 +152,7 @@ class ProgressExecutor(ThreadPoolExecutor):
 
     @override
     def shutdown(self, wait: bool = True, *, cancel_futures: bool = False) -> None:
+        self.__cancelled_event.set()
         super().shutdown(wait, cancel_futures=cancel_futures)
 
         if self.__dialog is not None:
