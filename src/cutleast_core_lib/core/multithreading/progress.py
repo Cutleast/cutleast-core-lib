@@ -2,6 +2,8 @@
 Copyright (c) Cutleast
 """
 
+from __future__ import annotations
+
 from typing import Callable, Optional
 
 from pydantic import BaseModel
@@ -42,3 +44,29 @@ class ProgressUpdate(BaseModel, frozen=True):
     Maximum progress value of the thread. Overwrites the previous maximum if specified.
     If the value is 0 (unknown), progress bars are set to indeterminate mode.
     """
+
+    def update(self, new_update: ProgressUpdate) -> ProgressUpdate:
+        """
+        Creates a new progress update where the data of this one is updated with the
+        data of a new one.
+
+        Args:
+            new_update (ProgressUpdate): New progress update.
+
+        Returns:
+            ProgressUpdate: The updated progress update.
+        """
+
+        status_text: Optional[str] = (
+            new_update.status_text
+            if new_update.status_text is not None
+            else self.status_text
+        )
+        value: Optional[int] = (
+            new_update.value if new_update.value is not None else self.value
+        )
+        maximum: Optional[int] = (
+            new_update.maximum if new_update.maximum is not None else self.maximum
+        )
+
+        return ProgressUpdate(status_text=status_text, value=value, maximum=maximum)

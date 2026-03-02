@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import logging
 import time
+from functools import reduce
+from threading import Lock
 from typing import Callable, Generic, Optional, TypeVar, override
 
 import comtypes.client as cc
@@ -112,13 +114,22 @@ class ProgressDialog(QDialog, Generic[T]):
         def currentMax(self) -> int:
             return self.__pbar.maximum()
 
+    UPDATE_INTERVAL: int = int(1_000 // 30)  # ~ 30 FPS
+    TERMINATION_TIMEOUT: int = 1_000  # 1 second
+
+    cancel_requested = Signal()
+    """Signal emitted when the user requested to cancel the process."""
+
     __update_signal = Signal(int, ProgressUpdate)
     __update_main_signal = Signal(ProgressUpdate)
     __remove_signal = Signal(int)
 
     __start_time: Optional[float] = None
-    __timer_id: Optional[int] = None
+    __titlebar_timer_id: Optional[int] = None
+    __update_timer_id: Optional[int] = None
     __thread: Thread[T]
+    __lock: Lock
+    __scheduled_updates: dict[int, list[ProgressUpdate]]
 
     __tbprogress_hwnd: Optional[int] = None
 
@@ -145,6 +156,9 @@ class ProgressDialog(QDialog, Generic[T]):
 
         self.__thread = Thread(target=lambda: func(self), parent=self)
         self.__thread.finished.connect(self.__on_finished)
+
+        self.__lock = Lock()
+        self.__scheduled_updates = {}
 
         self.__init_ui()
 
@@ -191,10 +205,14 @@ class ProgressDialog(QDialog, Generic[T]):
     def __update_size(self) -> None:
         self.__section_area.adjustSize()
 
-        new_height: int = self.__main_progress.sizeHint().height() + 15
+        main_height: int = self.__main_progress.sizeHint().height()
+        new_height: int = main_height + 15
 
         if self.__section_area.isExpanded():
-            new_height += new_height * len(self.__progress_widgets)
+            widget_count: int = len(self.__progress_widgets)
+            new_height += main_height * widget_count
+            new_height += self.__additional_progress_vlayout.spacing() * widget_count
+            new_height += 10
         else:
             new_height += 5
 
@@ -245,7 +263,9 @@ class ProgressDialog(QDialog, Generic[T]):
                 The payload containing the updated display values.
         """
 
-        self.__update_signal.emit(progress_id, payload)
+        # self.__update_signal.emit(progress_id, payload)
+        with self.__lock:
+            self.__scheduled_updates.setdefault(progress_id, []).append(payload)
 
     def __update_progress(self, progress_id: int, payload: ProgressUpdate) -> None:
         if progress_id not in self.__progress_widgets:
@@ -273,9 +293,13 @@ class ProgressDialog(QDialog, Generic[T]):
 
     def __remove_progress(self, progress_id: int) -> None:
         if progress_id in self.__progress_widgets:
-            widget: ProgressDialog.ProgressWidget = self.__progress_widgets.pop(
-                progress_id
-            )
+            with self.__lock:
+                # clear scheduled any update
+                self.__scheduled_updates.pop(progress_id, None)
+                widget: ProgressDialog.ProgressWidget = self.__progress_widgets.pop(
+                    progress_id
+                )
+
             widget.hide()
             self.__additional_progress_vlayout.removeWidget(widget)
             widget.deleteLater()
@@ -300,11 +324,36 @@ class ProgressDialog(QDialog, Generic[T]):
 
         super().timerEvent(event)
 
+        match event.timerId():
+            case self.__titlebar_timer_id:
+                self.__update_titlebar()
+
+            case self.__update_timer_id:
+                self.__process_scheduled_updates()
+
+    def __update_titlebar(self) -> None:
         self.setWindowTitle(
             self.tr("Elapsed time:")
             + " "
             + format_duration(int(time.time() - (self.__start_time or time.time())))
         )
+
+    def __process_scheduled_updates(self) -> None:
+        with self.__lock:
+            progress_ids: list[int] = list(self.__scheduled_updates.keys())
+
+        for progress_id in progress_ids:
+            with self.__lock:
+                payloads: Optional[list[ProgressUpdate]] = self.__scheduled_updates.pop(
+                    progress_id, None
+                )
+
+            if payloads is not None:
+                updated_payload: ProgressUpdate = reduce(
+                    ProgressUpdate.update, payloads
+                )
+
+                self.__update_progress(progress_id, updated_payload)
 
     def run(self) -> T:
         """
@@ -320,12 +369,13 @@ class ProgressDialog(QDialog, Generic[T]):
         self.__thread.start()
 
         self.__start_time = time.time()
-        self.__timer_id = self.startTimer(1000)
+        self.__titlebar_timer_id = self.startTimer(1000)
+        self.__update_timer_id = self.startTimer(ProgressDialog.UPDATE_INTERVAL)
 
         super().exec()
 
-        self.killTimer(self.__timer_id)
-        self.__timer_id = None
+        self.__titlebar_timer_id = self.killTimer(self.__titlebar_timer_id)
+        self.__update_timer_id = self.killTimer(self.__update_timer_id)
 
         self.log.debug(
             f"Time taken: {format_duration(int(time.time() - self.__start_time))}"
@@ -377,8 +427,13 @@ class ProgressDialog(QDialog, Generic[T]):
 
         if confirmation:
             if self.__thread.isRunning():
-                self.log.critical("Terminating background thread...")
-                self.__thread.terminate()
+                self.log.info("Requesting background thread to stop...")
+                self.cancel_requested.emit()
+                if not self.__thread.wait(ProgressDialog.TERMINATION_TIMEOUT):
+                    self.log.critical(
+                        "Background thread did not stop within timeout. Terminating..."
+                    )
+                    self.__thread.terminate()
             super().closeEvent(event)
         elif event:
             event.ignore()
