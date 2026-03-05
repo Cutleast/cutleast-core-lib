@@ -5,8 +5,10 @@ Copyright (c) Cutleast
 import datetime
 import logging
 import os
+import shutil
 import subprocess
 import time
+import uuid
 from io import BufferedReader, RawIOBase
 from pathlib import Path
 from typing import Any, BinaryIO, Literal, override
@@ -212,6 +214,79 @@ class Archive:
             run_process(cmd)
         finally:
             os.remove(filenames_txt)
+
+    def extract_files_map(
+        self,
+        files: dict[Path, Path],
+        dest: Path,
+    ) -> None:
+        """
+        Extracts multiple files and remaps their archive paths to custom relative
+        destination paths.
+
+        Extraction is performed into a temporary directory located on the same drive as
+        `dest` to avoid cross-device copies and C:\\ temp usage.
+
+        Args:
+            files (dict[Path, Path]):
+                Dictionary of archive-internal paths to destination paths, relative to
+                `dest`.
+            dest (Path): Base directory where files should be placed.
+
+        Raises:
+            FileNotFoundError: If an extracted file cannot be located.
+            ValueError: If a target path escapes `dest`.
+            RuntimeError: When the 7-zip commandline returns a non-zero exit code.
+        """
+
+        if not len(files):
+            return
+
+        dest = dest.resolve()
+        dest.mkdir(parents=True, exist_ok=True)
+
+        tmp_dir: Path = dest.parent / f".__extract_tmp_{uuid.uuid4().hex}"
+        tmp_dir.mkdir(parents=True, exist_ok=False)
+
+        cmd: list[str] = [
+            str(Archive.BIN_PATH),
+            "x",
+            str(self.path),
+            f"-o{tmp_dir}",
+            "-aoa",
+            "-y",
+        ]
+
+        filenames_txt: Path = self.path.with_suffix(".txt")
+        filenames_txt.write_text(
+            "\n".join(str(p) for p in files.keys()),
+            encoding="utf8",
+        )
+        cmd.append(f"@{filenames_txt}")
+
+        try:
+            run_process(cmd)
+
+            for archive_path, relative_target in files.items():
+                src: Path = tmp_dir / archive_path
+                if not src.exists():
+                    raise FileNotFoundError(f"Extracted file not found: {archive_path}")
+
+                target: Path = (dest / relative_target).resolve()
+
+                # prevent directory traversal
+                if not str(target).startswith(str(dest)):
+                    raise ValueError(
+                        f"Target path escapes destination: {relative_target}"
+                    )
+
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(src, target)
+
+        finally:
+            os.remove(filenames_txt)
+            if tmp_dir.is_dir():
+                shutil.rmtree(tmp_dir, ignore_errors=True)
 
     def get_file_stream(self, file: Path) -> BinaryIO:
         """
