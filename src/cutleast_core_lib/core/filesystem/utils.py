@@ -171,3 +171,20 @@ def add_suffix(path: Path, suffix: str) -> Path:
     """
 
     return path.with_suffix(path.suffix + suffix)
+
+
+def rem_last_suffix(path: Path) -> Path:
+    """
+    Removes the last suffix from the specified path.
+
+    Convenience method for
+        `path.with_suffix("")`
+
+    Args:
+        path (Path): Path to remove suffix from.
+
+    Returns:
+        Path: Path with last suffix removed.
+    """
+
+    return path.with_suffix("")
