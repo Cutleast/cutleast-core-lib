@@ -4,7 +4,7 @@ Copyright (c) Cutleast
 
 from typing import override
 
-from PySide6.QtCore import Qt, QTimerEvent
+from PySide6.QtCore import Qt, QTimerEvent, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QPushButton
 
@@ -15,6 +15,12 @@ class CopyButton(QPushButton):
     """
     Custom QPushButton which shows a copy icon and changes it to a check mark icon for
     three seconds upon click.
+    """
+
+    copyClicked = Signal()
+    """
+    Signal emitted when the button is clicked. Use this instead of `clicked` to avoid
+    conflict with the icon timer.
     """
 
     __copy_icon: QIcon
@@ -39,3 +45,5 @@ class CopyButton(QPushButton):
     def __on_click(self) -> None:
         self.setIcon(self.__check_icon)
         self.startTimer(3000, timerType=Qt.TimerType.PreciseTimer)
+
+        self.copyClicked.emit()
