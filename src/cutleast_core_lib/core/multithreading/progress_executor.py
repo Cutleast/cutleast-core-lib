@@ -8,7 +8,7 @@ from threading import Event, Lock, current_thread
 from typing import Any, Concatenate, Optional, ParamSpec, TypeAlias, TypeVar, override
 
 from cutleast_core_lib.core.utilities.exceptions import TaskCancelledError
-from cutleast_core_lib.ui.widgets.progress_dialog import ProgressDialog
+from cutleast_core_lib.ui.progress.display import ProgressDisplay
 
 from .progress import ProgressUpdate, UpdateCallback
 
@@ -23,7 +23,7 @@ A callable that accepts a progress callback function as its first positional arg
 
 class ProgressExecutor(ThreadPoolExecutor):
     """
-    A custom ThreadPoolExecutor that displays progress in a ProgressDialog.
+    A custom ThreadPoolExecutor that displays progress in a ProgressDisplay.
     Each worker thread gets its own progress bar that displays the progress
     and status of the task currently processed by that worker.
     The executor displays the total progress (number of tasks completed) in the main
@@ -33,7 +33,7 @@ class ProgressExecutor(ThreadPoolExecutor):
     callback function as their first positional argument.**
     """
 
-    __dialog: Optional[ProgressDialog] = None
+    __display: Optional[ProgressDisplay] = None
     __lock: Lock
     __completed_tasks: int
     __pending_tasks: int
@@ -47,22 +47,22 @@ class ProgressExecutor(ThreadPoolExecutor):
 
     def __init__(
         self,
-        dialog: Optional[ProgressDialog] = None,
+        display: Optional[ProgressDisplay] = None,
         max_workers: Optional[int] = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:
         """
         Args:
-            dialog (Optional[ProgressDialog], optional):
-                Progress dialog, may be None. Defaults to None.
+            display (Optional[ProgressDisplay], optional):
+                Progress display, may be None. Defaults to None.
             max_workers (Optional[int], optional):
                 Maximum number of workers. Defaults to None.
         """
 
         super().__init__(max_workers=max_workers, *args, **kwargs)
 
-        self.__dialog = dialog
+        self.__display = display
         self.__lock = Lock()
         self.__completed_tasks = 0
         self.__pending_tasks = 0
@@ -71,8 +71,8 @@ class ProgressExecutor(ThreadPoolExecutor):
         self.__worker_ids = {}
         self.__main_progress_text = ""
 
-        if dialog is not None:
-            dialog.cancel_requested.connect(
+        if display is not None:
+            display.cancel_requested.connect(
                 lambda: self.shutdown(wait=False, cancel_futures=True)
             )
 
@@ -122,8 +122,8 @@ class ProgressExecutor(ThreadPoolExecutor):
                 if self.__cancelled_event.is_set():
                     raise TaskCancelledError
 
-                if self.__dialog is not None:
-                    self.__dialog.updateProgress(worker_id, payload)
+                if self.__display is not None:
+                    self.__display.updateProgress(worker_id, payload)
 
             try:
                 result: T = fn(update_callback, *_args, **_kwargs)
@@ -133,11 +133,11 @@ class ProgressExecutor(ThreadPoolExecutor):
                 with self.__lock:
                     self.__completed_tasks += 1
 
-                    if self.__pending_tasks < 1 and self.__dialog is not None:
-                        self.__dialog.removeProgress(worker_id)
+                    if self.__pending_tasks < 1 and self.__display is not None:
+                        self.__display.removeProgress(worker_id)
 
-                if self.__dialog is not None:
-                    self.__dialog.updateMainProgress(
+                if self.__display is not None:
+                    self.__display.updateMainProgress(
                         ProgressUpdate(
                             status_text=(
                                 f"{self.__main_progress_text} ({self.__completed_tasks} "
@@ -155,8 +155,8 @@ class ProgressExecutor(ThreadPoolExecutor):
         self.__cancelled_event.set()
         super().shutdown(wait, cancel_futures=cancel_futures)
 
-        if self.__dialog is not None:
-            self.__dialog.clearProgressWidgets()  # ensure that there are no progress bars left
+        if self.__display is not None:
+            self.__display.clearProgressBars()  # ensure that there are no progress bars left
 
 
 if __name__ == "__main__":
@@ -167,6 +167,7 @@ if __name__ == "__main__":
 
     from PySide6.QtWidgets import QApplication
 
+    from cutleast_core_lib.ui.progress.dialog import ProgressDialog
     from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
     from cutleast_core_lib.ui.utilities.ui_mode import UIMode
 
@@ -186,10 +187,10 @@ if __name__ == "__main__":
                 )
             )
 
-    def run_parallel(dialog: ProgressDialog[None]) -> None:
+    def run_parallel(pdisplay: ProgressDisplay) -> None:
         """Executes multiple tasks in parallel using 4 worker threads."""
 
-        dialog.updateMainProgress(
+        pdisplay.updateMainProgress(
             ProgressUpdate(
                 status_text="Running tasks...",
                 value=0,
@@ -197,7 +198,7 @@ if __name__ == "__main__":
             )
         )
 
-        with ProgressExecutor(dialog, max_workers=4) as executor:
+        with ProgressExecutor(pdisplay, max_workers=4) as executor:
             executor.set_main_progress_text("Running tasks...")
 
             futures: list[Future] = []
