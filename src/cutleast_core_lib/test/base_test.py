@@ -7,6 +7,7 @@ Copyright (c) Cutleast
 import os
 from abc import ABCMeta
 from pathlib import Path
+from typing import Generator
 
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem
@@ -93,7 +94,9 @@ class BaseTest(metaclass=ABCMeta):
         return Cache.get_optional() or Cache(Path("test_cache"), "development")
 
     @pytest.fixture
-    def clipboard(self, monkeypatch: pytest.MonkeyPatch) -> ClipboardMock:
+    def clipboard(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> Generator[ClipboardMock, None, None]:
         """
         Fixture to mock the clipboard using `setup.clipboard.Clipboard`.
         Patches `QtGui.QClipboard.setText` and `QtGui.QClipboard.text`.
@@ -101,13 +104,15 @@ class BaseTest(metaclass=ABCMeta):
         Args:
             monkeypatch (pytest.MonkeyPatch): The MonkeyPatch fixture.
 
-        Returns:
-            ClipboardMock: The mocked clipboard.
+        Yields:
+            Generator[ClipboardMock, None, None]: The mocked clipboard.
         """
 
         clipboard_mock = ClipboardMock()
 
-        monkeypatch.setattr("PySide6.QtGui.QClipboard.setText", clipboard_mock.copy)
-        monkeypatch.setattr("PySide6.QtGui.QClipboard.text", clipboard_mock.paste)
+        monkeypatch.setattr(
+            "PySide6.QtWidgets.QApplication.clipboard",
+            lambda: clipboard_mock,
+        )
 
-        return clipboard_mock
+        yield clipboard_mock
