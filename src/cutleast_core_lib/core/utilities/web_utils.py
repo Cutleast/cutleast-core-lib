@@ -6,13 +6,15 @@ from pathlib import Path
 
 from requests import Response, get
 
+from cutleast_core_lib.core.utilities.hash import sha256_hash
+
 from ..cache.cache import Cache
 from .exceptions import Non200HttpError
 
 
 @Cache.persistent_cache(
     cache_subfolder=Path("web_cache"),
-    id_generator=lambda url: hex(hash(url))[2:10],
+    id_generator=lambda url: sha256_hash(url.encode("utf8")),
     max_age=60 * 60 * 24,
 )
 def get_raw_web_content(url: str) -> bytes:
