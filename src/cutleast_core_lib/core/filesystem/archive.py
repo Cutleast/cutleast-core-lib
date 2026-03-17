@@ -9,9 +9,9 @@ import shutil
 import subprocess
 import time
 import uuid
-from io import BufferedReader, RawIOBase
+from io import RawIOBase
 from pathlib import Path
-from typing import Any, BinaryIO, Literal, override
+from typing import Any, BinaryIO, Literal, Optional, cast, override
 
 from cutleast_core_lib.core.utilities.exe_info import get_current_path
 from cutleast_core_lib.core.utilities.process_runner import run_process
@@ -65,8 +65,22 @@ class Archive:
     DATE_FORMAT: str = "%Y-%m-%d %H:%M:%S"
     """The format of the modified timestamp when getting a list of the files."""
 
+    ENTRY_SEPARATOR: str = "----------"
+    """
+    The separator between the archive info and its files when getting a list of the
+    files.
+    """
+
+    ATTR_KEY: str = "Attributes"
+    """The key for the file attributes when getting a list of the files."""
+
+    DIR_ATTR: str = "D"
+    """The attribute value marking a directory when getting a list of the files."""
+
     path: Path
     """The path to the archive file."""
+
+    __files: Optional[list[File]]
 
     log: logging.Logger = logging.getLogger("Archive")
 
@@ -77,6 +91,7 @@ class Archive:
         """
 
         self.path = path
+        self.__files = None
 
     @property
     def files(self) -> list[File]:
@@ -87,43 +102,54 @@ class Archive:
             list[File]: List of file with relative paths.
         """
 
-        cmd: list[str] = ["7z.exe", "l", "-slt", str(self.path)]
-        result: subprocess.CompletedProcess[str] = subprocess.run(
-            cmd, capture_output=True, text=True, check=True
-        )
+        if self.__files is None:
+            cmd: list[str] = [str(Archive.BIN_PATH), "l", "-slt", str(self.path)]
+            result: subprocess.CompletedProcess[str] = subprocess.run(
+                cmd, capture_output=True, text=True, check=True
+            )
 
-        entries: list[File] = []
-        current: dict[str, Any] = {}
-        for line in result.stdout.splitlines():
-            line = line.strip()
-            if not line:
-                continue
+            entries: list[File] = []
+            current: dict[str, Any] = {}
+            in_entries: bool = False
+            for line in result.stdout.splitlines():
+                line = line.strip()
 
-            if line == "--":
-                if Archive.PATH_KEY in current:
-                    dt = datetime.datetime.strptime(
-                        current[Archive.MODIFIED_KEY], Archive.DATE_FORMAT
-                    )
-                    ts = int(time.mktime(dt.timetuple()))
+                if line == Archive.ENTRY_SEPARATOR:
+                    current = {}
+                    in_entries = True
+                    continue
 
-                    entries.append(
-                        File(
-                            path=current[Archive.PATH_KEY],
-                            size=current[Archive.SIZE_KEY],
-                            last_modified=ts,
-                            creation_time=ts,
+                if line == "" and in_entries and Archive.PATH_KEY in current:
+                    attrs: str = current.get(Archive.ATTR_KEY, "")
+                    if Archive.DIR_ATTR not in attrs:
+                        raw_modified: str = current.get(Archive.MODIFIED_KEY, "")
+                        # 7z timestamps may include sub-seconds; truncate
+                        # to "YYYY-MM-DD HH:MM:SS"
+                        date_part: str = raw_modified[:19]
+                        dt = datetime.datetime.strptime(date_part, Archive.DATE_FORMAT)
+                        ts = int(time.mktime(dt.timetuple()))
+                        raw_size: str = current.get(Archive.SIZE_KEY, "0")
+                        entries.append(
+                            File(
+                                path=current[Archive.PATH_KEY],
+                                size=int(raw_size) if raw_size else 0,
+                                last_modified=ts,
+                                creation_time=ts,
+                            )
                         )
-                    )
-                current = {}
-                continue
 
-            if "=" in line:
-                key: str
-                value: str
-                key, value = line.split("=", 1)
-                current[key.strip()] = value.strip()
+                if not in_entries:
+                    continue
 
-        return entries
+                if "=" in line:
+                    key: str
+                    value: str
+                    key, value = line.split("=", 1)
+                    current[key.strip()] = value.strip()
+
+            self.__files = entries
+
+        return self.__files
 
     def extract_all(self, dest: Path, full_paths: bool = True) -> None:
         """
@@ -313,7 +339,7 @@ class Archive:
         if not proc.stdout:
             raise RuntimeError("Failed to open stdout pipe for 7z process.")
 
-        return BufferedReader(Archive._FileStream(proc))
+        return cast(BinaryIO, Archive._FileStream(proc))
 
     def glob(self, pattern: str) -> list[Path]:
         """
