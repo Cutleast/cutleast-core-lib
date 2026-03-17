@@ -8,6 +8,8 @@ from typing import Optional
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
 
+from cutleast_core_lib.core.utilities.filter import matches_filter
+
 from .text_width import measure_text_width
 
 
@@ -45,14 +47,14 @@ def iter_toplevel_items(widget: QTreeWidget) -> Generator[QTreeWidgetItem]:
 
 def iter_all_items(widget: QTreeWidget) -> Generator[QTreeWidgetItem]:
     """
-    Recursively iterates over all items in a QTreeWidget, including top-level
-    and nested children.
+    Recursively iterates over all items in a QTreeWidget, including top-level and nested
+    children. Parents are yielded before their children.
 
     Args:
         widget (QTreeWidget): Tree widget to iterate.
 
     Yields:
-        Generator[QTreeWidgetItem]: All tree items in depth-first order.
+        Generator[QTreeWidgetItem]: All tree items in top-first order.
     """
 
     def _iter_item(item: QTreeWidgetItem) -> Generator[QTreeWidgetItem]:
@@ -148,3 +150,26 @@ def set_item_foreground(item: QTreeWidgetItem, color: QColor) -> None:
 
     for i in range(item.columnCount()):
         item.setForeground(i, color)
+
+
+def apply_text_filter(widget: QTreeWidget, text: str, case_sensitive: bool) -> None:
+    """
+    Applies a text filter to a tree widget.
+
+    ## Example Usage:
+
+        search_bar.searchChanged.connect(
+            lambda text, cs: apply_text_filter(tree_widget, text, cs)
+        )
+
+    Args:
+        widget (QTreeWidget): Tree widget to apply to.
+        text (str): Filter text to apply.
+        case_sensitive (bool): If the filter should be case sensitive or not.
+    """
+
+    for item in reversed(list(iter_all_items(widget))):  # reversed -> depth-first
+        item.setHidden(
+            not matches_filter(get_item_text(item), text, case_sensitive)
+            and not are_children_visible(item)
+        )
