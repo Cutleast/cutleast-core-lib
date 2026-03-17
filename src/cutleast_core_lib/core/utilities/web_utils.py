@@ -4,12 +4,12 @@ Copyright (c) Cutleast
 
 from pathlib import Path
 
-from requests import Response, get
+from requests import HTTPError, Response, get
 
+from cutleast_core_lib.core.utilities.exceptions import Non200HttpError
 from cutleast_core_lib.core.utilities.hash import sha256_hash
 
 from ..cache.cache import Cache
-from .exceptions import Non200HttpError
 
 
 @Cache.persistent_cache(
@@ -51,7 +51,9 @@ def get_raw_web_content_uncached(url: str) -> bytes:
 
     res: Response = get(url)
 
-    if res.status_code != 200:
-        raise Non200HttpError(url, res.status_code)
+    try:
+        res.raise_for_status()
+    except HTTPError as ex:
+        raise Non200HttpError(url, res.status_code) from ex
 
     return res.content
