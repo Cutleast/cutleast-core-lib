@@ -2,53 +2,105 @@
 Copyright (c) Cutleast
 """
 
-from typing import Generic, Iterable, TypeVar
+from collections.abc import Iterator, MutableMapping
+from typing import Generic, Optional, TypeVar, overload, override
 
 K = TypeVar("K")
 V = TypeVar("V")
+_MISSING: object = object()
 
 
-class ReferenceDict(Generic[K, V]):
+class ReferenceDict(MutableMapping[K, V], Generic[K, V]):
     """
-    Dict-like container with reference keys. Useful for mutable objects that
-    can be altered without destroying the mapping to the value.
+    Dict-like container that uses object identity (`id()`) instead of hash equality as
+    the key discriminator.
 
-    Also doesn't require hashable keys.
+    This makes it suitable for mutable objects that cannot be (or should not be) used as
+    dict keys, because it does not require the key type to be hashable. Two distinct
+    objects that compare equal are treated as different keys.
+
+    This class provides all features of the `Mapping` protocol.
     """
 
     __values: dict[int, tuple[K, V]]
 
-    def __init__(self, initial: dict[K, V] = {}) -> None:
+    def __init__(
+        self,
+        initial: Optional[dict[K, V]] = None,
+    ) -> None:
+        """
+        Initialises the container.
+
+        Args:
+            initial (Optional[dict[K, V]]):
+                Optional mapping whose key-value pairs are copied into this container.
+                Each key is registered by its current `id()`.  Defaults to an empty
+                mapping when `None`.
+        """
+
+        if initial is None:
+            initial = {}
+
         self.__values = {id(k): (k, v) for k, v in initial.items()}
 
+    @override
     def __getitem__(self, key: K) -> V:
-        return self.__values[id(key)][1]
+        try:
+            return self.__values[id(key)][1]
+        except KeyError:
+            raise KeyError(key) from None
 
+    @override
     def __setitem__(self, key: K, value: V) -> None:
-        self.__values[id(key)] = key, value
+        self.__values[id(key)] = (key, value)
 
+    @override
     def __delitem__(self, key: K) -> None:
-        del self.__values[id(key)]
+        try:
+            del self.__values[id(key)]
+        except KeyError:
+            raise KeyError(key) from None
 
-    def __contains__(self, key: K) -> bool:
-        return id(key) in self.__values
+    @override
+    def __iter__(self) -> Iterator[K]:
+        for key, _ in self.__values.values():
+            yield key
 
+    @override
     def __len__(self) -> int:
         return len(self.__values)
 
-    def keys(self) -> Iterable[K]:
-        for item in self.__values.values():
-            yield item[0]
+    @override
+    def __contains__(self, key: object) -> bool:
+        return id(key) in self.__values
 
-    def values(self) -> Iterable[V]:
-        for item in self.__values.values():
-            yield item[1]
+    @overload
+    def pop(self, key: K) -> V: ...
 
-    def items(self) -> Iterable[tuple[K, V]]:
-        return self.__values.values()
+    @overload
+    def pop(self, key: K, default: V) -> V: ...
 
-    def pop(self, key: K) -> V:
-        return self.__values.pop(id(key))[1]
+    @overload
+    def pop(self, key: K, default: object) -> object: ...
 
+    @override
+    def pop(
+        self,
+        key: K,
+        default: object = _MISSING,
+    ) -> object:
+        try:
+            return self.__values.pop(id(key))[1]
+        except KeyError:
+            if default is _MISSING:
+                raise KeyError(key) from None
+            return default
+
+    @override
     def clear(self) -> None:
         self.__values.clear()
+
+    @override
+    def __repr__(self) -> str:
+        pairs = ", ".join(f"'{k}': '{v}'" for k, v in self.__values.values())
+        return f"{type(self).__name__}({{{pairs}}})"
