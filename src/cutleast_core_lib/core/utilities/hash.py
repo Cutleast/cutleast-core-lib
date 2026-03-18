@@ -3,6 +3,7 @@ Copyright (c) Cutleast
 """
 
 import hashlib
+from pathlib import Path
 from typing import BinaryIO, Optional
 
 from cutleast_core_lib.core.multithreading.progress import (
@@ -56,3 +57,30 @@ def md5_hash_stream(
             update(update_callback, ProgressUpdate(value=data_read, maximum=size))
 
     return hash_md5.hexdigest()
+
+
+def md5_hash_file(
+    file: Path,
+    file_size: int,
+    chunk_size: int = 1 * 1024 * 1024,
+    update_callback: Optional[UpdateCallback] = None,
+) -> str:
+    """
+    Calculates the MD5 hash of a file.
+
+    Args:
+        file (Path): The file to calculate the hash for.
+        file_size (int): The size of the file.
+        chunk_size (int, optional): Chunk size. Defaults to 1 MB.
+        update_callback (Optional[UpdateCallback], optional):
+            Optional update callback for progress updates. Defaults to None.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+
+    Returns:
+        str: The MD5 hash of the file.
+    """
+
+    with file.open("rb") as f:
+        return md5_hash_stream(f, file_size, chunk_size, update_callback)
