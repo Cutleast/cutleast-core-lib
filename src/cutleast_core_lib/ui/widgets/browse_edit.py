@@ -95,6 +95,16 @@ class BrowseLineEdit(QLineEdit):
 
         self.__caption = caption
 
+    def setBasePath(self, base_path: Path) -> None:
+        """
+        Sets the base path for relative paths.
+
+        Args:
+            base_path (Path): Base path.
+        """
+
+        self.__base_path = base_path
+
     def getPath(self, absolute: bool = False) -> Path:
         """
         Returns the current path.
