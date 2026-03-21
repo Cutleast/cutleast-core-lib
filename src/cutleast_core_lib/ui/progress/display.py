@@ -18,7 +18,7 @@ class ABCQtMeta(type(QWidget), ABCMeta):  # pyright: ignore[reportGeneralTypeIss
     """
 
 
-class ProgressDisplay(metaclass=ABCQtMeta):
+class ProgressDisplay(metaclass=ABCQtMeta):  # pyright: ignore[reportImplicitAbstractClass]
     """
     Base class for all widgets that can display and manage multiple progress bars
     including a main one.

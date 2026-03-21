@@ -29,7 +29,7 @@ class ABCQtMeta(type(QApplication), ABCMeta):  # pyright: ignore[reportGeneralTy
     """
 
 
-class BaseApp(QApplication, metaclass=ABCQtMeta):
+class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImplicitAbstractClass]
     """
     Abstract base class for the main application.
     """
