@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 """
 
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLineEdit, QPushButton
@@ -20,6 +20,7 @@ class BrowseLineEdit(QLineEdit):
     __browse_button: QPushButton
     __file_mode: QFileDialog.FileMode = QFileDialog.FileMode.AnyFile
     __filters: Optional[list[str]] = None
+    __caption: Optional[str] = None
 
     pathChanged = Signal(Path, Path)
     """
@@ -32,11 +33,7 @@ class BrowseLineEdit(QLineEdit):
     """
 
     def __init__(
-        self,
-        initial_path: Optional[Path] = None,
-        base_path: Optional[Path] = None,
-        *args: Any,
-        **kwargs: dict[str, Any],
+        self, initial_path: Optional[Path] = None, base_path: Optional[Path] = None
     ) -> None:
         """
         Args:
@@ -46,7 +43,7 @@ class BrowseLineEdit(QLineEdit):
                 Base path for relative paths. Defaults to None.
         """
 
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
         self.__base_path = base_path
 
@@ -87,6 +84,16 @@ class BrowseLineEdit(QLineEdit):
         """
 
         self.__filters = filters
+
+    def setCaption(self, caption: str) -> None:
+        """
+        Sets the caption of the file dialog.
+
+        Args:
+            caption (str): Caption.
+        """
+
+        self.__caption = caption
 
     def getPath(self, absolute: bool = False) -> Path:
         """
@@ -133,7 +140,11 @@ class BrowseLineEdit(QLineEdit):
     def __browse(self) -> None:
         current_text: str = self.text().strip()
 
-        file_dialog = QFileDialog()
+        if self.__caption is not None:
+            file_dialog = QFileDialog(caption=self.__caption)
+        else:
+            file_dialog = QFileDialog()
+
         file_dialog.setFileMode(self.__file_mode)
         if self.__filters is not None:
             file_dialog.setNameFilters(self.__filters)
@@ -142,6 +153,8 @@ class BrowseLineEdit(QLineEdit):
             current_path: Path = self.getPath(absolute=True)
             file_dialog.setDirectory(str(current_path.parent))
             file_dialog.selectFile(current_path.name)
+        elif self.__base_path is not None:
+            file_dialog.setDirectory(str(self.__base_path))
 
         if file_dialog.exec():
             selected_files: list[str] = file_dialog.selectedFiles()
@@ -152,7 +165,7 @@ class BrowseLineEdit(QLineEdit):
                 self.setPath(file)
 
 
-def test() -> None:
+def test() -> None:  # noqa: D103
     from PySide6.QtWidgets import QApplication
 
     app = QApplication()
