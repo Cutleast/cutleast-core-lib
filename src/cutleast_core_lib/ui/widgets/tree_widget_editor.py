@@ -91,9 +91,7 @@ class TreeWidgetEditor(QWidget, Generic[T]):
         __copy_action: QAction
         __paste_action: QAction
 
-        def __init__(
-            self, model_cls: type[M], parent: Optional[QWidget] = None
-        ) -> None:
+        def __init__(self, model_cls: type[M], parent: Optional[QWidget] = None) -> None:
             super().__init__(parent)
 
             self.__model_cls = model_cls
@@ -165,8 +163,10 @@ class TreeWidgetEditor(QWidget, Generic[T]):
 
     _model_cls: type[T]
     _items: ReferenceDict[T, QTreeWidgetItem]
+    _items_editable: bool
 
     _vlayout: QVBoxLayout
+    _tool_bar: QToolBar
     _remove_action: QAction
     _edit_action: QAction
     __search_bar: SearchBar
@@ -188,6 +188,7 @@ class TreeWidgetEditor(QWidget, Generic[T]):
         super().__init__()
 
         self._model_cls = model_cls
+        self._items_editable = True
 
         self._init_ui()
 
@@ -225,16 +226,16 @@ class TreeWidgetEditor(QWidget, Generic[T]):
         hlayout = QHBoxLayout()
         self._vlayout.addLayout(hlayout)
 
-        tool_bar = QToolBar()
-        tool_bar.setFixedWidth(132)
-        hlayout.addWidget(tool_bar)
+        self._tool_bar = QToolBar()
+        self._tool_bar.setFixedWidth(132)
+        hlayout.addWidget(self._tool_bar)
 
-        add_action: QAction = tool_bar.addAction(
+        add_action: QAction = self._tool_bar.addAction(
             IconProvider.get_qta_icon("mdi6.plus"), self.tr("Add new item...")
         )
         add_action.triggered.connect(self.onAdd.emit)
 
-        self._remove_action = tool_bar.addAction(
+        self._remove_action = self._tool_bar.addAction(
             IconProvider.get_qta_icon("mdi6.minus"),
             self.tr("Remove selected item(s)...") + " (" + self.tr("Del") + ")",
         )
@@ -242,7 +243,7 @@ class TreeWidgetEditor(QWidget, Generic[T]):
         self._remove_action.setShortcut("Delete")
         self._remove_action.triggered.connect(self.__remove_selected_items)
 
-        self._edit_action = tool_bar.addAction(
+        self._edit_action = self._tool_bar.addAction(
             IconProvider.get_qta_icon("mdi6.pencil"),
             self.tr("Edit selected item...") + " (" + self.tr("Double click") + ")",
         )
@@ -280,6 +281,9 @@ class TreeWidgetEditor(QWidget, Generic[T]):
         )
 
     def __item_double_clicked(self, item: QTreeWidgetItem, column: int) -> None:
+        if not self._items_editable:
+            return
+
         items: dict[QTreeWidgetItem, T] = {
             item: edited_item
             for edited_item, item in self._items.items()
@@ -320,9 +324,7 @@ class TreeWidgetEditor(QWidget, Generic[T]):
 
     def _filter(self, text: str, case_sensitive: bool) -> None:
         for item in iter_toplevel_items(self._tree_widget):
-            item.setHidden(
-                not matches_filter(get_item_text(item), text, case_sensitive)
-            )
+            item.setHidden(not matches_filter(get_item_text(item), text, case_sensitive))
 
     def _add_item(self, item: T) -> QTreeWidgetItem:
         """
@@ -499,3 +501,15 @@ class TreeWidgetEditor(QWidget, Generic[T]):
                 ),
             )
         )
+
+    def setEditItemEnabled(self, enabled: bool) -> None:
+        """
+        Toggles if items can be edited. This does not affect the add and remove actions.
+
+        Args:
+            enabled (bool): `True` if items can be edited, `False` otherwise
+        """
+
+        self._items_editable = enabled
+        self._edit_action.setVisible(enabled)
+        self._tool_bar.setFixedWidth(132 if enabled else 90)
