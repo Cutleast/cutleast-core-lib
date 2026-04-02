@@ -252,12 +252,12 @@ class Archive:
         files: dict[Path, Path],
         dest: Path,
     ) -> None:
-        """
+        r"""
         Extracts multiple files and remaps their archive paths to custom relative
         destination paths.
 
         Extraction is performed into a temporary directory located on the same drive as
-        `dest` to avoid cross-device copies and C:\\ temp usage.
+        `dest` to avoid cross-device copies and C:\ temp usage.
 
         Args:
             files (dict[Path, Path]):
