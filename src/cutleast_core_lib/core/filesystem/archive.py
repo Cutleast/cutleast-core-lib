@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import time
 import uuid
+from collections.abc import Generator
 from io import RawIOBase
 from pathlib import Path
 from typing import Any, BinaryIO, Literal, Optional, cast, override
@@ -50,8 +51,40 @@ class Archive:
 
             super().close()
 
+    class _EntryStream(RawIOBase):
+        def __init__(self, entry: Any) -> None:
+            import libarchive
+
+            if not isinstance(entry, libarchive.ArchiveEntry):
+                raise TypeError(f"Expected libarchive.ArchiveEntry, got {type(entry)}")
+
+            self.__blocks: Generator[bytes, None, None] = entry.get_blocks()
+            self.__buffer: bytes = b""
+
+        @override
+        def read(self, size: int = -1) -> bytes:
+            if size == -1:
+                return self.__buffer + b"".join(self.__blocks)
+
+            while len(self.__buffer) < size:
+                try:
+                    self.__buffer += next(self.__blocks)
+                except StopIteration:
+                    break
+
+            result: bytes = self.__buffer[:size]
+            self.__buffer = self.__buffer[size:]
+            return result
+
+        @override
+        def readable(self) -> Literal[True]:
+            return True
+
     BIN_PATH: Path = get_current_path() / "res" / "7-zip" / "7z.exe"
     """Path to the 7-zip executable"""
+
+    LIBARCHIVE_DLL_PATH: Path = get_current_path() / "res" / "libarchive2.dll"
+    """Path to the libarchive DLL."""
 
     PATH_KEY: str = "Path"
     """The key for the file path when getting a list of the files."""
@@ -324,6 +357,8 @@ class Archive:
         """
         Gets an in-memory stream for a file in the archive.
 
+        If you need to call this in batch, use `iter_file_streams` instead.
+
         Args:
             file (Path): Path to the file within the archive.
 
@@ -346,6 +381,41 @@ class Archive:
             raise RuntimeError("Failed to open stdout pipe for 7z process.")
 
         return cast(BinaryIO, Archive._FileStream(proc))
+
+    def iter_file_streams(
+        self,
+    ) -> Generator[tuple[File, BinaryIO], None, None]:
+        r"""
+        Iterates over all files in the archive, yielding a stream for each.
+
+        Each stream is only valid for the duration of the current iteration step and must
+        not be used after the next `next()` call.
+
+        **To be able to use this method, the `libarchive-c` library must be installed and
+        the DLL file must be present at "res\libarchive2.dll".**
+
+        Yields:
+            tuple[File, BinaryIO]: The file metadata and its binary stream.
+        """
+
+        import os
+
+        os.environ.setdefault("LIBARCHIVE", str(Archive.LIBARCHIVE_DLL_PATH))
+
+        import libarchive
+
+        file_paths: dict[Path, File] = {f.path: f for f in self.files}
+
+        with libarchive.file_reader(str(self.path)) as la:
+            for entry in la:
+                if entry.isdir:
+                    continue
+
+                file: Optional[File] = file_paths.get(Path(entry.pathname))
+                if file is None:
+                    continue
+
+                yield file, cast(BinaryIO, Archive._EntryStream(entry))
 
     def glob(self, pattern: str) -> list[Path]:
         """
