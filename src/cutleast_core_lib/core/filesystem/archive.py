@@ -103,9 +103,15 @@ class Archive:
         """
 
         if self.__files is None:
-            cmd: list[str] = [str(Archive.BIN_PATH), "l", "-slt", str(self.path)]
+            cmd: list[str] = [
+                str(Archive.BIN_PATH),
+                "l",
+                "-slt",
+                "-sccUTF-8",
+                str(self.path),
+            ]
             result: subprocess.CompletedProcess[str] = subprocess.run(
-                cmd, capture_output=True, text=True, check=True
+                cmd, capture_output=True, text=True, check=True, encoding="utf8"
             )
 
             entries: list[File] = []
