@@ -211,6 +211,7 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
 
         retcode: int = super().exec()
 
+        self._shutdown()
         self.clean()
 
         self.log.info("Exiting application...")
@@ -231,6 +232,11 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
             return True
 
         return False
+
+    def _shutdown(self) -> None:
+        """
+        Shuts down the application. This is called immediately before the cleanup.
+        """
 
     def clean(self) -> None:
         """
