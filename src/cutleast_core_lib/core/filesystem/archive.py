@@ -411,7 +411,7 @@ class Archive:
                 if entry.isdir:
                     continue
 
-                file: Optional[File] = file_paths.get(Path(entry.pathname))
+                file: Optional[File] = file_paths.get(Path(entry.pathname))  # pyright: ignore[reportArgumentType]
                 if file is None:
                     continue
 
