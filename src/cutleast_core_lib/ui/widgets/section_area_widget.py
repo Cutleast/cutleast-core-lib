@@ -129,7 +129,6 @@ class SectionAreaWidget(QWidget):
             self.__glayout.addWidget(self.__content_widget, 1, 0, 1, 3)
         else:
             self.__glayout.addWidget(self.__content_widget, 1, 1)
-        self.__glayout.setRowStretch(1, 1)
         self.__content_widget.hide()
 
     def __toggle(self, expanded: bool) -> None:
@@ -141,6 +140,12 @@ class SectionAreaWidget(QWidget):
             self.__toggle_button.setIcon(self.__chevron_down_icon)
 
         self.__content_widget.setVisible(expanded)
+
+        if expanded:
+            self.__glayout.setRowStretch(1, 1)
+        else:
+            self.__glayout.setRowStretch(1, 0)
+
         self.toggled.emit(expanded)
 
     def setExpanded(self, expanded: bool) -> None:
