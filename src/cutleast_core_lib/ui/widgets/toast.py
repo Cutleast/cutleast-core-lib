@@ -25,7 +25,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from cutleast_core_lib.core.utilities.localized_enum import LocalizedEnum
+from cutleast_core_lib.ui.utilities.position import Position
 
 
 class Toast(QWidget):
@@ -35,54 +35,6 @@ class Toast(QWidget):
 
     MARGIN: int = 25
     """Margin to the screen borders."""
-
-    class Position(LocalizedEnum):
-        """Enum for the possible positions of the toast."""
-
-        Top = "top"
-        """The toast is displayed near the center of the top of the screen."""
-
-        Bottom = "bottom"
-        """The toast is displayed near the center of the bottom of the screen."""
-
-        Left = "left"
-        """The toast is displayed near the center of the left of the screen."""
-
-        Right = "right"
-        """The toast is displayed near the center of the right of the screen."""
-
-        TopLeft = "top_left"
-        """The toast is displayed near the top left of the screen."""
-
-        TopRight = "top_right"
-        """The toast is displayed near the top right of the screen."""
-
-        BottomLeft = "bottom_left"
-        """The toast is displayed near the bottom left of the screen."""
-
-        BottomRight = "bottom_right"
-        """The toast is displayed near the bottom right of the screen."""
-
-        @override
-        def get_localized_name(self) -> str:
-            locs: dict[Toast.Position, str] = {
-                Toast.Position.Top: QApplication.translate("Position", "Top"),
-                Toast.Position.Bottom: QApplication.translate("Position", "Bottom"),
-                Toast.Position.Left: QApplication.translate("Position", "Left"),
-                Toast.Position.Right: QApplication.translate("Position", "Right"),
-                Toast.Position.TopLeft: QApplication.translate("Position", "Top Left"),
-                Toast.Position.TopRight: QApplication.translate(
-                    "Position", "Top Right"
-                ),
-                Toast.Position.BottomLeft: QApplication.translate(
-                    "Position", "Bottom Left"
-                ),
-                Toast.Position.BottomRight: QApplication.translate(
-                    "Position", "Bottom Right"
-                ),
-            }
-
-            return locs[self]
 
     __position: Position
     __offset_taskbar: bool
@@ -215,24 +167,24 @@ class Toast(QWidget):
         y_offset: int = self.height() // 2 + Toast.MARGIN
 
         match self.__position:
-            case Toast.Position.Top:
+            case Position.Top:
                 point.setY(y_offset)
-            case Toast.Position.Bottom:
+            case Position.Bottom:
                 point.setY(scr.height() - y_offset)
-            case Toast.Position.Left:
+            case Position.Left:
                 point.setX(x_offset)
-            case Toast.Position.Right:
+            case Position.Right:
                 point.setX(scr.width() - x_offset)
-            case Toast.Position.TopLeft:
+            case Position.TopLeft:
                 point.setX(x_offset)
                 point.setY(y_offset)
-            case Toast.Position.TopRight:
+            case Position.TopRight:
                 point.setX(scr.width() - x_offset)
                 point.setY(y_offset)
-            case Toast.Position.BottomLeft:
+            case Position.BottomLeft:
                 point.setX(x_offset)
                 point.setY(scr.height() - y_offset)
-            case Toast.Position.BottomRight:
+            case Position.BottomRight:
                 point.setX(scr.width() - x_offset)
                 point.setY(scr.height() - y_offset)
 
