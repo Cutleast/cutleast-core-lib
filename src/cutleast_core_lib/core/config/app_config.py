@@ -39,14 +39,10 @@ class AppConfig(BaseConfig):
     )
     """Log format"""
 
-    log_date_format: Annotated[str, Field(alias="log.date_format")] = (
-        "%d.%m.%Y %H:%M:%S"
-    )
+    log_date_format: Annotated[str, Field(alias="log.date_format")] = "%d.%m.%Y %H:%M:%S"
     """Log date format"""
 
-    log_file_name: Annotated[str, Field(alias="log.file_name")] = (
-        "%d-%m-%Y-%H-%M-%S.log"
-    )
+    log_file_name: Annotated[str, Field(alias="log.file_name")] = "%d-%m-%Y-%H-%M-%S.log"
     """Log file name"""
 
     log_visible: Annotated[bool, Field(alias="log.visible")] = False
