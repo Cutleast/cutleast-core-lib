@@ -2,7 +2,7 @@
 Copyright (c) Cutleast
 """
 
-from typing import TypeVar
+from typing import Optional, TypeVar
 
 _T = TypeVar("_T")
 
@@ -28,5 +28,25 @@ def checked_cast(type_hint: type[_T], value: object) -> _T:
             f"Cannot cast value of type '{type(value).__name__}'"
             f" to '{type_hint.__name__}': {value!r}"
         )
+
+    return value
+
+
+def not_none(value: Optional[_T]) -> _T:
+    """
+    Checks if the specified value is not `None` and raises a `ValueError` if it is.
+
+    Args:
+        value (Optional[_T]): Value to check.
+
+    Raises:
+        ValueError: If the value is `None`.
+
+    Returns:
+        _T: The value if it is not `None`.
+    """
+
+    if value is None:
+        raise ValueError("Value cannot be None")
 
     return value
