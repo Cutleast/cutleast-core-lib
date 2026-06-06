@@ -6,13 +6,13 @@ authors = [{ name = "cutleast", email = "cutleast@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "comtypes",
+    "babel",
+    "comtypes ; sys_platform == 'win32'",
     "darkdetect",
     "jstyleson",
     "py7zr",
     "pydantic",
     "pyside6",
-    "pywin32",
     "qtawesome",
     "rarfile",
     "requests",

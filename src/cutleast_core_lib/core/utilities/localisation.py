@@ -2,11 +2,10 @@
 Copyright (c) Cutleast
 """
 
-import locale
 import logging
 from typing import Optional
 
-import win32api
+from babel import Locale
 
 log: logging.Logger = logging.getLogger("Localisation")
 
@@ -24,8 +23,7 @@ def detect_system_locale() -> Optional[str]:
     system_locale: Optional[str] = None
 
     try:
-        language_id: int = win32api.GetUserDefaultLangID()
-        system_locale = locale.windows_locale[language_id]
+        system_locale = str(Locale.default())
         log.debug(f"Detected system language: {system_locale}")
 
     except Exception as ex:

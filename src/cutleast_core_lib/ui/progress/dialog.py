@@ -9,7 +9,6 @@ import time
 from functools import reduce
 from typing import Callable, Generic, Optional, TypeVar, override
 
-import comtypes.client as cc
 from PySide6.QtCore import QCoreApplication, Qt, QTimerEvent, Signal, SignalInstance
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import QApplication, QDialog, QMessageBox, QVBoxLayout, QWidget
@@ -26,6 +25,8 @@ from .bar import ProgressBarWidget
 from .display import ProgressDisplay
 
 try:
+    import comtypes.client as cc
+
     cc.GetModule(f"{get_current_path()}/res/TaskbarLib.tlb")
 
     import comtypes.gen.TaskbarLib as tbl  # type: ignore # noqa: E402

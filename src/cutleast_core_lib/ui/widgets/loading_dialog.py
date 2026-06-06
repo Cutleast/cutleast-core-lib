@@ -6,7 +6,6 @@ import logging
 import time
 from typing import Any, Callable, Generic, Optional, TypeVar, override
 
-import comtypes.client as cc
 from PySide6.QtCore import QCoreApplication, Qt, QTimerEvent, Signal
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
@@ -27,6 +26,8 @@ from cutleast_core_lib.core.utilities.thread import Thread
 from cutleast_core_lib.core.utilities.truncate import TruncateMode, truncate_string
 
 try:
+    import comtypes.client as cc
+
     cc.GetModule(f"{get_current_path()}/res/TaskbarLib.tlb")
 
     import comtypes.gen.TaskbarLib as tbl  # type: ignore # noqa: E402
