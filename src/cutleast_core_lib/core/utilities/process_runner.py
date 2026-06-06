@@ -5,17 +5,24 @@ Copyright (c) Cutleast
 import logging
 import subprocess
 import sys
+from pathlib import Path
+from typing import Optional
 
 log: logging.Logger = logging.getLogger("ProcessRunner")
 
 
-def run_process(command: list[str], live_output: bool = False) -> None:
+def run_process(
+    command: list[str], live_output: bool = False, cwd: Optional[Path] = None
+) -> None:
     """
     Executes an external command and logs its output in case of an error.
 
     Args:
         command (list[str]): Executable + arguments to run.
-        live_output (bool): Whether to print the stdout output in realtime.
+        live_output (bool, optional):
+            Whether to print the stdout output in realtime. Defaults to False.
+        cwd (Optional[Path], optional):
+            The working directory to run the command in. Defaults to None.
 
     Raises:
         RuntimeError: When the process returns a non-zero exit code.
@@ -29,6 +36,7 @@ def run_process(command: list[str], live_output: bool = False) -> None:
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE if not live_output else sys.stdout,
         stderr=subprocess.PIPE if not live_output else sys.stderr,
+        cwd=cwd,
         text=True,
         encoding="utf8",
         errors="ignore",
