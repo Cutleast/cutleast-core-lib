@@ -8,6 +8,7 @@ from pydantic import SerializerFunctionWrapHandler, model_serializer
 from pydantic.main import BaseModel
 
 ModelType = TypeVar("ModelType", bound=type[BaseModel])
+"""Type variable for a Pydantic model type."""
 
 
 def include_literal_defaults(cls: ModelType) -> ModelType:
