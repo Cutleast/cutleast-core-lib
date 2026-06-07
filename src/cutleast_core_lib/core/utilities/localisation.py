@@ -5,7 +5,7 @@ Copyright (c) Cutleast
 import logging
 from typing import Optional
 
-from babel import Locale
+from PySide6.QtCore import QLocale
 
 log: logging.Logger = logging.getLogger("Localisation")
 
@@ -23,7 +23,10 @@ def detect_system_locale() -> Optional[str]:
     system_locale: Optional[str] = None
 
     try:
-        system_locale = str(Locale.default())
+        system_locale = (
+            f"{QLocale.languageToCode(QLocale.system().language())}_"
+            f"{QLocale.territoryToCode(QLocale.system().territory())}"
+        )
         log.debug(f"Detected system language: {system_locale}")
 
     except Exception as ex:
