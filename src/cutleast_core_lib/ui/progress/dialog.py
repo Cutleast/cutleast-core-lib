@@ -15,33 +15,13 @@ from PySide6.QtWidgets import QApplication, QDialog, QMessageBox, QVBoxLayout, Q
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
 from cutleast_core_lib.core.utilities.datetime import format_duration
-from cutleast_core_lib.core.utilities.exceptions import format_exception
-from cutleast_core_lib.core.utilities.exe_info import get_current_path
 from cutleast_core_lib.core.utilities.thread import Thread
 from cutleast_core_lib.ui.widgets.section_area_widget import SectionAreaWidget
 from cutleast_core_lib.ui.widgets.smooth_scroll_area import SmoothScrollArea
 
 from .bar import ProgressBarWidget
 from .display import ProgressDisplay
-
-try:
-    import comtypes.client as cc
-
-    cc.GetModule(f"{get_current_path()}/res/TaskbarLib.tlb")
-
-    import comtypes.gen.TaskbarLib as tbl  # type: ignore # noqa: E402
-
-    taskbar = cc.CreateObject(
-        "{56FDF344-FD6D-11d0-958A-006097C9A090}", interface=tbl.ITaskbarList3
-    )
-except Exception as ex:
-    print(format_exception(ex))
-    print("WARNING: No taskbar progress API available: see exception above")
-    taskbar = None
-
-
-TBL_DETERMINATE: int = 0x1
-TBL_INDETERMINATE: int = 0x2
+from .taskbar import TaskbarProgressDisplay
 
 T = TypeVar("T")
 V = TypeVar("V")
@@ -64,7 +44,7 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
     __update_timer_id: Optional[int] = None
     __thread: Thread[T]
 
-    __tbprogress_hwnd: Optional[int] = None
+    __tb_display: TaskbarProgressDisplay
 
     __vlayout: QVBoxLayout
     __section_area: SectionAreaWidget
@@ -83,7 +63,7 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
         super().__init__(parent)
         ProgressDisplay.__init__(self)
 
-        self.__tbprogress_hwnd = self.winId()
+        self.__tb_display = TaskbarProgressDisplay(self.winId())
 
         # force focus
         self.setModal(True)
@@ -160,15 +140,8 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
     def __update_main_progress(self, payload: ProgressUpdate) -> None:
         self.__main_progress.updateProgress(payload)
 
-        if taskbar is not None and self.__tbprogress_hwnd is not None:
-            cur_progress: ProgressUpdate = self.__main_progress.currentProgress()
-            if not cur_progress.is_determinate:
-                taskbar.SetProgressState(self.__tbprogress_hwnd, TBL_INDETERMINATE)
-            else:
-                taskbar.SetProgressState(self.__tbprogress_hwnd, TBL_DETERMINATE)
-                taskbar.SetProgressValue(
-                    self.__tbprogress_hwnd, cur_progress.value, cur_progress.maximum
-                )
+        cur_progress: ProgressUpdate = self.__main_progress.currentProgress()
+        self.__tb_display.updateProgress(cur_progress)
 
     def __update_progress(self, progress_id: int, payload: ProgressUpdate) -> None:
         if progress_id not in self.__progress_widgets:
@@ -266,8 +239,7 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
         )
 
         # clear taskbar state
-        if self.__tbprogress_hwnd is not None and taskbar is not None:
-            taskbar.SetProgressState(self.__tbprogress_hwnd, 0x0)
+        self.__tb_display.clear()
 
         result: T | Exception = self.__thread.get_result()
 
