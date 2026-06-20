@@ -162,7 +162,7 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
 
         if taskbar is not None and self.__tbprogress_hwnd is not None:
             cur_progress: ProgressUpdate = self.__main_progress.currentProgress()
-            if cur_progress.maximum == 0:
+            if not cur_progress.is_determinate:
                 taskbar.SetProgressState(self.__tbprogress_hwnd, TBL_INDETERMINATE)
             else:
                 taskbar.SetProgressState(self.__tbprogress_hwnd, TBL_DETERMINATE)
@@ -235,9 +235,7 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
                 )
 
             if payloads is not None:
-                updated_payload: ProgressUpdate = reduce(
-                    ProgressUpdate.update, payloads
-                )
+                updated_payload: ProgressUpdate = reduce(ProgressUpdate.update, payloads)
 
                 self.__update_progress(progress_id, updated_payload)
 

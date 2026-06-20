@@ -70,3 +70,27 @@ class ProgressUpdate(BaseModel, frozen=True):
         )
 
         return ProgressUpdate(status_text=status_text, value=value, maximum=maximum)
+
+    @property
+    def is_determinate(self) -> bool:
+        """
+        Whether the progress is determinate or not. A progress is indeterminate if the
+        maximum is 0.
+
+        Returns:
+            bool: Whether the progress is determinate or not.
+        """
+
+        return self.maximum is not None and self.maximum != 0
+
+    @property
+    def is_completed(self) -> bool:
+        """
+        Whether the progress is completed or not. A progress is completed if the value is
+        greater than zero and equal to the maximum.
+
+        Returns:
+            bool: Whether the progress is completed or not.
+        """
+
+        return self.value is not None and self.value > 0 and self.value == self.maximum

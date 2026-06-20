@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QWidget
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
 from cutleast_core_lib.core.utilities.qt_res_provider import read_resource
+from cutleast_core_lib.core.utilities.typing_utils import not_none
 
 
 class SpinnerWidget(QWidget):
@@ -70,12 +71,10 @@ class SpinnerWidget(QWidget):
             else self.__last_text
         )
         self.__last_text = text
-        if (
-            progress_update.value is not None
-            and progress_update.maximum is not None
-            and progress_update.maximum != 0
-        ):
-            text = f"({int((progress_update.value / progress_update.maximum) * 100)} %) "
+        if progress_update.is_determinate:
+            value: int = not_none(progress_update.value)
+            maximum: int = not_none(progress_update.maximum)
+            text = f"({int((value / maximum) * 100)} %) "
             text += self.__last_text
 
         self.setText(text)
