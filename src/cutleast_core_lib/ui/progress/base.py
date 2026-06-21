@@ -31,7 +31,7 @@ class BaseProgressWidget(ProgressDisplay, metaclass=ABCQtMeta):  # pyright: igno
     Base class for all widgets that implement the ProgressDisplay interface.
 
     This class does not inherit from QWidget directly to avoid inheritance conflicts in
-    subclasses. Everything Qt-related must be handled by the concrete implementations.
+    subclasses. Everything Qt-related is already handled by an internal helper QObject.
     """
 
     class _SignalHelper(QObject):
@@ -68,9 +68,6 @@ class BaseProgressWidget(ProgressDisplay, metaclass=ABCQtMeta):  # pyright: igno
     MAIN_PROGRESS_ID: int = -1
     """Constant progress ID for the main progress bar."""
 
-    UPDATE_INTERVAL: int = int(1_000 // 30)  # ~ 30 FPS
-    """Interval in milliseconds for how often the progress bars should be updated."""
-
     TERMINATION_TIMEOUT: int = 1_000  # 1 second
     """Time in milliseconds to wait for the widget to terminate when cancelling."""
 
@@ -104,7 +101,7 @@ class BaseProgressWidget(ProgressDisplay, metaclass=ABCQtMeta):  # pyright: igno
         self._signal_helper.update_timer_signal.connect(self._process_scheduled_updates)
 
     def _start_update_timer(self) -> None:
-        self._signal_helper.start_update_timer(BaseProgressWidget.UPDATE_INTERVAL)
+        self._signal_helper.start_update_timer(ProgressDisplay.UPDATE_INTERVAL)
 
     def _stop_update_timer(self) -> None:
         self._signal_helper.stop_update_timer()

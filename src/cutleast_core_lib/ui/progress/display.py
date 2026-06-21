@@ -13,9 +13,12 @@ if TYPE_CHECKING:
 
 class ProgressDisplay(ABC):
     """
-    Protocol for all classes that can display and manage multiple progress bars including
+    Interface for all classes that can display and manage multiple progress bars including
     a main one.
     """
+
+    UPDATE_INTERVAL: int = int(1_000 // 30)  # ~ 30 FPS
+    """Interval in milliseconds for how often the progress bars should be updated."""
 
     @abstractmethod
     def updateMainProgress(self, payload: ProgressUpdate) -> None:
