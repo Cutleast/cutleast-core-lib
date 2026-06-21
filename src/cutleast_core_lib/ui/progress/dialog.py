@@ -4,12 +4,10 @@ Copyright (c) Cutleast
 
 from __future__ import annotations
 
-import logging
 import time
-from functools import reduce
 from typing import Callable, Generic, Optional, TypeVar, override
 
-from PySide6.QtCore import QCoreApplication, Qt, QTimerEvent, Signal, SignalInstance
+from PySide6.QtCore import QCoreApplication, Qt, QTimerEvent
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import QApplication, QDialog, QMessageBox, QVBoxLayout, QWidget
 
@@ -20,6 +18,7 @@ from cutleast_core_lib.ui.widgets.section_area_widget import SectionAreaWidget
 from cutleast_core_lib.ui.widgets.smooth_scroll_area import SmoothScrollArea
 
 from .bar import ProgressBarWidget
+from .base import BaseProgressWidget
 from .display import ProgressDisplay
 from .taskbar import TaskbarProgressDisplay
 
@@ -27,21 +26,14 @@ T = TypeVar("T")
 V = TypeVar("V")
 
 
-class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
+class ProgressDialog(BaseProgressWidget, QDialog, Generic[T]):
     """
     Custom QProgressDialog featuring a main progress bar and a collapsible section for
     additional progress bars (e.g. for worker threads).
     """
 
-    __cancel_requested = Signal()
-    __update_signal = Signal(int, ProgressUpdate)
-    __update_main_signal = Signal(ProgressUpdate)
-    __remove_signal = Signal(int)
-    __clear_signal = Signal()
-
     __start_time: Optional[float] = None
     __titlebar_timer_id: Optional[int] = None
-    __update_timer_id: Optional[int] = None
     __thread: Thread[T]
 
     __tb_display: TaskbarProgressDisplay
@@ -55,13 +47,19 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
 
     __max_height: Optional[int] = None
 
-    log: logging.Logger = logging.getLogger("ProgressDialog")
-
     def __init__(
-        self, func: Callable[[ProgressDialog[T]], T], parent: Optional[QWidget] = None
+        self, func: Callable[[ProgressDisplay], T], parent: Optional[QWidget] = None
     ) -> None:
+        """
+        Args:
+            func (Callable[[ProgressDisplay], T]):
+                Callable that gets executed in the background thread.
+            parent (Optional[QWidget], optional):
+                Optional parent widget. Defaults to None.
+        """
+
+        QDialog.__init__(self, parent)
         super().__init__(parent)
-        ProgressDisplay.__init__(self)
 
         self.__tb_display = TaskbarProgressDisplay(self.winId())
 
@@ -73,10 +71,6 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
 
         self.__init_ui()
 
-        self._update_main_signal.connect(self.__update_main_progress)
-        self._update_signal.connect(self.__update_progress)
-        self._remove_signal.connect(self.__remove_progress)
-        self._clear_signal.connect(self.__clear_progress_bars)
         self.__section_area.toggled.connect(lambda _: self.__update_size())
 
         self.__update_size()
@@ -137,13 +131,16 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
     def setMaximumHeight(self, maxh: int) -> None:
         self.__max_height = maxh
 
-    def __update_main_progress(self, payload: ProgressUpdate) -> None:
+    @override
+    def _update_main_progress(self, payload: ProgressUpdate) -> None:
         self.__main_progress.updateProgress(payload)
 
+        # we need the full progress update for the taskbar display
         cur_progress: ProgressUpdate = self.__main_progress.currentProgress()
         self.__tb_display.updateProgress(cur_progress)
 
-    def __update_progress(self, progress_id: int, payload: ProgressUpdate) -> None:
+    @override
+    def _update_progress(self, progress_id: int, payload: ProgressUpdate) -> None:
         if progress_id not in self.__progress_widgets:
             pwidget = ProgressBarWidget()
             self.__additional_progress_vlayout.addWidget(pwidget)
@@ -156,10 +153,11 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
 
         self.__progress_widgets[progress_id].updateProgress(payload)
 
-    def __remove_progress(self, progress_id: int) -> None:
+    @override
+    def _remove_progress(self, progress_id: int) -> None:
         if progress_id in self.__progress_widgets:
             with self._lock:
-                # clear scheduled any update
+                # clear any scheduled update
                 self._scheduled_updates.pop(progress_id, None)
                 widget: ProgressBarWidget = self.__progress_widgets.pop(progress_id)
 
@@ -171,9 +169,10 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
                 self.__update_size()
                 self.__section_area.setExpanded(len(self.__progress_widgets) > 0)
 
-    def __clear_progress_bars(self) -> None:
+    @override
+    def _clear_progress_bars(self) -> None:
         for progress_id in self.__progress_widgets.copy():
-            self.removeProgress(progress_id)
+            self._remove_progress(progress_id)
 
     @override
     def timerEvent(self, event: QTimerEvent) -> None:
@@ -187,30 +186,12 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
             case self.__titlebar_timer_id:
                 self.__update_titlebar()
 
-            case self.__update_timer_id:
-                self.__process_scheduled_updates()
-
     def __update_titlebar(self) -> None:
         self.setWindowTitle(
             self.tr("Elapsed time:")
             + " "
             + format_duration(int(time.time() - (self.__start_time or time.time())))
         )
-
-    def __process_scheduled_updates(self) -> None:
-        with self._lock:
-            progress_ids: list[int] = list(self._scheduled_updates.keys())
-
-        for progress_id in progress_ids:
-            with self._lock:
-                payloads: Optional[list[ProgressUpdate]] = self._scheduled_updates.pop(
-                    progress_id, None
-                )
-
-            if payloads is not None:
-                updated_payload: ProgressUpdate = reduce(ProgressUpdate.update, payloads)
-
-                self.__update_progress(progress_id, updated_payload)
 
     def run(self) -> T:
         """
@@ -227,12 +208,12 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
 
         self.__start_time = time.time()
         self.__titlebar_timer_id = self.startTimer(1000)
-        self.__update_timer_id = self.startTimer(ProgressDialog.UPDATE_INTERVAL)
+        self._start_update_timer()
 
         super().exec()
 
         self.__titlebar_timer_id = self.killTimer(self.__titlebar_timer_id)
-        self.__update_timer_id = self.killTimer(self.__update_timer_id)
+        self._stop_update_timer()
 
         self.log.debug(
             f"Time taken: {format_duration(int(time.time() - self.__start_time))}"
@@ -284,7 +265,7 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
         if confirmation:
             if self.__thread.isRunning():
                 self.log.info("Requesting background thread to stop...")
-                self.cancel_requested.emit()
+                self.cancel()
                 if not self.__thread.wait(ProgressDialog.TERMINATION_TIMEOUT):
                     self.log.critical(
                         "Background thread did not stop within timeout. Terminating..."
@@ -293,31 +274,6 @@ class ProgressDialog(QDialog, ProgressDisplay, Generic[T]):
             super().closeEvent(event)
         elif event:
             event.ignore()
-
-    @property
-    @override
-    def cancel_requested(self) -> SignalInstance:
-        return self.__cancel_requested
-
-    @property
-    @override
-    def _update_signal(self) -> SignalInstance:
-        return self.__update_signal
-
-    @property
-    @override
-    def _update_main_signal(self) -> SignalInstance:
-        return self.__update_main_signal
-
-    @property
-    @override
-    def _remove_signal(self) -> SignalInstance:
-        return self.__remove_signal
-
-    @property
-    @override
-    def _clear_signal(self) -> SignalInstance:
-        return self.__clear_signal
 
 
 if __name__ == "__main__":
@@ -331,20 +287,20 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     IconProvider(UIMode.Dark, "#ffffff")
 
-    def process(pdialog: ProgressDialog[int]) -> int:
-        total = 10
-        pdialog.updateMainProgress(
+    def process(pdisplay: ProgressDisplay) -> int:
+        total = 100000
+        pdisplay.updateMainProgress(
             ProgressUpdate(status_text="Starting main process...", value=0, maximum=0)
         )
 
         workers: dict[int, Thread[None]] = {}
-        for i in range(3):
+        for i in range(10):
             wid = i + 1
 
             def worker_func(wid: int) -> None:
                 for j in range(total):
-                    time.sleep(random.randint(5, 20) / 10)
-                    pdialog.updateProgress(
+                    time.sleep(random.randint(5, 20) / 10000)
+                    pdisplay.updateProgress(
                         wid,
                         ProgressUpdate(
                             status_text=f"Worker {wid}: Step {j + 1}/{total}",
@@ -353,9 +309,9 @@ if __name__ == "__main__":
                         ),
                     )
 
-                pdialog.removeProgress(wid)
+                pdisplay.removeProgress(wid)
 
-            pdialog.updateProgress(
+            pdisplay.updateProgress(
                 wid,
                 ProgressUpdate(
                     status_text=f"Worker {wid}: Starting...", value=0, maximum=0
@@ -367,8 +323,8 @@ if __name__ == "__main__":
             thread.start()
 
         for i in range(total):
-            time.sleep(1)
-            pdialog.updateMainProgress(
+            time.sleep(random.randint(5, 20) / 10000)
+            pdisplay.updateMainProgress(
                 ProgressUpdate(
                     status_text=f"Main process: Step {i + 1}/{total}",
                     value=i + 1,
@@ -380,7 +336,7 @@ if __name__ == "__main__":
             thread.wait()
 
         for wid in workers:
-            pdialog.updateProgress(
+            pdisplay.updateProgress(
                 wid,
                 ProgressUpdate(
                     status_text=f"Worker {wid}: Finalizing...",
@@ -389,7 +345,7 @@ if __name__ == "__main__":
                 ),
             )
 
-        pdialog.updateMainProgress(
+        pdisplay.updateMainProgress(
             ProgressUpdate(
                 status_text="Finalizing main process...", value=total, maximum=total
             )
