@@ -27,6 +27,7 @@ class ProgressWidget(BaseProgressWidget, QWidget):
 
     __main_progress: ProgressBarWidget
     __progress_widgets: dict[int, ProgressBarWidget]
+    __toggle_button_visible: bool = True
 
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         """
@@ -83,7 +84,7 @@ class ProgressWidget(BaseProgressWidget, QWidget):
             pwidget = ProgressBarWidget()
             self.__additional_progress_vlayout.addWidget(pwidget)
             self.__progress_widgets[progress_id] = pwidget
-            self.__section_area.setToggleButtonVisible(True)
+            self.__section_area.setToggleButtonVisible(self.__toggle_button_visible)
             if not self.__section_area.isExpanded():
                 self.__section_area.setExpanded(True)
 
@@ -100,7 +101,9 @@ class ProgressWidget(BaseProgressWidget, QWidget):
             widget.hide()
             self.__additional_progress_vlayout.removeWidget(widget)
             widget.deleteLater()
-            self.__section_area.setToggleButtonVisible(len(self.__progress_widgets) > 0)
+            self.__section_area.setToggleButtonVisible(
+                self.__toggle_button_visible and len(self.__progress_widgets) > 0
+            )
             if self.__section_area.isExpanded():
                 self.__section_area.setExpanded(len(self.__progress_widgets) > 0)
 
@@ -108,3 +111,14 @@ class ProgressWidget(BaseProgressWidget, QWidget):
     def _clear_progress_bars(self) -> None:
         for progress_id in self.__progress_widgets.copy():
             self._remove_progress(progress_id)
+
+    def setToggleButtonVisible(self, visible: bool) -> None:
+        """
+        Sets the visibility of the toggle button for the additional progress bars.
+
+        Args:
+            visible (bool): Whether the toggle button should be visible.
+        """
+
+        self.__toggle_button_visible = visible
+        self.__section_area.setToggleButtonVisible(visible)

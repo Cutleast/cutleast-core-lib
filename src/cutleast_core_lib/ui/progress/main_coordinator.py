@@ -6,14 +6,15 @@ from functools import reduce
 from threading import Lock
 from typing import Optional, override
 
-from PySide6.QtCore import QTimerEvent
+from PySide6.QtCore import QObject, QTimerEvent
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate, UpdateCallback
-from cutleast_core_lib.core.utilities.singleton import Singleton, SingletonQObject
-from cutleast_core_lib.ui.progress.display import ProgressDisplay
+from cutleast_core_lib.core.utilities.singleton import Singleton
+
+from .display import ProgressDisplay
 
 
-class MainProgressCoordinator(SingletonQObject, ProgressDisplay):
+class MainProgressCoordinator(ProgressDisplay, QObject, Singleton):
     """
     Singleton object that delegates the progress of primary processes in an app to any
     number of progress displays and update callbacks.
@@ -122,3 +123,46 @@ class MainProgressCoordinator(SingletonQObject, ProgressDisplay):
     def clearProgressBars(self) -> None:
         for display in self.__displays:
             display.clearProgressBars()
+
+
+if __name__ == "__main__":
+    import sys
+
+    from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
+
+    from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
+    from cutleast_core_lib.ui.utilities.ui_mode import UIMode
+
+    from .taskbar import TaskbarProgressDisplay
+    from .widget import ProgressWidget
+
+    app = QApplication(sys.argv)
+    IconProvider(UIMode.Dark, "#ffffff")
+
+    MainProgressCoordinator()
+    window = QWidget()
+    vlayout = QVBoxLayout()
+    window.setLayout(vlayout)
+
+    widget = ProgressWidget()
+    vlayout.addWidget(widget)
+
+    tb_display = TaskbarProgressDisplay(window.winId())
+
+    coordinator = MainProgressCoordinator.get()
+    coordinator.add_display(widget)
+    coordinator.add_update_callback(tb_display.updateProgress)
+    coordinator.updateMainProgress(
+        ProgressUpdate(status_text="Doing something important...", value=0, maximum=0)
+    )
+    for i in range(5):
+        coordinator.updateProgress(
+            i,
+            ProgressUpdate(
+                status_text=f"Worker {i}: Doing something else...", value=0, maximum=0
+            ),
+        )
+
+    window.show()
+
+    sys.exit(app.exec())

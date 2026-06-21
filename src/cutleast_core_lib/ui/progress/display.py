@@ -2,8 +2,10 @@
 Copyright (c) Cutleast
 """
 
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from typing import TYPE_CHECKING
+
+from PySide6.QtWidgets import QWidget
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
 
@@ -11,7 +13,13 @@ if TYPE_CHECKING:
     from cutleast_core_lib.core.multithreading.progress_executor import ProgressExecutor
 
 
-class ProgressDisplay(ABC):
+class ABCQtMeta(type(QWidget), ABCMeta):  # pyright: ignore[reportGeneralTypeIssues]
+    """
+    Combined metaclass for ABC + PySide6 Qt types to avoid metaclass conflicts.
+    """
+
+
+class ProgressDisplay(ABC, metaclass=ABCQtMeta):
     """
     Interface for all classes that can display and manage multiple progress bars including
     a main one.
@@ -19,6 +27,9 @@ class ProgressDisplay(ABC):
 
     UPDATE_INTERVAL: int = int(1_000 // 30)  # ~ 30 FPS
     """Interval in milliseconds for how often the progress bars should be updated."""
+
+    TERMINATION_TIMEOUT: int = 1_000  # 1 second
+    """Time in milliseconds to wait for the widget to terminate when cancelling."""
 
     @abstractmethod
     def updateMainProgress(self, payload: ProgressUpdate) -> None:

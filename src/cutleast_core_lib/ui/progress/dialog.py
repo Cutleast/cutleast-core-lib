@@ -4,29 +4,34 @@ Copyright (c) Cutleast
 
 from __future__ import annotations
 
+import logging
 import time
 from typing import Callable, Generic, Optional, TypeVar, override
 
 from PySide6.QtCore import QCoreApplication, Qt, QTimerEvent
 from PySide6.QtGui import QCloseEvent
-from PySide6.QtWidgets import QApplication, QDialog, QMessageBox, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
 from cutleast_core_lib.core.utilities.datetime import format_duration
 from cutleast_core_lib.core.utilities.thread import Thread
-from cutleast_core_lib.ui.widgets.section_area_widget import SectionAreaWidget
-from cutleast_core_lib.ui.widgets.smooth_scroll_area import SmoothScrollArea
 
-from .bar import ProgressBarWidget
-from .base import BaseProgressWidget
 from .display import ProgressDisplay
 from .taskbar import TaskbarProgressDisplay
+from .widget import ProgressWidget
 
 T = TypeVar("T")
 V = TypeVar("V")
 
 
-class ProgressDialog(BaseProgressWidget, QDialog, Generic[T]):
+class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
     """
     Custom QProgressDialog featuring a main progress bar and a collapsible section for
     additional progress bars (e.g. for worker threads).
@@ -36,16 +41,17 @@ class ProgressDialog(BaseProgressWidget, QDialog, Generic[T]):
     __titlebar_timer_id: Optional[int] = None
     __thread: Thread[T]
 
+    __tb_timer_id: Optional[int] = None
     __tb_display: TaskbarProgressDisplay
 
     __vlayout: QVBoxLayout
-    __section_area: SectionAreaWidget
-    __additional_progress_vlayout: QVBoxLayout
+    __progress_widget: ProgressWidget
+    __cancel_button: QPushButton
 
-    __main_progress: ProgressBarWidget
-    __progress_widgets: dict[int, ProgressBarWidget]
-
+    __cur_progress: Optional[ProgressUpdate] = None
     __max_height: Optional[int] = None
+
+    log: logging.Logger = logging.getLogger("ProgressDialog")
 
     def __init__(
         self, func: Callable[[ProgressDisplay], T], parent: Optional[QWidget] = None
@@ -59,7 +65,6 @@ class ProgressDialog(BaseProgressWidget, QDialog, Generic[T]):
         """
 
         QDialog.__init__(self, parent)
-        super().__init__(parent)
 
         self.__tb_display = TaskbarProgressDisplay(self.winId())
 
@@ -71,9 +76,7 @@ class ProgressDialog(BaseProgressWidget, QDialog, Generic[T]):
 
         self.__init_ui()
 
-        self.__section_area.toggled.connect(lambda _: self.__update_size())
-
-        self.__update_size()
+        self.__cancel_button.clicked.connect(self.close)
 
     def __init_ui(self) -> None:
         self.setContentsMargins(0, 0, 0, 0)
@@ -85,94 +88,42 @@ class ProgressDialog(BaseProgressWidget, QDialog, Generic[T]):
         self.__vlayout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.__vlayout)
 
-        self.__main_progress = ProgressBarWidget()
+        self.__progress_widget = ProgressWidget()
+        self.__progress_widget.setToggleButtonVisible(False)
+        self.__vlayout.addWidget(self.__progress_widget)
 
-        scroll_area = SmoothScrollArea()
-        scroll_area.setWidgetResizable(True)
-        additional_progress_widget = QWidget()
-        additional_progress_widget.setContentsMargins(0, 0, 0, 0)
-        self.__additional_progress_vlayout = QVBoxLayout()
-        self.__additional_progress_vlayout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__additional_progress_vlayout.setContentsMargins(0, 0, 0, 0)
-        additional_progress_widget.setLayout(self.__additional_progress_vlayout)
-        scroll_area.setWidget(additional_progress_widget)
-
-        self.__section_area = SectionAreaWidget(
-            self.__main_progress,
-            scroll_area,
-            toggle_position=SectionAreaWidget.TogglePosition.Right,
-            stretch_content=False,
-        )
-        self.__section_area.setToggleButtonVisible(False)
-        self.__vlayout.addWidget(self.__section_area)
-
-        self.__progress_widgets = {}
-
-    def __update_size(self) -> None:
-        self.__section_area.adjustSize()
-
-        main_height: int = self.__main_progress.sizeHint().height()
-        new_height: int = main_height + 15
-
-        if self.__section_area.isExpanded():
-            widget_count: int = len(self.__progress_widgets)
-            new_height += main_height * widget_count
-            new_height += self.__additional_progress_vlayout.spacing() * widget_count
-            new_height += 10
-        else:
-            new_height += 5
-
-        if self.__max_height is not None:
-            new_height = min(self.__max_height, new_height)
-
-        self.setFixedHeight(new_height)
+        self.__cancel_button = QPushButton(self.tr("Cancel"))
+        self.__vlayout.addWidget(self.__cancel_button)
 
     @override
     def setMaximumHeight(self, maxh: int) -> None:
         self.__max_height = maxh
 
     @override
-    def _update_main_progress(self, payload: ProgressUpdate) -> None:
-        self.__main_progress.updateProgress(payload)
+    def updateMainProgress(self, payload: ProgressUpdate) -> None:
+        self.__progress_widget.updateMainProgress(payload)
 
         # we need the full progress update for the taskbar display
-        cur_progress: ProgressUpdate = self.__main_progress.currentProgress()
-        self.__tb_display.updateProgress(cur_progress)
+        if self.__cur_progress is None:
+            self.__cur_progress = payload
+        else:
+            self.__cur_progress = self.__cur_progress.update(payload)
 
     @override
-    def _update_progress(self, progress_id: int, payload: ProgressUpdate) -> None:
-        if progress_id not in self.__progress_widgets:
-            pwidget = ProgressBarWidget()
-            self.__additional_progress_vlayout.addWidget(pwidget)
-            self.__progress_widgets[progress_id] = pwidget
-            self.__section_area.setToggleButtonVisible(True)
-            if self.__section_area.isExpanded():
-                self.__update_size()
-            else:
-                self.__section_area.setExpanded(True)
-
-        self.__progress_widgets[progress_id].updateProgress(payload)
+    def updateProgress(self, progress_id: int, payload: ProgressUpdate) -> None:
+        self.__progress_widget.updateProgress(progress_id, payload)
 
     @override
-    def _remove_progress(self, progress_id: int) -> None:
-        if progress_id in self.__progress_widgets:
-            with self._lock:
-                # clear any scheduled update
-                self._scheduled_updates.pop(progress_id, None)
-                widget: ProgressBarWidget = self.__progress_widgets.pop(progress_id)
-
-            widget.hide()
-            self.__additional_progress_vlayout.removeWidget(widget)
-            widget.deleteLater()
-            self.__section_area.setToggleButtonVisible(len(self.__progress_widgets) > 0)
-            if self.__section_area.isExpanded():
-                self.__update_size()
-                self.__section_area.setExpanded(len(self.__progress_widgets) > 0)
+    def cancel(self) -> None:
+        self.__progress_widget.cancel()
 
     @override
-    def _clear_progress_bars(self) -> None:
-        for progress_id in self.__progress_widgets.copy():
-            self._remove_progress(progress_id)
+    def removeProgress(self, progress_id: int) -> None:
+        self.__progress_widget.removeProgress(progress_id)
+
+    @override
+    def clearProgressBars(self) -> None:
+        self.__progress_widget.clearProgressBars()
 
     @override
     def timerEvent(self, event: QTimerEvent) -> None:
@@ -185,6 +136,9 @@ class ProgressDialog(BaseProgressWidget, QDialog, Generic[T]):
         match event.timerId():
             case self.__titlebar_timer_id:
                 self.__update_titlebar()
+            case self.__tb_timer_id:
+                if self.__cur_progress is not None:
+                    self.__tb_display.updateProgress(self.__cur_progress)
 
     def __update_titlebar(self) -> None:
         self.setWindowTitle(
@@ -208,12 +162,12 @@ class ProgressDialog(BaseProgressWidget, QDialog, Generic[T]):
 
         self.__start_time = time.time()
         self.__titlebar_timer_id = self.startTimer(1000)
-        self._start_update_timer()
+        self.__tb_timer_id = self.startTimer(ProgressDisplay.UPDATE_INTERVAL)
 
         super().exec()
 
         self.__titlebar_timer_id = self.killTimer(self.__titlebar_timer_id)
-        self._stop_update_timer()
+        self.__tb_timer_id = self.killTimer(self.__tb_timer_id)
 
         self.log.debug(
             f"Time taken: {format_duration(int(time.time() - self.__start_time))}"
@@ -266,7 +220,7 @@ class ProgressDialog(BaseProgressWidget, QDialog, Generic[T]):
             if self.__thread.isRunning():
                 self.log.info("Requesting background thread to stop...")
                 self.cancel()
-                if not self.__thread.wait(ProgressDialog.TERMINATION_TIMEOUT):
+                if not self.__thread.wait(ProgressDisplay.TERMINATION_TIMEOUT):
                     self.log.critical(
                         "Background thread did not stop within timeout. Terminating..."
                     )

@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 """
 
 import logging
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from functools import reduce
 from threading import Event, Lock
 from typing import TYPE_CHECKING, Optional, override
@@ -20,13 +20,7 @@ if TYPE_CHECKING:
     from cutleast_core_lib.core.multithreading.progress_executor import ProgressExecutor
 
 
-class ABCQtMeta(type(QWidget), ABCMeta):  # pyright: ignore[reportGeneralTypeIssues]
-    """
-    Combined metaclass for ABC + PySide6 Qt types to avoid metaclass conflicts.
-    """
-
-
-class BaseProgressWidget(ProgressDisplay, metaclass=ABCQtMeta):  # pyright: ignore[reportImplicitAbstractClass]
+class BaseProgressWidget(ProgressDisplay):  # pyright: ignore[reportImplicitAbstractClass]
     """
     Base class for all widgets that implement the ProgressDisplay interface.
 
@@ -67,9 +61,6 @@ class BaseProgressWidget(ProgressDisplay, metaclass=ABCQtMeta):  # pyright: igno
 
     MAIN_PROGRESS_ID: int = -1
     """Constant progress ID for the main progress bar."""
-
-    TERMINATION_TIMEOUT: int = 1_000  # 1 second
-    """Time in milliseconds to wait for the widget to terminate when cancelling."""
 
     _lock: Lock
     _cancel_event: Event
