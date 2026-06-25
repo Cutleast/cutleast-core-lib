@@ -54,8 +54,10 @@ class ProgressWidget(BaseProgressWidget, QWidget):
         self.__main_progress = ProgressBarWidget()
 
         scroll_area = SmoothScrollArea()
+        scroll_area.setProperty("transparent", True)
         scroll_area.setWidgetResizable(True)
         additional_progress_widget = QWidget()
+        additional_progress_widget.setProperty("transparent", True)
         additional_progress_widget.setContentsMargins(0, 0, 0, 0)
         self.__additional_progress_vlayout = QVBoxLayout()
         self.__additional_progress_vlayout.setAlignment(Qt.AlignmentFlag.AlignTop)
