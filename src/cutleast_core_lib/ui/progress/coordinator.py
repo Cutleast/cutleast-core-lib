@@ -113,6 +113,11 @@ class ProgressCoordinator(ProgressDisplay, QObject):
             display.cancel()
 
     @override
+    def resetCancel(self) -> None:
+        for display in self.__displays:
+            display.resetCancel()
+
+    @override
     def removeProgress(self, progress_id: int) -> None:
         for display in self.__displays:
             display.removeProgress(progress_id)

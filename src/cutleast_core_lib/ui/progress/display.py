@@ -69,6 +69,12 @@ class ProgressDisplay(ABC, metaclass=ABCQtMeta):
         """
 
     @abstractmethod
+    def resetCancel(self) -> None:
+        """
+        Resets the cancel event so that progress updates can be called again.
+        """
+
+    @abstractmethod
     def removeProgress(self, progress_id: int) -> None:
         """
         Removes a progress bar by its progress ID from the widget. Does nothing if there

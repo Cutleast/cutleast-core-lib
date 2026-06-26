@@ -132,6 +132,10 @@ class BaseProgressWidget(ProgressDisplay):  # pyright: ignore[reportImplicitAbst
             self._progress_executor.shutdown(wait=False, cancel_futures=True)
 
     @override
+    def resetCancel(self) -> None:
+        self._cancel_event.clear()
+
+    @override
     def removeProgress(self, progress_id: int) -> None:
         self._signal_helper.remove_signal.emit(progress_id)
 

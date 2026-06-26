@@ -118,6 +118,10 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
         self.__progress_widget.cancel()
 
     @override
+    def resetCancel(self) -> None:
+        self.__progress_widget.resetCancel()
+
+    @override
     def removeProgress(self, progress_id: int) -> None:
         self.__progress_widget.removeProgress(progress_id)
 
