@@ -79,13 +79,11 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
         self.__cancel_button.clicked.connect(self.close)
 
     def __init_ui(self) -> None:
-        self.setContentsMargins(0, 0, 0, 0)
         self.setFixedWidth(600)
         self.setMaximumHeight(400)
 
         self.__vlayout = QVBoxLayout(self)
         self.__vlayout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.__vlayout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.__vlayout)
 
         self.__progress_widget = ProgressWidget()
