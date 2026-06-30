@@ -7,11 +7,11 @@ from typing import Any, Literal, TypeVar, get_origin
 from pydantic import SerializerFunctionWrapHandler, model_serializer
 from pydantic.main import BaseModel
 
-ModelType = TypeVar("ModelType", bound=type[BaseModel])
+ModelType = TypeVar("ModelType", bound=BaseModel)
 """Type variable for a Pydantic model type."""
 
 
-def include_literal_defaults(cls: ModelType) -> ModelType:
+def include_literal_defaults(cls: type[ModelType]) -> type[ModelType]:
     """
     Decorator that forces Literal-annotated fields to be included in serialization,
     even when `exclude_defaults=True` is used.
