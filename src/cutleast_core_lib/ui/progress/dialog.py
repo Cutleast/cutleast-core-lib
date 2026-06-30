@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import logging
 import time
+from threading import Lock
 from typing import Callable, Generic, Optional, TypeVar, override
 
 from PySide6.QtCore import QCoreApplication, Qt, QTimerEvent
@@ -37,6 +38,8 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
     additional progress bars (e.g. for worker threads).
     """
 
+    __lock: Lock
+
     __start_time: Optional[float] = None
     __titlebar_timer_id: Optional[int] = None
     __thread: Thread[T]
@@ -65,6 +68,8 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
         """
 
         QDialog.__init__(self, parent)
+
+        self.__lock = Lock()
 
         self.__tb_display = TaskbarProgressDisplay(self.winId())
 
@@ -102,10 +107,11 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
         self.__progress_widget.updateMainProgress(payload)
 
         # we need the full progress update for the taskbar display
-        if self.__cur_progress is None:
-            self.__cur_progress = payload
-        else:
-            self.__cur_progress = self.__cur_progress.update(payload)
+        with self.__lock:
+            if self.__cur_progress is None:
+                self.__cur_progress = payload
+            else:
+                self.__cur_progress = self.__cur_progress.update(payload)
 
     @override
     def updateProgress(self, progress_id: int, payload: ProgressUpdate) -> None:
@@ -139,8 +145,10 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
             case self.__titlebar_timer_id:
                 self.__update_titlebar()
             case self.__tb_timer_id:
-                if self.__cur_progress is not None:
-                    self.__tb_display.updateProgress(self.__cur_progress)
+                with self.__lock:
+                    if self.__cur_progress is not None:
+                        self.__tb_display.updateProgress(self.__cur_progress)
+                        self.__cur_progress = None
 
     def __update_titlebar(self) -> None:
         self.setWindowTitle(
@@ -164,7 +172,7 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
 
         self.__start_time = time.time()
         self.__titlebar_timer_id = self.startTimer(1000)
-        self.__tb_timer_id = self.startTimer(ProgressDisplay.UPDATE_INTERVAL)
+        self.__tb_timer_id = self.startTimer(1000 // 10)  # 10 fps for taskbar updates
 
         super().exec()
 

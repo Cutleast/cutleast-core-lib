@@ -80,7 +80,9 @@ class BaseProgressWidget(ProgressDisplay):  # pyright: ignore[reportImplicitAbst
         self._lock = Lock()
         self._cancel_event = Event()
         self._scheduled_updates = {}
-        self._signal_helper = BaseProgressWidget._SignalHelper(parent)
+        self._signal_helper = BaseProgressWidget._SignalHelper(
+            parent or (self if isinstance(self, QObject) else None)
+        )
         self._progress_executor = None
 
         self.log = logging.getLogger(self.__class__.__name__)
