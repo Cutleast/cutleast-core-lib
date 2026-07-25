@@ -6,8 +6,9 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Callable
 from threading import Lock
-from typing import Callable, Generic, Optional, TypeVar, override
+from typing import Generic, Optional, TypeVar, override
 
 from PySide6.QtCore import QCoreApplication, Qt, QTimerEvent
 from PySide6.QtGui import QCloseEvent
@@ -16,6 +17,7 @@ from PySide6.QtWidgets import (
     QDialog,
     QMessageBox,
     QPushButton,
+    QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
@@ -52,7 +54,7 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
     __cancel_button: QPushButton
 
     __cur_progress: Optional[ProgressUpdate] = None
-    __max_height: Optional[int] = None
+    __max_height: int = 400
 
     log: logging.Logger = logging.getLogger("ProgressDialog")
 
@@ -80,12 +82,12 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
         self.__thread.finished.connect(self.__on_finished)
 
         self.__init_ui()
+        self.__fit_height_to_content()
 
         self.__cancel_button.clicked.connect(self.close)
 
     def __init_ui(self) -> None:
-        self.setFixedWidth(600)
-        self.setMaximumHeight(400)
+        self.setMinimumWidth(600)
 
         self.__vlayout = QVBoxLayout(self)
         self.__vlayout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -95,8 +97,17 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
         self.__progress_widget.setToggleButtonVisible(False)
         self.__vlayout.addWidget(self.__progress_widget)
 
+        self.__vlayout.addSpacing(5)
+
         self.__cancel_button = QPushButton(self.tr("Cancel"))
-        self.__vlayout.addWidget(self.__cancel_button)
+        self.__cancel_button.setObjectName("cancel_button")
+        self.__cancel_button.setSizePolicy(
+            QSizePolicy.Policy.Minimum,
+            self.__cancel_button.sizePolicy().verticalPolicy(),
+        )
+        self.__vlayout.addWidget(
+            self.__cancel_button, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
 
     @override
     def setMaximumHeight(self, maxh: int) -> None:
@@ -149,6 +160,15 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
                     if self.__cur_progress is not None:
                         self.__tb_display.updateProgress(self.__cur_progress)
                         self.__cur_progress = None
+
+                self.__fit_height_to_content()
+
+    def __fit_height_to_content(self) -> None:
+        target_height: int = min(self.sizeHint().height(), self.__max_height)
+        target_width: int = max(self.width(), self.minimumSizeHint().width())
+
+        if self.height() != target_height or self.width() < target_width:
+            self.setFixedSize(target_width, target_height)
 
     def __update_titlebar(self) -> None:
         self.setWindowTitle(
@@ -252,7 +272,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     IconProvider(UIMode.Dark, "#ffffff")
 
-    def process(pdisplay: ProgressDisplay) -> int:
+    def process(pdisplay: ProgressDisplay) -> int:  # noqa: D103
         total = 100000
         pdisplay.updateMainProgress(
             ProgressUpdate(status_text="Starting main process...", value=0, maximum=0)
