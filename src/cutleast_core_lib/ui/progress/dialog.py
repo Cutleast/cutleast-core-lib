@@ -176,6 +176,7 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
 
         super().exec()
 
+        self.__progress_widget._stop_update_timer()  # pyright: ignore[reportPrivateUsage]
         self.__titlebar_timer_id = self.killTimer(self.__titlebar_timer_id)
         self.__tb_timer_id = self.killTimer(self.__tb_timer_id)
 
