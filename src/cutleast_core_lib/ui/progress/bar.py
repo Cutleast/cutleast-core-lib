@@ -5,19 +5,22 @@ Copyright (c) Cutleast
 from typing import Optional, override
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QLabel, QProgressBar, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QProgressBar, QVBoxLayout, QWidget
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
-from cutleast_core_lib.core.utilities.truncate import TruncateMode, truncate_string
+from cutleast_core_lib.ui.widgets.elided_label import ElidedLabel
 
 
 class ProgressBarWidget(QWidget):
     """
     Compound widget containing a label and a progress bar stacked vertically.
+
+    The label is automatically elided in the middle and the progress bar is
+    indeterminate by default.
     """
 
     __vlayout: QVBoxLayout
-    __label: QLabel
+    __label: ElidedLabel
     __pbar: QProgressBar
 
     @override
@@ -33,12 +36,14 @@ class ProgressBarWidget(QWidget):
         self.__vlayout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.__vlayout)
 
-        self.__label = QLabel()
+        self.__label = ElidedLabel(elide_mode=Qt.TextElideMode.ElideMiddle)
         self.__label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.__vlayout.addWidget(self.__label)
 
         self.__pbar = QProgressBar()
         self.__pbar.setTextVisible(False)
+        self.__pbar.setValue(0)
+        self.__pbar.setMaximum(0)
         self.__vlayout.addWidget(self.__pbar)
 
     def updateProgress(self, payload: ProgressUpdate) -> None:
@@ -51,9 +56,7 @@ class ProgressBarWidget(QWidget):
         """
 
         if payload.status_text is not None:
-            self.__label.setText(
-                truncate_string(payload.status_text, 90, TruncateMode.Middle)
-            )
+            self.__label.setText(payload.status_text)
 
         if payload.maximum is not None:
             self.__pbar.setMaximum(payload.maximum)
