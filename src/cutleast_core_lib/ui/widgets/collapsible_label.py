@@ -40,6 +40,16 @@ class CollapsibleLabel(QLabel):
         parent: Optional[QWidget] = None,
         treshold: int = 200,
     ) -> None:
+        """
+        Args:
+            text (Optional[str], optional): The text to display. Defaults to None.
+            parent (Optional[QWidget], optional):
+                Optional parent widget. Defaults to None.
+            treshold (int, optional):
+                The threshold length at which the text is truncated when collapsed.
+                Defaults to 200.
+        """
+
         super().__init__(parent)
 
         self.__treshold = treshold
@@ -156,7 +166,7 @@ if __name__ == "__main__":
 
     sys.path.append(os.path.join(os.getcwd(), "src"))
 
-    import resources_rc as resources_rc
+    import resources_rc as resources_rc  # noqa: PLC0414
 
     IconProvider(UIMode.Dark, "#ffffff")
 

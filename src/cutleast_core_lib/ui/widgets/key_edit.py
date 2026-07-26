@@ -2,7 +2,7 @@
 Copyright (c) Cutleast
 """
 
-from typing import Any
+from typing import Any, override
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
@@ -22,6 +22,7 @@ class KeyLineEdit(QLineEdit):
     __visible_icon: QIcon
     __hidden_icon: QIcon
 
+    @override
     def __init__(self, *args: Any, **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
 

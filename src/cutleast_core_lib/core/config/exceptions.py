@@ -13,6 +13,11 @@ class ConfigValidationError(LocalizedException):
     """
 
     def __init__(self, message: str) -> None:
+        """
+        Args:
+            message (str): The validation message.
+        """
+
         super().__init__(message)
 
     @override

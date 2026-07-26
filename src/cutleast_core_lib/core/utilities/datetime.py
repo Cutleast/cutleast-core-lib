@@ -9,15 +9,16 @@ from fnmatch import fnmatch
 
 
 def datetime_format_to_regex(format_string: str) -> str:
-    """
+    r"""
     Creates a regex pattern of a datetime format string.
 
     Args:
         format_string (str): Datetime format string, for example `%d.%m.%Y-%H.%M.%S.log`.
 
     Returns:
-        str: Regex matching the datetime format,
-            for example `[\\d]{2}\\.[\\d]{2}\\.-[\\d]{2}\\.[\\d]{2}\\.[\\d]{2}\\.log`.
+        str:
+            Regex matching the datetime format, for example
+            `[\d]{2}\.[\d]{2}\.-[\d]{2}\.[\d]{2}\.[\d]{2}\.log`.
     """
 
     # Mapping of datetime format codes to regex patterns
@@ -57,8 +58,8 @@ def get_diff(start_time: str, end_time: str, str_format: str = "%H:%M:%S") -> st
     """
 
     return str(
-        datetime.strptime(end_time, str_format)
-        - datetime.strptime(start_time, str_format)
+        datetime.strptime(end_time, str_format)  # noqa: DTZ007
+        - datetime.strptime(start_time, str_format)  # noqa: DTZ007
     )
 
 
@@ -83,7 +84,7 @@ def format_duration(seconds: int) -> str:
     return f"{hours:02d}:{minutes:02d}:{secs:02d}"
 
 
-def fmt_timestamp(timestamp: int | float, fmt: str = "%d.%m.%Y %H:%M:%S") -> str:
+def fmt_timestamp(timestamp: float, fmt: str = "%d.%m.%Y %H:%M:%S") -> str:
     """
     Creates a time string from a UNIX timestamp.
     """

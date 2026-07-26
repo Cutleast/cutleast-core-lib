@@ -5,7 +5,8 @@ Copyright (c) Cutleast
 import functools
 import hashlib
 import pickle
-from typing import Any, Callable, Optional, ParamSpec, TypeVar
+from collections.abc import Callable
+from typing import Any, Optional, ParamSpec, TypeVar
 
 P = ParamSpec("P")
 R = TypeVar("R")

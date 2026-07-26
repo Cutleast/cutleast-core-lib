@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 """
 
 
-def scale_value(value: int | float, unit: str = "B", factor: int = 1024) -> str:
+def scale_value(value: float, unit: str = "B", factor: int = 1024) -> str:
     """
     Scales a value to its proper format with a unit and a factor as
     scaling and returns it as string; for e.g:
@@ -13,7 +13,7 @@ def scale_value(value: int | float, unit: str = "B", factor: int = 1024) -> str:
         1253656678 => '1.17 GB'
 
     Args:
-        value (int | float): Value to scale.
+        value (float): Value to scale.
         unit (str, optional): Unit suffix. Defaults to "B" (Bytes).
         factor (int, optional): Scaling factor. Defaults to 1024 (Bytes).
 

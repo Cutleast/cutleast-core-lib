@@ -46,6 +46,7 @@ class AppSettings(SettingsPage[AppConfig]):
     __ui_mode_box: EnumDropdown[UIMode]
     __clear_cache_button: QPushButton
 
+    @override
     def __init__(self, initial_config: AppConfig) -> None:
         self.cache = Cache.get_optional()
 
@@ -106,9 +107,7 @@ class AppSettings(SettingsPage[AppConfig]):
             "*" + self.tr("Number of newest log files to keep"), self.__logs_num_box
         )
 
-        self.__log_level_box = EnumDropdown(
-            Logger.Level, self._initial_config.log_level
-        )
+        self.__log_level_box = EnumDropdown(Logger.Level, self._initial_config.log_level)
         self._basic_flayout.addRow("*" + self.tr("Log Level"), self.__log_level_box)
 
         self.__log_visible = QCheckBox()

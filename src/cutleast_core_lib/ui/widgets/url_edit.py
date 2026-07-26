@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 """
 
 import webbrowser
-from typing import Any, Optional
+from typing import Any, Optional, override
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QPushButton
@@ -18,6 +18,7 @@ class UrlEdit(QLineEdit):
 
     __open_url_button: QPushButton
 
+    @override
     def __init__(self, *args: Any, **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
 

@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 """
 
 from abc import abstractmethod
-from typing import TypeVar, override
+from typing import Self, TypeVar, override
 
 from .base_enum import BaseEnum
 
@@ -27,7 +27,7 @@ class LocalizedEnum(BaseEnum):
         """
 
     @classmethod
-    def get_by_localized_name(cls: type[E], localized_name: str) -> E:
+    def get_by_localized_name(cls, localized_name: str) -> Self:
         """
         Returns an enum member with the given localized name.
 
@@ -38,7 +38,7 @@ class LocalizedEnum(BaseEnum):
             ValueError: If no enum member has the given localized name.
 
         Returns:
-            E: Enum member
+            Self: Enum member
         """
 
         for e in cls:

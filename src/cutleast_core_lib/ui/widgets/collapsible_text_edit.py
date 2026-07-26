@@ -4,10 +4,11 @@ Copyright (c) Cutleast
 
 from typing import Optional, override
 
-from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QResizeEvent
 from PySide6.QtWidgets import QPlainTextEdit, QPushButton, QSizePolicy, QWidget
+
+from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
 
 
 class CollapsibleTextEdit(QPlainTextEdit):
@@ -30,6 +31,7 @@ class CollapsibleTextEdit(QPlainTextEdit):
     __collapse_icon: QIcon
     __toggle_button: QPushButton
 
+    @override
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 

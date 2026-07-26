@@ -2,8 +2,8 @@
 Copyright (c) Cutleast
 """
 
+from collections.abc import Callable
 from enum import Enum
-from typing import Callable
 
 from pydantic import BaseModel
 from PySide6.QtCore import Qt

@@ -29,6 +29,14 @@ class UpdaterDialog(QDialog):
         changelog: str,
         download_url: str,
     ) -> None:
+        """
+        Args:
+            installed_version (Version): The version that is currently installed.
+            latest_version (Version): The latest version available for download.
+            changelog (str): The changelog for the latest version.
+            download_url (str): The URL to download the latest version.
+        """
+
         super().__init__(QApplication.activeModalWidget())
 
         vlayout = QVBoxLayout()

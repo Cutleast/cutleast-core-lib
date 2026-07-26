@@ -16,12 +16,12 @@ try:
 
     cc.GetModule(tlb_path)
 
-    import comtypes.gen.TaskbarLib as tbl  # type: ignore # noqa: E402
+    import comtypes.gen.TaskbarLib as tbl  # noqa: E402, RUF100
 
     tlb = cc.CreateObject(
         "{56FDF344-FD6D-11d0-958A-006097C9A090}", interface=tbl.ITaskbarList3
     )
-except Exception as ex:
+except Exception as ex:  # noqa: BLE001
     print(format_exception(ex))
     print("DEBUG: TLB Path: " + tlb_path)
     print("WARNING: No taskbar progress API available: see exception above")

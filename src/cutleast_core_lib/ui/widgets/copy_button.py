@@ -26,6 +26,7 @@ class CopyButton(QPushButton):
     __copy_icon: QIcon
     __check_icon: QIcon
 
+    @override
     def __init__(self) -> None:
         super().__init__()
 

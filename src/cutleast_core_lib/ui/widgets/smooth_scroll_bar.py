@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 
 Original code from here:
     https://github.com/tonquer/JMComic-qt/blob/main/src/component/scroll/smooth_scroll_bar.py
-and adapted for usage in MMM.
+and adapted for usage in the core-lib.
 """
 
 from typing import Optional, override
@@ -23,6 +23,7 @@ class SmoothScrollBar(QScrollBar):
 
     __moveEventSignal = Signal()
 
+    @override
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
@@ -37,7 +38,6 @@ class SmoothScrollBar(QScrollBar):
 
     def _finished(self) -> None:
         self.__moveEventSignal.emit()
-        return
 
     @override
     def setValue(self, value: int) -> None:
@@ -51,6 +51,14 @@ class SmoothScrollBar(QScrollBar):
         self.__animation.start()
 
     def setScrollValue(self, value: int) -> None:
+        """
+        Scrolls the scrollbar smoothly by a given value. The value can be positive or
+        negative, and the scrollbar will be clamped to its minimum and maximum values.
+
+        Args:
+            value (int): The value to scroll by.
+        """
+
         self.__value += value
         self.__value = max(self.minimum(), self.__value)
         self.__value = min(self.maximum(), self.__value)
@@ -58,14 +66,19 @@ class SmoothScrollBar(QScrollBar):
         self.setValue(self.__value)
 
     def scrollTo(self, value: int) -> None:
+        """
+        Scrolls the scrollbar smoothly to a given value. The value will be clamped to the
+        scrollbar's minimum and maximum values.
+
+        Args:
+            value (int): The value to scroll to.
+        """
+
         self.__value = value
         self.__value = max(self.minimum(), self.__value)
         self.__value = min(self.maximum(), self.__value)
 
         self.setValue(self.__value)
-
-    def resetValue(self, value: int) -> None:
-        self.__value = value
 
     @override
     def mousePressEvent(self, event: QMouseEvent) -> None:

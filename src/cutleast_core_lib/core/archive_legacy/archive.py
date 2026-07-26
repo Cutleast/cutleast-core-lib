@@ -26,6 +26,11 @@ class Archive(metaclass=ABCMeta):
     log: logging.Logger = logging.getLogger("Archive")
 
     def __init__(self, path: Path) -> None:
+        """
+        Args:
+            path (Path): The path to the archive file.
+        """
+
         self.path = path
 
     @property

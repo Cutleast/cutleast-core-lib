@@ -56,7 +56,7 @@ class DirectoryScanner:
             except Exception as ex:
                 cls.log.error(f"Failed to scan '{entry_path}': {ex}", exc_info=ex)
                 if not ignore_errors:
-                    raise ex
+                    raise
 
         return result
 

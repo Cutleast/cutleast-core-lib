@@ -4,7 +4,8 @@ Copyright (c) Cutleast
 
 from __future__ import annotations
 
-from typing import Any, Callable, ClassVar, Iterator, ParamSpec, TypeVar, override
+from collections.abc import Callable, Iterator
+from typing import Any, ClassVar, ParamSpec, TypeVar, override
 
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo
@@ -42,8 +43,8 @@ def default_factory(
 
     def _wrap(func: Callable[P, R]) -> Callable[P, R]:
         # Mark the object (even if it is already a classmethod).
-        setattr(func, "__is_dynamic_default_factory__", True)
-        setattr(func, "__dynamic_default_field__", field_name)
+        setattr(func, "__is_dynamic_default_factory__", True)  # noqa: B010
+        setattr(func, "__dynamic_default_field__", field_name)  # noqa: B010
         return func
 
     return _wrap
@@ -66,7 +67,7 @@ class DynamicDefaultModel(BaseModel):
         Yields (field_name, callable) pairs.
         """
 
-        for _, obj in cls.__dict__.items():
+        for obj in cls.__dict__.values():
             field_name = getattr(obj, "__dynamic_default_field__", None)
             is_marked = getattr(obj, "__is_dynamic_default_factory__", False)
             if is_marked and isinstance(field_name, str):
@@ -111,9 +112,7 @@ class DynamicDefaultModel(BaseModel):
 
         # 1) Inherit: build from base classes (from higher up to closer down)
         mapping: dict[str, Callable[..., Any]] = {}
-        for base in reversed(
-            cls.__mro__[1:]
-        ):  # from higher up in MRO to nearer classes
+        for base in reversed(cls.__mro__[1:]):  # from higher up in MRO to nearer classes
             base_map = getattr(base, "__dynamic_default_factories__", None)
             if isinstance(base_map, dict):
                 mapping.update(base_map)

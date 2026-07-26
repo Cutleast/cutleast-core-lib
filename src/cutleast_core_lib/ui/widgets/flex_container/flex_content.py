@@ -2,6 +2,8 @@
 Copyright (c) Cutleast
 """
 
+from abc import abstractmethod
+
 from PySide6.QtWidgets import QWidget
 
 
@@ -13,6 +15,7 @@ class FlexContent(QWidget):
     display their title in the tile header.
     """
 
+    @abstractmethod
     def get_identifier(self) -> str:
         """
         Returns a persistent, unique string identifier for this panel type.
@@ -26,6 +29,7 @@ class FlexContent(QWidget):
 
         ...
 
+    @abstractmethod
     def get_title(self) -> str:
         """
         Returns the human-readable title of this panel. The title is displayed in the

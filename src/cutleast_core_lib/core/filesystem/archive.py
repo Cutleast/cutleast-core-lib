@@ -165,7 +165,7 @@ class Archive:
                         # 7z timestamps may include sub-seconds; truncate
                         # to "YYYY-MM-DD HH:MM:SS"
                         date_part: str = raw_modified[:19]
-                        dt = datetime.datetime.strptime(date_part, Archive.DATE_FORMAT)
+                        dt = datetime.datetime.strptime(date_part, Archive.DATE_FORMAT)  # noqa: DTZ007
                         ts = int(time.mktime(dt.timetuple()))
                         raw_size: str = current.get(Archive.SIZE_KEY, "0")
                         entries.append(
@@ -323,10 +323,7 @@ class Archive:
         ]
 
         filenames_txt: Path = self.path.with_suffix(".txt")
-        filenames_txt.write_text(
-            "\n".join(str(p) for p in files.keys()),
-            encoding="utf8",
-        )
+        filenames_txt.write_text("\n".join(str(p) for p in files), encoding="utf8")
         cmd.append(f"@{filenames_txt}")
 
         try:

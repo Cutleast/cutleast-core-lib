@@ -58,9 +58,13 @@ class ProgressExecutor(ThreadPoolExecutor):
                 Progress display, may be None. Defaults to None.
             max_workers (Optional[int], optional):
                 Maximum number of workers. Defaults to None.
+            *args: Any:
+                Additional positional arguments passed to the ThreadPoolExecutor.
+            **kwargs: Any:
+                Additional keyword arguments passed to the ThreadPoolExecutor.
         """
 
-        super().__init__(max_workers=max_workers, *args, **kwargs)
+        super().__init__(*args, max_workers=max_workers, **kwargs)
 
         self.__display = display
         self.__lock = Lock()
@@ -98,6 +102,8 @@ class ProgressExecutor(ThreadPoolExecutor):
 
         Args:
             fn (WorkerFunction[T]): The callable to be executed.
+            *args: Any: The positional arguments to pass to the callable.
+            **kwargs: Any: The keyword arguments to pass to the callable.
 
         Returns:
             A Future representing the given call.

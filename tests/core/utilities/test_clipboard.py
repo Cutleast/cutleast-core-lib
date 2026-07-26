@@ -2,7 +2,8 @@
 Copyright (c) Cutleast
 """
 
-from typing import Generator, Optional, cast
+from collections.abc import Generator
+from typing import Optional, cast
 
 import pytest
 from cutleast_core_lib.core.utilities.clipboard import Clipboard

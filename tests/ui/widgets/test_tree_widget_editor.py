@@ -2,7 +2,7 @@
 Copyright (c) Cutleast
 """
 
-from typing import Callable
+from collections.abc import Callable
 
 import pytest
 from cutleast_core_lib.core.utilities.clipboard import Clipboard

@@ -2,8 +2,8 @@
 Copyright (c) Cutleast
 """
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 import pytest
 from cutleast_core_lib.core.utilities.ini_file import IniData, IniFile, IniValue
@@ -22,10 +22,10 @@ class TestIniFile:
     """Name of the private `IniFile.serialize_value` method."""
 
     @staticmethod
-    def parse_value_stub(raw: str) -> IniValue: ...
+    def parse_value_stub(raw: str) -> IniValue: ...  # noqa: D102
 
     @staticmethod
-    def serialize_value_stub(value: IniValue) -> str: ...
+    def serialize_value_stub(value: IniValue) -> str: ...  # noqa: D102
 
     @pytest.fixture
     def parse_value(self) -> Callable[[str], IniValue]:

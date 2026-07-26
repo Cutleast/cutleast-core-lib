@@ -16,6 +16,7 @@ class Menu(QMenu):
     Adapted QMenu with a custom drop shadow.
     """
 
+    @override
     def __init__(
         self,
         icon: Optional[QIcon | QPixmap] = None,

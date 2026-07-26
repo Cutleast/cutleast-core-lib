@@ -12,6 +12,11 @@ class LogWidget(QPlainTextEdit):
     """
 
     def __init__(self, initial_text: str = "") -> None:
+        """
+        Args:
+            initial_text (str, optional): Initial text to display. Defaults to "".
+        """
+
         super().__init__()
 
         self.setObjectName("monospace")

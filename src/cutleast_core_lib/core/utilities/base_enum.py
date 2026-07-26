@@ -15,20 +15,14 @@ class BaseEnum(Enum):
 
     @overload
     @classmethod
-    def get(cls, name: str, /) -> Optional[Self]:
-        """
-        Gets an enum member by name.
-
-        Args:
-            name (str): Name of the enum member.
-
-        Returns:
-            Optional[Self]: Enum member or None if no enum member has the given name.
-        """
+    def get(cls, name: str, /) -> Optional[Self]: ...
 
     @overload
     @classmethod
-    def get(cls, name: str, default: T, /) -> Self | T:
+    def get(cls, name: str, default: T, /) -> Self | T: ...
+
+    @classmethod
+    def get(cls, name: str, default: Optional[T] = None, /) -> Optional[Self | T]:
         """
         Gets an enum member by name.
 
@@ -40,8 +34,6 @@ class BaseEnum(Enum):
             Self | T: Enum member or default value.
         """
 
-    @classmethod
-    def get(cls, name: str, default: Optional[T] = None, /) -> Optional[Self | T]:
         try:
             return cls[name]
         except KeyError:
@@ -49,20 +41,16 @@ class BaseEnum(Enum):
 
     @overload
     @classmethod
-    def get_by_value(cls, value: Any, /) -> Optional[Self]:
-        """
-        Gets an enum member by its value.
-
-        Args:
-            value (Any): Value of the enum member.
-
-        Returns:
-            Optional[Self]: Enum member or None if no enum member has the given value.
-        """
+    def get_by_value(cls, value: Any, /) -> Optional[Self]: ...
 
     @overload
     @classmethod
-    def get_by_value(cls, value: Any, default: T, /) -> Self | T:
+    def get_by_value(cls, value: Any, default: T, /) -> Self | T: ...
+
+    @classmethod
+    def get_by_value(
+        cls, value: Any, default: Optional[T] = None, /
+    ) -> Optional[Self | T]:
         """
         Gets an enum member by its value.
 
@@ -74,10 +62,6 @@ class BaseEnum(Enum):
             Self | T: Enum member or default value.
         """
 
-    @classmethod
-    def get_by_value(
-        cls, value: Any, default: Optional[T] = None, /
-    ) -> Optional[Self | T]:
         try:
             return cls(value)
         except KeyError:

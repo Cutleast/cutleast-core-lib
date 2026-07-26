@@ -6,6 +6,7 @@ import hashlib
 import os
 import re
 import shutil
+import subprocess
 from pathlib import Path
 
 from virtual_glob import InMemoryPath
@@ -39,7 +40,7 @@ def get_file_identifier(file_path: os.PathLike) -> str:
     """
 
     mtime = os.path.getmtime(file_path)
-    data = f"{file_path}-{mtime}".encode("utf-8")
+    data = f"{file_path}-{mtime}".encode()
     digest = hashlib.blake2b(data, digest_size=8).hexdigest()
     return digest[:8]
 
@@ -152,7 +153,7 @@ def open_in_explorer(path: Path) -> None:
         path (Path): The path to open.
     """
 
-    os.system(f'explorer.exe /select,"{path}"')
+    subprocess.run(f'explorer.exe /select,"{path}"', check=False)
 
 
 def add_suffix(path: Path, suffix: str) -> Path:

@@ -2,6 +2,8 @@
 Copyright (c) Cutleast
 """
 
+from typing import override
+
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QAction, QCursor
 
@@ -24,6 +26,7 @@ class TreeMenu(Menu):
     _expand_all_action: QAction
     _collapse_all_action: QAction
 
+    @override
     def __init__(self) -> None:
         super().__init__()
 

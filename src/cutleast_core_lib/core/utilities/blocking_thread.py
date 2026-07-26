@@ -2,7 +2,8 @@
 Copyright (c) Cutleast
 """
 
-from typing import Callable, Generic, TypeVar, override
+from collections.abc import Callable
+from typing import Generic, Optional, TypeVar, override
 
 from PySide6.QtCore import QEventLoop, QThread
 from PySide6.QtWidgets import QWidget
@@ -23,9 +24,17 @@ class BlockingThread(QThread, Generic[T]):
     def __init__(
         self,
         target: Callable[[], T],
-        name: str | None = None,
-        parent: QWidget | None = None,
+        name: Optional[str] = None,
+        parent: Optional[QWidget] = None,
     ) -> None:
+        """
+        Args:
+            target (Callable[[], T]): The target function to be executed in the thread.
+            name (Optional[str], optional): The name of the thread. Defaults to None.
+            parent (Optional[QWidget], optional):
+                Optional parent widget. Defaults to None.
+        """
+
         super().__init__(parent)
 
         self.__target = target

@@ -58,4 +58,11 @@ class EnumDropdown(EnumSelector[E]):
             self.__dropdown.setCurrentText(value.name)
 
     def setCurrentIndex(self, index: int) -> None:
+        """
+        Sets the current selected index.
+
+        Args:
+            index (int): The index to set as the current selection.
+        """
+
         self.__dropdown.setCurrentIndex(index)

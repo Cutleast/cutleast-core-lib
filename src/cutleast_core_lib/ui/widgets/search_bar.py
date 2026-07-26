@@ -2,6 +2,8 @@
 Copyright (c) Cutleast
 """
 
+from typing import Any, override
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton
 
@@ -29,7 +31,8 @@ class SearchBar(QLineEdit):
     __clear_button: QPushButton
     __search_hint_label: QLabel
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
+    @override
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
         self.addAction(

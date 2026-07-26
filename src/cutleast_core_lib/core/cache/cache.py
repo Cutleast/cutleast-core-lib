@@ -10,8 +10,9 @@ import os
 import pickle
 import shutil
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Optional, ParamSpec, TypeAlias, TypeVar
+from typing import Any, Optional, ParamSpec, TypeAlias, TypeVar
 
 from semantic_version import Version
 

@@ -30,6 +30,11 @@ class SettingsPage(SmoothScrollArea, Generic[T]):
     _initial_config: T
 
     def __init__(self, initial_config: T) -> None:
+        """
+        Args:
+            initial_config (T): The initial configuration to display.
+        """
+
         super().__init__()
 
         self._initial_config = initial_config

@@ -32,7 +32,7 @@ class SplitterNode(BaseModel, frozen=True):
     * `"vertical"`   - children are stacked (top -> bottom).
     """
 
-    children: list["LayoutNode"]
+    children: list[LayoutNode]
     """
     Ordered list of child nodes.  Each entry is either a `PanelNode` or a nested
     `SplitterNode`.

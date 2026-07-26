@@ -125,5 +125,5 @@ class Updater(Singleton):
 
         try:
             return get_raw_web_content_uncached(self.changelog_url).decode("utf-8")
-        except Exception as ex:
+        except Exception as ex:  # noqa: BLE001
             return format_exception(ex)

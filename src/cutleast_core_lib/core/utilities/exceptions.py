@@ -4,7 +4,8 @@ Copyright (c) Cutleast
 
 import traceback
 from abc import abstractmethod
-from typing import Any, Callable, ParamSpec, TypeVar, override
+from collections.abc import Callable
+from typing import Any, ParamSpec, TypeVar, override
 
 from PySide6.QtWidgets import QApplication
 
@@ -40,6 +41,11 @@ class LocalizedException(Exception):
     """
 
     def __init__(self, *values: Any) -> None:
+        """
+        Args:
+            *values (Any): Values to format the message with.
+        """
+
         if self.getLocalizedMessage():
             super().__init__(self.getLocalizedMessage().format(*values))
         else:
@@ -82,6 +88,12 @@ class RequestError(LocalizedException):
     """
 
     def __init__(self, request_url: str, *values: Any) -> None:
+        """
+        Args:
+            request_url (str): The URL of the request that failed.
+            *values (Any): Values to format the message with.
+        """
+
         super().__init__(request_url, *values)
 
     @override
@@ -95,6 +107,12 @@ class Non200HttpError(RequestError):
     """
 
     def __init__(self, request_url: str, status_code: int) -> None:
+        """
+        Args:
+            request_url (str): The URL of the request that failed.
+            status_code (int): The HTTP status code returned by the request.
+        """
+
         super().__init__(request_url, status_code)
 
     @override

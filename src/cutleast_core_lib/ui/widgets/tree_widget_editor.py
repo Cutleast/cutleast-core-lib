@@ -92,6 +92,13 @@ class TreeWidgetEditor(QWidget, Generic[T]):
         __paste_action: QAction
 
         def __init__(self, model_cls: type[M], parent: Optional[QWidget] = None) -> None:
+            """
+            Args:
+                model_cls (type[M]): Type of the items.
+                parent (Optional[QWidget], optional):
+                    Optional parent widget. Defaults to None.
+            """
+
             super().__init__(parent)
 
             self.__model_cls = model_cls
@@ -126,6 +133,15 @@ class TreeWidgetEditor(QWidget, Generic[T]):
             self.__paste_action.triggered.connect(self.pasteRequested.emit)
 
         def open(self, cur_item: Optional[M]) -> None:
+            """
+            Opens the context menu at the current cursor position based on the currently
+            selected item.
+
+            Args:
+                cur_item (Optional[M]):
+                    Currently selected item or None if no item is selected.
+            """
+
             self.__duplicate_action.setVisible(cur_item is not None)
             self.__cut_action.setVisible(cur_item is not None)
             self.__copy_action.setVisible(cur_item is not None)

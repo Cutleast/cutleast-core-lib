@@ -7,11 +7,12 @@ import os
 import re
 import sys
 import time
+from collections.abc import Callable
 from datetime import datetime
 from functools import wraps
 from io import TextIOWrapper
 from pathlib import Path
-from typing import Any, Callable, Optional, ParamSpec, TextIO, TypeVar, override
+from typing import Any, Optional, ParamSpec, TextIO, TypeVar, override
 
 from .base_enum import BaseEnum
 from .datetime import datetime_format_to_regex
@@ -58,8 +59,15 @@ class Logger(logging.Logger, Singleton):
         """Critical log level"""
 
     def __init__(
-        self, log_file: Path, fmt: str | None = None, date_fmt: str | None = None
+        self, log_file: Path, fmt: Optional[str] = None, date_fmt: Optional[str] = None
     ) -> None:
+        """
+        Args:
+            log_file (Path): Path to log file.
+            fmt (Optional[str], optional): Logging format. Defaults to None.
+            date_fmt (Optional[str], optional): Date format. Defaults to None.
+        """
+
         logging.Logger.__init__(self, "Logger")
         Singleton.__init__(self)
 
@@ -79,7 +87,7 @@ class Logger(logging.Logger, Singleton):
 
         self.open()
 
-    def open(self) -> None:
+    def open(self) -> None:  # noqa: D102
         self.__stdout = sys.stdout
         self.__stderr = sys.stderr
 
@@ -135,12 +143,12 @@ class Logger(logging.Logger, Singleton):
             if file.is_file()
             and re.match(log_filename_pattern, file.name, re.IGNORECASE)
         ]
-        log_files.sort(key=lambda name: datetime.strptime(name.name, basename))
+        log_files.sort(key=lambda name: datetime.strptime(name.name, basename))  # noqa: DTZ007
 
         while len(log_files) > num_of_files:
             os.remove(log_files.pop(0))
 
-    def close(self) -> None:
+    def close(self) -> None:  # noqa: D102
         sys.stdout = self.__stdout
         sys.stderr = self.__stderr
         self.__log_file.close()
@@ -158,9 +166,9 @@ class Logger(logging.Logger, Singleton):
             self.__log_file.write(string)
             if self.__stdout is not None:
                 self.__stdout.write(string)
-        except Exception as ex:
+        except Exception as ex:  # noqa: BLE001
             if self.__stdout is not None:
-                self.__stdout.write(f"Logging error occured: {str(ex)}")
+                self.__stdout.write(f"Logging error occured: {ex}")
 
         if self.__callback is not None:
             self.__callback(string)
@@ -172,7 +180,7 @@ class Logger(logging.Logger, Singleton):
 
         self.__log_file.flush()
 
-    def fileno(self) -> int:
+    def fileno(self) -> int:  # noqa: D102
         return (self.__stdout or sys.stdout).fileno()
 
     def get_content(self) -> str:

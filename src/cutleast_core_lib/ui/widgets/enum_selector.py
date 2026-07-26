@@ -46,7 +46,7 @@ class EnumSelector(QWidget, Generic[E]):
         self.setObjectName("transparent")
 
         vlayout.addWidget(
-            self._init_ui(initial_value or list(enum_type.__members__.values())[0])
+            self._init_ui(initial_value or next(iter(enum_type.__members__.values())))
         )
 
     @abstractmethod

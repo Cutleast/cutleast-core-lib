@@ -4,14 +4,15 @@ Copyright (c) Cutleast
 
 from __future__ import annotations
 
-from typing import Callable, Optional
+from collections.abc import Callable
+from typing import Optional
 
 from pydantic import BaseModel
 
 UpdateCallback = Callable[["ProgressUpdate"], None]
 
 
-def update(update_callback: Optional[UpdateCallback], arg: "ProgressUpdate") -> None:
+def update(update_callback: Optional[UpdateCallback], arg: ProgressUpdate) -> None:
     """
     Function to call a update callback or do nothing if it is None.
 

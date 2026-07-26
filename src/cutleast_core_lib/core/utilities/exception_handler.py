@@ -4,8 +4,9 @@ Copyright (c) Cutleast
 
 import logging
 import sys
+from collections.abc import Callable
 from types import TracebackType
-from typing import Callable
+from typing import override
 from winsound import MessageBeep as alert
 
 from PySide6.QtCore import QObject
@@ -23,12 +24,12 @@ class ExceptionHandler(QObject):
 
     log: logging.Logger = logging.getLogger("ExceptionHandler")
     __sys_excepthook: (
-        Callable[[type[BaseException], BaseException, TracebackType | None], None]
-        | None
+        Callable[[type[BaseException], BaseException, TracebackType | None], None] | None
     ) = None
 
     __parent: QApplication
 
+    @override
     def __init__(self, parent: QApplication) -> None:
         super().__init__(parent)
 
@@ -117,10 +118,8 @@ class ExceptionHandler(QObject):
         try:
             callable()
         except Exception as ex:
-            if expected_exception is not None and not isinstance(
-                ex, expected_exception
-            ):
-                raise ex
+            if expected_exception is not None and not isinstance(ex, expected_exception):
+                raise
 
             return True
 

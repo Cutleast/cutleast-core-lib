@@ -30,13 +30,14 @@ class ThemeManager(Singleton, metaclass=ABCMeta):
     _stylesheet: Optional[str] = None
 
     def __init__(
-        self, accent_color: str, ui_mode: UIMode, fonts: list[str] = []
+        self, accent_color: str, ui_mode: UIMode, fonts: Optional[list[str]] = None
     ) -> None:
         """
         Args:
             accent_color (str): The user-configured accent color.
             ui_mode (UIMode): The user-configured UI mode.
-            fonts (list[str], optional): The application fonts. Defaults to [].
+            fonts (Optional[list[str]], optional):
+                The application fonts. Defaults to None.
 
         Raises:
             RuntimeError: When the class is already initialized.
@@ -46,7 +47,7 @@ class ThemeManager(Singleton, metaclass=ABCMeta):
 
         self._accent_color = accent_color
         self._ui_mode = ui_mode
-        self._fonts = fonts
+        self._fonts = fonts if fonts is not None else []
 
         self._init()
 

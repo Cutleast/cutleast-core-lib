@@ -16,6 +16,7 @@ class HelpLabel(QLabel):
     A label that displays help text when hovered over.
     """
 
+    @override
     def __init__(self, help_text: str) -> None:
         super().__init__(help_text)
 

@@ -25,7 +25,7 @@ class ProgressDisplay(ABC, metaclass=ABCQtMeta):
     a main one.
     """
 
-    UPDATE_INTERVAL: int = int(1_000 // 30)  # ~ 30 FPS
+    UPDATE_INTERVAL: int = 1_000 // 30  # ~ 30 FPS
     """Interval in milliseconds for how often the progress bars should be updated."""
 
     TERMINATION_TIMEOUT: int = 1_000  # 1 second

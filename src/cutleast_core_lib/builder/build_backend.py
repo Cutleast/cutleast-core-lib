@@ -21,7 +21,7 @@ class BuildBackend(metaclass=ABCMeta):
 
     log: logging.Logger
 
-    def __init__(self) -> None:
+    def __init__(self) -> None:  # noqa: D107
         self.log = logging.getLogger(self.__class__.__name__)
 
     def preprocess_source(self, source_folder: Path, metadata: BuildMetadata) -> None:

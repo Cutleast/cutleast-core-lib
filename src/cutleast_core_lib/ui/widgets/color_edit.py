@@ -25,6 +25,8 @@ class ColorLineEdit(QLineEdit):
         """
         Args:
             preset_colors (list[str]): List of preset colors.
+            *args (Any): Additional positional arguments for QLineEdit.
+            **kwargs (dict[str, Any]): Additional keyword arguments for QLineEdit.
         """
 
         super().__init__(*args, **kwargs)
@@ -63,9 +65,7 @@ class ColorLineEdit(QLineEdit):
 
     def __choose_color(self) -> None:
         colordialog = QColorDialog()
-        colordialog.setOption(
-            colordialog.ColorDialogOption.DontUseNativeDialog, on=True
-        )
+        colordialog.setOption(colordialog.ColorDialogOption.DontUseNativeDialog, on=True)
         for i, color in enumerate(self.__preset_colors):
             colordialog.setCustomColor(i, QColor(color))
         color = self.text()

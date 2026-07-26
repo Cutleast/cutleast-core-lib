@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 
 Original code from here:
     https://github.com/tonquer/JMComic-qt/blob/main/src/component/scroll_area/smooth_scroll_area.py
-and adapted for usage in MMM.
+and adapted for usage in the core-lib.
 """
 
 from typing import Optional, override
@@ -22,6 +22,7 @@ class SmoothScrollArea(QScrollArea):
 
     __verticalScrollBar: SmoothScrollBar
 
+    @override
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
@@ -36,7 +37,7 @@ class SmoothScrollArea(QScrollArea):
         self.__verticalScrollBar.setScrollValue(-arg__1.angleDelta().y())
 
 
-def test() -> None:
+def test() -> None:  # noqa: D103
     app = QApplication()
 
     loremipsum = """

@@ -6,8 +6,8 @@ Copyright (c) Cutleast
 
 import os
 from abc import ABCMeta
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator
 
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem

@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import override
 
 import pytest
-
 from cutleast_core_lib.core.utilities.reference_dict import ReferenceDict
 
 
@@ -44,7 +43,7 @@ class TestReferenceDict:
 
         # then
         assert test_dict[test_object] == "test"
-        assert list(test_dict.items())[0] == (test_object, "test")
+        assert next(iter(test_dict.items())) == (test_object, "test")
 
         with pytest.raises(KeyError):
             regular_dict[test_object]

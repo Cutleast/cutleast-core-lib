@@ -2,7 +2,7 @@
 Copyright (c) Cutleast
 """
 
-from typing import Optional
+from typing import Optional, override
 
 from PySide6.QtWidgets import QLCDNumber, QWidget
 
@@ -14,6 +14,7 @@ class LCDNumber(QLCDNumber):
     This is required because QLCDNumber cannot be styled with QSS.
     """
 
+    @override
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 

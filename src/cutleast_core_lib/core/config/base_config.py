@@ -8,7 +8,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, TypeVar, get_origin, get_type_hints
+from typing import Any, Self, TypeVar, get_origin, get_type_hints
 
 import jstyleson as json
 from pydantic import ConfigDict
@@ -37,7 +37,7 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
     _config_path: Path
 
     @classmethod
-    def load(cls: type[T], user_config_path: Path, log_settings: bool = True) -> T:
+    def load(cls, user_config_path: Path, log_settings: bool = True) -> Self:
         """
         Loads configuration.
 
@@ -47,7 +47,7 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
                 Whether to print loaded config to log. Defaults to True.
 
         Returns:
-            T: Loaded configuration.
+            Self: Loaded configuration.
         """
 
         user_config_file_path: Path = user_config_path / cls.get_config_name()
@@ -66,8 +66,8 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
             )
 
         try:
-            config: T = cls.model_validate(config_data)
-        except Exception as ex:
+            config: Self = cls.model_validate(config_data)
+        except Exception as ex:  # noqa: BLE001
             cls._get_logger().error(
                 f"Failed to process user configuration: {ex}", exc_info=ex
             )
@@ -192,8 +192,10 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
         self._get_logger().info("Current Configuration:")
         keys: list[str] = list(
             filter(
-                lambda f: BaseConfig.PropertyMarker.ExcludeFromLogging
-                not in self.__class__.get_property_markers(f),
+                lambda f: (
+                    BaseConfig.PropertyMarker.ExcludeFromLogging
+                    not in self.__class__.get_property_markers(f)
+                ),
                 self.__class__.model_fields.keys(),
             )
         )
