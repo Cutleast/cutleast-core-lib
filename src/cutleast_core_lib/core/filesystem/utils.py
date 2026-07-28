@@ -176,7 +176,7 @@ def add_suffix(path: Path, suffix: str) -> Path:
 
 def rem_last_suffix(path: Path) -> Path:
     """
-    Removes the last suffix from the specified path.
+    Removes the last suffix from the specified path (`example.tar.gz` -> `example.tar`).
 
     Convenience method for
         `path.with_suffix("")`
