@@ -2,6 +2,12 @@
 Copyright (c) Cutleast
 """
 
+from pathlib import Path
+
+from PySide6.QtWidgets import QApplication
+
+from cutleast_core_lib.core.config.exceptions import ConfigValidationError
+
 
 class ValidationUtils:
     """
@@ -55,3 +61,22 @@ class ValidationUtils:
             raise ValueError(f"'{color_code}' is not a valid hex color code.")
 
         return color_code
+
+    @classmethod
+    def validate_parent_path(cls, path_input: str) -> None:
+        """
+        Validates if the parent of a path exists, if a path is specified at all. Does
+        nothing if the path is empty.
+
+        Args:
+            path_input (str): The path to validate.
+        """
+
+        if path_input.strip():
+            path = Path(path_input.strip())
+            if not path.parent.is_dir():
+                raise ConfigValidationError(
+                    QApplication.translate(
+                        "ValidationUtils", "The path '{path}' does not exist!"
+                    ).format(path=path.parent)
+                )
