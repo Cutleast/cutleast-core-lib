@@ -81,11 +81,7 @@ class SettingsPage(SmoothScrollArea, Generic[T]):
 
         if (
             event.type() == QEvent.Type.Wheel
-            and (
-                isinstance(source, QComboBox)
-                or isinstance(source, QSpinBox)
-                or isinstance(source, QDoubleSpinBox)
-            )
+            and isinstance(source, (QComboBox, QSpinBox, QDoubleSpinBox))
             and isinstance(event, QWheelEvent)
         ):
             self.wheelEvent(event)
