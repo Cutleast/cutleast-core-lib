@@ -5,11 +5,12 @@ Copyright (c) Cutleast
 import logging
 import os
 import platform
-from cgi import parse_header
 from pathlib import Path
 from typing import Optional
+from urllib.parse import urlsplit, urlunsplit
 
 import requests as req
+from cgi import parse_header
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QApplication
 
@@ -83,6 +84,10 @@ class Downloader(QObject):
 
         dl_path: Path
         headers: dict[str, str] = {"User-Agent": self.user_agent}
+        url_parts = urlsplit(download_url)
+        safe_download_url: str = urlunsplit(
+            (url_parts.scheme, url_parts.netloc, url_parts.path, "", "")
+        )
 
         with req.Session() as session:
             stream = session.get(
@@ -96,14 +101,12 @@ class Downloader(QObject):
                 file_name = parse_header(_content)[1].get("filename", None)
 
             if file_name is None:
-                self.log.debug(f"Stream Headers: {stream.headers}")
+                self.log.debug(f"No filename in response from '{safe_download_url}'.")
                 raise ValueError("No filename given!")
 
             dl_path = dest_folder / file_name
 
-            self.log.info(
-                f"Downloading '{file_name}' from '{download_url}' to '{dest_folder}'..."
-            )
+            self.log.info(f"Downloading '{file_name}' from '{safe_download_url}'...")
 
             if total_size == 0:
                 self.log.warning(

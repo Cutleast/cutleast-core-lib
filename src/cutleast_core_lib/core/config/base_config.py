@@ -189,7 +189,7 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
         Prints current settings to log.
         """
 
-        self._get_logger().info("Current Configuration:")
+        self._get_logger().debug("Current Configuration:")
         keys: list[str] = list(
             filter(
                 lambda f: (
@@ -201,4 +201,4 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
         )
         indent: int = max(len(key) + 1 for key in keys)
         for key in keys:
-            self._get_logger().info(f"{key.rjust(indent)} = {getattr(self, key)!r}")
+            self._get_logger().debug(f"{key.rjust(indent)} = {getattr(self, key)!r}")

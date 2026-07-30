@@ -4,7 +4,7 @@ Copyright (c) Cutleast
 
 from typing import Optional, override
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
@@ -20,6 +20,22 @@ class ProgressWidget(BaseProgressWidget, QWidget):
     """
     Widget for displaying and managing a main progress bar and multiple sub progress
     bars.
+    """
+
+    progressAdded = Signal(int)
+    """
+    Signal emitted when a new progress bar was added.
+
+    Args:
+        int: ID of the newly added progress bar.
+    """
+
+    progressRemoved = Signal(int)
+    """
+    Signal emitted when a progress bar was removed.
+
+    Args:
+        int: ID of the removed progress bar.
     """
 
     __vlayout: QVBoxLayout
@@ -120,6 +136,8 @@ class ProgressWidget(BaseProgressWidget, QWidget):
             if not self.__section_area.isExpanded():
                 self.__section_area.setExpanded(True)
 
+            self.progressAdded.emit(progress_id)
+
         self.__progress_widgets[progress_id].updateProgress(payload)
 
     @override
@@ -138,6 +156,8 @@ class ProgressWidget(BaseProgressWidget, QWidget):
             )
             if self.__section_area.isExpanded():
                 self.__section_area.setExpanded(len(self.__progress_widgets) > 0)
+
+            self.progressRemoved.emit(progress_id)
 
     @override
     def _clear_progress_bars(self) -> None:

@@ -84,6 +84,13 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
         self.__init_ui()
         self.__fit_height_to_content()
 
+        self.__progress_widget.progressAdded.connect(
+            lambda _: self.__fit_height_to_content()
+        )
+        self.__progress_widget.progressRemoved.connect(
+            lambda _: self.__fit_height_to_content()
+        )
+
         self.__cancel_button.clicked.connect(self.close)
 
     def __init_ui(self) -> None:
@@ -160,8 +167,6 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
                     if self.__cur_progress is not None:
                         self.__tb_display.updateProgress(self.__cur_progress)
                         self.__cur_progress = None
-
-                self.__fit_height_to_content()
 
     def __fit_height_to_content(self) -> None:
         target_height: int = min(self.sizeHint().height(), self.__max_height)

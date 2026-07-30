@@ -158,16 +158,19 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
         Logs basic information.
         """
 
+        cmd: list[str]
+        compiled: bool
+        cmd, compiled = get_execution_info()
         width = 100
         log_title = f" {self.applicationName()} ".center(width, "=")
         self.log.info(f"\n{'=' * width}\n{log_title}\n{'=' * width}")
         self.log.info(f"Program Version: {self.applicationVersion()}")
-        self.log.info(f"Executed command: {get_execution_info()[0]}")
-        self.log.info(f"Frozen/compiled: {get_execution_info()[1]}")
-        self.log.info(f"Current Path: {self.cur_path}")
-        self.log.info(f"Resource Path: {self.res_path}")
-        self.log.info(f"Data Path: {self.data_path}")
-        self.log.info(f"Log Path: {self.log_path}")
+        self.log.debug(f"Executed command: {cmd}")
+        self.log.info(f"Frozen/compiled: {compiled}")
+        self.log.debug(f"Current Path: {self.cur_path}")
+        self.log.debug(f"Resource Path: {self.res_path}")
+        self.log.debug(f"Data Path: {self.data_path}")
+        self.log.debug(f"Log Path: {self.log_path}")
         self.log.info(
             "Detected Platform: "
             f"{platform.system()} {platform.version()} {platform.architecture()[0]}"
