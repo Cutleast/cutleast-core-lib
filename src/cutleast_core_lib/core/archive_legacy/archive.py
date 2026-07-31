@@ -187,5 +187,5 @@ class Archive(metaclass=ABCMeta):
                 return ZIPARchive(archive_path)
             case suffix:
                 raise NotImplementedError(
-                    f"Archive format {suffix!r} not yet supported!"
+                    f"Archive format '{suffix}' not yet supported!"
                 )

@@ -179,7 +179,7 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
 
         if not isinstance(default_value, get_origin(expected_type) or expected_type):
             raise TypeError(
-                f"{field_name!r} ({type(default_value)}) is not a {expected_type}!"
+                f"'{field_name}' ({type(default_value)}) is not a {expected_type}!"
             )
 
         return default_value
@@ -201,4 +201,4 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
         )
         indent: int = max(len(key) + 1 for key in keys)
         for key in keys:
-            self._get_logger().debug(f"{key.rjust(indent)} = {getattr(self, key)!r}")
+            self._get_logger().debug(f"{key.rjust(indent)} = '{getattr(self, key)}'")

@@ -169,7 +169,7 @@ class ThemeManager(Singleton, metaclass=ABCMeta):
             case None:
                 cls.log.warning("Failed to detect system UI mode!")
             case unknown:
-                cls.log.warning(f"Unknown system UI mode {unknown!r}!")
+                cls.log.warning(f"Unknown system UI mode '{unknown}'!")
 
         return UIMode.Dark
 

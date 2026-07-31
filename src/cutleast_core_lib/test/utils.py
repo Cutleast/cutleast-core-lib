@@ -46,12 +46,12 @@ class Utils:
             method_name = f"_{obj.__class__.__name__}__{method_name}"
 
         if not hasattr(obj, method_name):
-            raise AttributeError(f"Method {method_name!r} not found!")
+            raise AttributeError(f"Method '{method_name}' not found!")
 
         field: Optional[Any] = getattr(obj, method_name, None)
 
         if not callable(field):
-            raise TypeError(f"{method_name!r} ({type(field)}) is not callable!")
+            raise TypeError(f"'{method_name}' ({type(field)}) is not callable!")
 
         method: Callable[P, R] = field  # type: ignore
 
@@ -80,7 +80,7 @@ class Utils:
         )
 
         if value is None:
-            raise AttributeError(f"Field {field_name!r} is None!")
+            raise AttributeError(f"Field '{field_name}' is None!")
 
         return value
 
@@ -107,14 +107,14 @@ class Utils:
         field_name = f"_{obj.__class__.__name__}__{field_name}"
 
         if not hasattr(obj, field_name):
-            raise AttributeError(f"Field {field_name!r} not found!")
+            raise AttributeError(f"Field '{field_name}' not found!")
 
         field: Optional[Any] = getattr(obj, field_name, None)
 
         if field is not None and not isinstance(
             field, get_origin(field_type) or field_type
         ):
-            raise TypeError(f"{field_name!r} ({type(field)}) is not a {field_type}!")
+            raise TypeError(f"'{field_name}' ({type(field)}) is not a {field_type}!")
 
         return field  # type: ignore
 
@@ -139,12 +139,12 @@ class Utils:
         field_name = "_" + field_name
 
         if not hasattr(obj, field_name):
-            raise AttributeError(f"Field {field_name!r} not found!")
+            raise AttributeError(f"Field '{field_name}' not found!")
 
         field: Optional[Any] = getattr(obj, field_name, None)
 
         if not isinstance(field, get_origin(field_type) or field_type):
-            raise TypeError(f"{field_name!r} ({type(field)}) is not a {field_type}!")
+            raise TypeError(f"'{field_name}' ({type(field)}) is not a {field_type}!")
 
         return field  # type: ignore
 
