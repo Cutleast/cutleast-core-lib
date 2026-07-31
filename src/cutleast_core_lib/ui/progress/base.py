@@ -4,7 +4,6 @@ Copyright (c) Cutleast
 
 import logging
 from abc import abstractmethod
-from functools import reduce
 from threading import Event, Lock
 from typing import TYPE_CHECKING, Optional, override
 
@@ -64,7 +63,7 @@ class BaseProgressWidget(ProgressDisplay):  # pyright: ignore[reportImplicitAbst
 
     _lock: Lock
     _cancel_event: Event
-    _scheduled_updates: dict[int, list[ProgressUpdate]]
+    _scheduled_updates: dict[int, ProgressUpdate]
     _signal_helper: _SignalHelper
     _progress_executor: Optional["ProgressExecutor"]
 
@@ -112,15 +111,17 @@ class BaseProgressWidget(ProgressDisplay):  # pyright: ignore[reportImplicitAbst
             raise TaskCancelledError
 
         with self._lock:
-            self._scheduled_updates.setdefault(progress_id, []).append(payload)
+            if progress_id in self._scheduled_updates:
+                payload = self._scheduled_updates[progress_id].update(payload)
+
+            self._scheduled_updates[progress_id] = payload
 
     def _process_scheduled_updates(self) -> None:
         with self._lock:
-            updates_to_process: dict[int, list[ProgressUpdate]] = self._scheduled_updates
+            updates_to_process: dict[int, ProgressUpdate] = self._scheduled_updates
             self._scheduled_updates = {}
 
-        for progress_id, payloads in updates_to_process.items():
-            payload: ProgressUpdate = reduce(ProgressUpdate.update, payloads)
+        for progress_id, payload in updates_to_process.items():
             if progress_id == BaseProgressWidget.MAIN_PROGRESS_ID:
                 self._signal_helper.update_main_signal.emit(payload)
             else:

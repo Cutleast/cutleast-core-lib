@@ -10,6 +10,8 @@ from typing import Optional
 
 log: logging.Logger = logging.getLogger("ProcessRunner")
 
+MAX_ERROR_OUTPUT_LENGTH: int = 4_000
+
 
 def run_process(
     command: list[str], live_output: bool = False, cwd: Optional[Path] = None
@@ -45,6 +47,14 @@ def run_process(
             output = process.stderr.read()
 
     if process.returncode:
-        log.debug(f"Command: {command}")
-        log.error(output)
+        executable_name: str = Path(command[0]).name if command else "<unknown>"
+        error_output: str = output.strip()
+        if len(error_output) > MAX_ERROR_OUTPUT_LENGTH:
+            error_output = error_output[:MAX_ERROR_OUTPUT_LENGTH] + "\n... (truncated)"
+
+        log.error(
+            f"Process '{executable_name}' failed with exit code {process.returncode}."
+        )
+        if error_output:
+            log.debug(f"Process stderr:\n{error_output}")
         raise RuntimeError(f"Process returned non-zero exit code: {process.returncode}")

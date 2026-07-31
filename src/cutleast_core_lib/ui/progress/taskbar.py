@@ -2,14 +2,16 @@
 Copyright (c) Cutleast
 """
 
+import logging
 from enum import IntEnum
+from typing import Optional
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
-from cutleast_core_lib.core.utilities.exceptions import format_exception
 from cutleast_core_lib.core.utilities.exe_info import get_current_path
 from cutleast_core_lib.core.utilities.typing_utils import not_none
 
 tlb_path: str = f"{get_current_path()}/res/TaskbarLib.tlb"
+tlb_error: Optional[Exception] = None
 
 try:
     import comtypes.client as cc
@@ -22,9 +24,7 @@ try:
         "{56FDF344-FD6D-11d0-958A-006097C9A090}", interface=tbl.ITaskbarList3
     )
 except Exception as ex:  # noqa: BLE001
-    print(format_exception(ex))
-    print("DEBUG: TLB Path: " + tlb_path)
-    print("WARNING: No taskbar progress API available: see exception above")
+    tlb_error = ex
     tlb = None
 
 
@@ -53,6 +53,9 @@ class TaskbarProgressDisplay:
     """
 
     __hwnd: int
+    __initialization_error_logged: bool = False
+
+    log: logging.Logger = logging.getLogger("TaskbarProgressDisplay")
 
     def __init__(self, hwnd: int) -> None:
         """
@@ -61,6 +64,17 @@ class TaskbarProgressDisplay:
         """
 
         self.__hwnd = hwnd
+
+        if (
+            tlb_error is not None
+            and not TaskbarProgressDisplay.__initialization_error_logged
+        ):
+            self.log.warning("Taskbar progress API is unavailable.")
+            self.log.debug(
+                "Taskbar progress API initialization failed.", exc_info=tlb_error
+            )
+            self.log.debug(f"Taskbar type library path: '{tlb_path}'.")
+            TaskbarProgressDisplay.__initialization_error_logged = True
 
     def setProgressState(self, state: TaskbarProgressState) -> None:
         """
