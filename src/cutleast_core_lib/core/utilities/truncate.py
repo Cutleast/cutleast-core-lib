@@ -82,7 +82,7 @@ def truncate_string(
 
 
 def raw_string(text: str, max_length: int = 100) -> str:
-    """
+    r"""
     Returns raw representation (for eg. "\\n" instead of a line break) of a text
     trimmed to a specified number of characters.
     Appends "..." suffix if the text was longer than the specified length.
