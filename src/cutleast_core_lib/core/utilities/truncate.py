@@ -3,6 +3,7 @@ Copyright (c) Cutleast
 """
 
 from enum import Enum
+from typing import Optional
 
 
 class TruncateMode(Enum):
@@ -81,7 +82,7 @@ def truncate_string(
             return s[:half] + placeholder + s[-(remaining - half) :]
 
 
-def raw_string(text: str, max_length: int = 100) -> str:
+def raw_string(text: str, max_length: Optional[int] = 100) -> str:
     r"""
     Returns raw representation (for eg. "\\n" instead of a line break) of a text
     trimmed to a specified number of characters.
@@ -89,10 +90,15 @@ def raw_string(text: str, max_length: int = 100) -> str:
 
     Args:
         text (str): String to trim.
-        max_length (int, optional): Maximum length of trimmed string. Defaults to 100.
+        max_length (Optional[int], optional):
+            Maximum length of trimmed string. If None, the string is not trimmed at all.
+            Defaults to 100.
 
     Returns:
         str: Trimmed string
     """
+
+    if max_length is None:
+        return f"{text!r}"[1:-1]
 
     return truncate_string(f"{text!r}"[1:-1], max_length)
