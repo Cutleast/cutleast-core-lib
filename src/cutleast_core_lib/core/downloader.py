@@ -5,18 +5,19 @@ Copyright (c) Cutleast
 import logging
 import os
 import platform
+from email.message import Message
 from pathlib import Path
 from typing import Optional
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import SplitResult, urlsplit, urlunsplit
 
 import requests as req
-from cgi import parse_header
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QApplication
 
-from cutleast_core_lib.core.utilities.scale import scale_value
+from cutleast_core_lib.core.filesystem.utils import add_suffix
 
 from .multithreading.progress import ProgressUpdate, UpdateCallback, update
+from .utilities.scale import scale_value
 
 
 class Downloader(QObject):
@@ -30,16 +31,24 @@ class Downloader(QObject):
 
     __running: bool = False
 
-    CHUNK_SIZE: int = 1024 * 1024  # 1 MB
-    TIMEOUT: int = 5  # 5 seconds
+    __user_agent: str
+    __chunk_size: int
+    __timeout: int
 
-    user_agent: str
-
-    def __init__(self, user_agent: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        user_agent: Optional[str] = None,
+        chunk_size: int = 1024 * 1024,
+        timeout: int = 5,
+    ) -> None:
         """
         Args:
             user_agent (Optional[str], optional):
                 The user agent to use for the download requests. Defaults to None.
+            chunk_size (int, optional):
+                The size of each chunk to download in bytes. Defaults to 1 MiB.
+            timeout (int, optional):
+                The timeout for the download requests in seconds. Defaults to 5 seconds.
         """
 
         super().__init__()
@@ -50,15 +59,15 @@ class Downloader(QObject):
         app_version: str = QApplication.applicationVersion()
 
         if user_agent is None:
-            self.user_agent = f"\
-{app_name}/{app_version} \
-(\
-{platform.system()} \
-{platform.version()}; \
-{platform.architecture()[0]}\
-)"
+            self.__user_agent = (
+                f"{app_name}/{app_version} ({platform.system()} {platform.version()}; "
+                f"{platform.architecture()[0]})"
+            )
         else:
-            self.user_agent = user_agent
+            self.__user_agent = user_agent
+
+        self.__chunk_size = chunk_size
+        self.__timeout = timeout
 
     def download(
         self,
@@ -69,6 +78,8 @@ class Downloader(QObject):
     ) -> Path:
         """
         Downloads a file from the internet and saves it at a specified location.
+        The data is written to a temporary file first, which is renamed to the final
+        filename after the download is complete.
 
         Args:
             download_url (str): Direct download URL to file.
@@ -82,31 +93,38 @@ class Downloader(QObject):
             Path: Path to downloaded file.
         """
 
-        dl_path: Path
-        headers: dict[str, str] = {"User-Agent": self.user_agent}
-        url_parts = urlsplit(download_url)
+        headers: dict[str, str] = {"User-Agent": self.__user_agent}
+        url_parts: SplitResult = urlsplit(download_url)
         safe_download_url: str = urlunsplit(
             (url_parts.scheme, url_parts.netloc, url_parts.path, "", "")
         )
 
         with req.Session() as session:
-            stream = session.get(
-                download_url, stream=True, headers=headers, timeout=self.TIMEOUT
+            stream: req.Response = session.get(
+                download_url, stream=True, headers=headers, timeout=self.__timeout
             )
 
-            total_size: int = int(stream.headers.get("Content-Length", "0"))
+            total_size = int(stream.headers.get("Content-Length", "0"))
 
-            _content = stream.headers.get("Content-Disposition")
-            if _content and file_name is None:
-                file_name = parse_header(_content)[1].get("filename", None)
+            content_disposition: Optional[str] = stream.headers.get(
+                "Content-Disposition"
+            )
+            if content_disposition and file_name is None:
+                header = Message()
+                header["Content-Disposition"] = content_disposition
+                file_name = header.get_filename()
 
             if file_name is None:
                 self.log.debug(f"No filename in response from '{safe_download_url}'.")
                 raise ValueError("No filename given!")
 
-            dl_path = dest_folder / file_name
+            dl_path: Path = dest_folder / file_name
+            tmp_path: Path = add_suffix(dl_path, ".part")
 
-            self.log.info(f"Downloading '{file_name}' from '{safe_download_url}'...")
+            self.log.info(
+                f"Downloading '{file_name}' from '{safe_download_url}' to "
+                f"'{dest_folder}'..."
+            )
 
             if total_size == 0:
                 self.log.warning(
@@ -121,10 +139,21 @@ class Downloader(QObject):
                     os.remove(dl_path)
                     self.log.warning(f"Removed already existing file from '{dl_path}'!")
 
+            if tmp_path.is_file():
+                if tmp_path.stat().st_size == total_size and total_size > 0:
+                    self.log.info("File already downloaded.")
+                    tmp_path.rename(dl_path)
+                    return dl_path
+                else:
+                    os.remove(tmp_path)
+                    self.log.warning(
+                        f"Removed already existing temporary file from '{tmp_path}'!"
+                    )
+
             self.__running = True
             current_size: int = 0
-            with dl_path.open("wb") as output_file:
-                for data in stream.iter_content(self.CHUNK_SIZE):
+            with tmp_path.open("wb") as output_file:
+                for data in stream.iter_content(self.__chunk_size):
                     if self.__running:
                         output_file.write(data)
                         current_size += len(data)
@@ -144,12 +173,14 @@ class Downloader(QObject):
                         ),
                     )
 
-        if self.__running and current_size == total_size:
+        if self.__running and (current_size == total_size or total_size == 0):
+            tmp_path.rename(dl_path)
             self.log.info("Download complete!")
 
         else:
             self.log.warning("Download incomplete!")
-            os.remove(dl_path)
+            dl_path.unlink(missing_ok=True)
+            tmp_path.unlink(missing_ok=True)
 
         return dl_path
 
@@ -162,27 +193,3 @@ class Downloader(QObject):
         """
 
         self.__stop_signal.emit()
-
-    @staticmethod
-    def single_download(
-        url: str,
-        dest_folder: Path,
-        file_name: Optional[str] = None,
-        progress_callback: Optional[UpdateCallback] = None,
-    ) -> Path:
-        """
-        Downloads a single file from a given URL to a destination folder.
-
-        Args:
-            url (str): URL of the file to download.
-            dest_folder (Path): Folder where the downloaded file should be saved.
-            file_name (Optional[str], optional):
-                Optional filename to use instead of the one in the URL. Defaults to None.
-            progress_callback (Optional[UpdateCallback], optional):
-                Optional function or method to call with a ProgressUpdate. Defaults to None.
-
-        Returns:
-            Path: Path to the downloaded file.
-        """
-
-        return Downloader().download(url, dest_folder, file_name, progress_callback)
