@@ -16,25 +16,32 @@ class ElidedLabel(QLabel):
     """
 
     __full_text: str
+    __tooltip_text: Optional[str]
     __elide_mode: Qt.TextElideMode
 
     def __init__(
         self,
         text: str = "",
+        tooltip_text: Optional[str] = None,
         elide_mode: Qt.TextElideMode = Qt.TextElideMode.ElideRight,
         parent: Optional[QWidget] = None,
     ) -> None:
         """
         Args:
-            text (str): The full text to display.
-            elide_mode (Qt.TextElideMode):
+            text (str, optional): The full text to display. Defaults to "".
+            tooltip_text (Optional[str], optional):
+                The text to display in the tooltip. Defaults to None, which
+                means the current full text is shown.
+            elide_mode (Qt.TextElideMode, optional):
                 Where the text is truncated. Defaults to Qt.TextElideMode.ElideRight.
-            parent (Optional[QWidget]): The parent widget.
+            parent (Optional[QWidget], optional):
+                Optional parent widget. Defaults to None.
         """
 
         super().__init__(parent)
 
         self.__full_text = text
+        self.__tooltip_text = tooltip_text
         self.__elide_mode = elide_mode
 
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
@@ -48,6 +55,12 @@ class ElidedLabel(QLabel):
     @override
     def setText(self, text: str) -> None:
         self.__full_text = text
+
+        self.__update_elided_text()
+
+    @override
+    def setToolTip(self, tooltip_text: Optional[str]) -> None:
+        self.__tooltip_text = tooltip_text
 
         self.__update_elided_text()
 
@@ -86,4 +99,10 @@ class ElidedLabel(QLabel):
 
         super().setText(elided)
 
-        self.setToolTip(self.__full_text if elided != self.__full_text else "")
+        tool_tip_text: str = (
+            self.__tooltip_text
+            if self.__tooltip_text is not None
+            else (self.__full_text if elided != self.__full_text else "")
+        )
+
+        super().setToolTip(tool_tip_text)
