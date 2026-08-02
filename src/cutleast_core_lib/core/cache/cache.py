@@ -133,7 +133,16 @@ class Cache(Singleton):
         if not cache_file_path.is_file() and default is not _Undefined:
             return default
 
-        return cls.__read_file(cache_file_path)
+        try:
+            return cls.__read_file(cache_file_path)
+        except Exception as ex:
+            cls.log.error(
+                f"Failed to read cache file '{cache_file_path}': {ex}", exc_info=ex
+            )
+            if default is not _Undefined:
+                return default
+
+            raise
 
     @classmethod
     def save_to_cache(cls, cache_file_path: Path, data: Any) -> None:
