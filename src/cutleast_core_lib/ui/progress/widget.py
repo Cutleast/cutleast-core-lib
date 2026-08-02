@@ -4,7 +4,7 @@ Copyright (c) Cutleast
 
 from typing import Optional, override
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import QSize, Qt, Signal, SignalInstance
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
@@ -21,6 +21,8 @@ class ProgressWidget(BaseProgressWidget, QWidget):
     Widget for displaying and managing a main progress bar and multiple sub progress
     bars.
     """
+
+    _cancelled = Signal()
 
     __vlayout: QVBoxLayout
     __section_area: SectionAreaWidget
@@ -82,6 +84,11 @@ class ProgressWidget(BaseProgressWidget, QWidget):
         self.__vlayout.addWidget(self.__section_area)
 
         self.__progress_widgets = {}
+
+    @property
+    @override
+    def cancelled(self) -> SignalInstance:
+        return self._cancelled
 
     @override
     def sizeHint(self) -> QSize:

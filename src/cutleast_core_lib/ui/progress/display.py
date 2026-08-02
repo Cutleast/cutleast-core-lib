@@ -3,14 +3,11 @@ Copyright (c) Cutleast
 """
 
 from abc import ABC, ABCMeta, abstractmethod
-from typing import TYPE_CHECKING
 
+from PySide6.QtCore import SignalInstance
 from PySide6.QtWidgets import QWidget
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
-
-if TYPE_CHECKING:
-    from cutleast_core_lib.core.multithreading.progress_executor import ProgressExecutor
 
 
 class ABCQtMeta(type(QWidget), ABCMeta):  # pyright: ignore[reportGeneralTypeIssues]
@@ -68,6 +65,13 @@ class ProgressDisplay(ABC, metaclass=ABCQtMeta):
         update progress call.
         """
 
+    @property
+    @abstractmethod
+    def cancelled(self) -> SignalInstance:
+        """
+        Signal emitted when the cancel event has been set.
+        """
+
     @abstractmethod
     def resetCancel(self) -> None:
         """
@@ -88,12 +92,4 @@ class ProgressDisplay(ABC, metaclass=ABCQtMeta):
     def clearProgressBars(self) -> None:
         """
         Removes all progress bars but the main progress bar from the widget.
-        """
-
-    def setProgressExecutor(self, executor: "ProgressExecutor") -> None:
-        """
-        Sets a progress executor that will be shutdown when `cancel()` is called.
-
-        Args:
-            executor (ProgressExecutor): The progress executor.
         """

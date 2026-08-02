@@ -10,7 +10,7 @@ from collections.abc import Callable
 from threading import Lock
 from typing import Generic, Optional, TypeVar, override
 
-from PySide6.QtCore import QCoreApplication, Qt, QTimerEvent
+from PySide6.QtCore import QCoreApplication, Qt, QTimerEvent, SignalInstance
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
     QApplication,
@@ -131,6 +131,11 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
     @override
     def cancel(self) -> None:
         self.__progress_widget.cancel()
+
+    @property
+    @override
+    def cancelled(self) -> SignalInstance:
+        return self.__progress_widget.cancelled
 
     @override
     def resetCancel(self) -> None:

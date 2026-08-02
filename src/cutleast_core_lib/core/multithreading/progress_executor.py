@@ -76,7 +76,9 @@ class ProgressExecutor(ThreadPoolExecutor):
         self.__main_progress_text = ""
 
         if display is not None:
-            display.setProgressExecutor(self)
+            display.cancelled.connect(
+                lambda: self.shutdown(wait=False, cancel_futures=True)
+            )
 
     def set_main_progress_text(self, text: str) -> None:
         """

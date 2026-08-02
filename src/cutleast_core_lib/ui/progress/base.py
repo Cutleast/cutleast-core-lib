@@ -5,7 +5,7 @@ Copyright (c) Cutleast
 import logging
 from abc import abstractmethod
 from threading import Event, Lock
-from typing import TYPE_CHECKING, Optional, override
+from typing import Optional, override
 
 from PySide6.QtCore import QObject, QTimerEvent, Signal
 from PySide6.QtWidgets import QWidget
@@ -14,9 +14,6 @@ from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
 from cutleast_core_lib.core.utilities.exceptions import TaskCancelledError
 
 from .display import ProgressDisplay
-
-if TYPE_CHECKING:
-    from cutleast_core_lib.core.multithreading.progress_executor import ProgressExecutor
 
 
 class BaseProgressWidget(ProgressDisplay):  # pyright: ignore[reportImplicitAbstractClass]
@@ -65,7 +62,6 @@ class BaseProgressWidget(ProgressDisplay):  # pyright: ignore[reportImplicitAbst
     _cancel_event: Event
     _scheduled_updates: dict[int, ProgressUpdate]
     _signal_helper: _SignalHelper
-    _progress_executor: Optional["ProgressExecutor"]
 
     log: logging.Logger
 
@@ -82,7 +78,6 @@ class BaseProgressWidget(ProgressDisplay):  # pyright: ignore[reportImplicitAbst
         self._signal_helper = BaseProgressWidget._SignalHelper(
             parent or (self if isinstance(self, QObject) else None)
         )
-        self._progress_executor = None
 
         self.log = logging.getLogger(self.__class__.__name__)
 
@@ -130,9 +125,7 @@ class BaseProgressWidget(ProgressDisplay):  # pyright: ignore[reportImplicitAbst
     @override
     def cancel(self) -> None:
         self._cancel_event.set()
-
-        if self._progress_executor is not None:
-            self._progress_executor.shutdown(wait=False, cancel_futures=True)
+        self.cancelled.emit()
 
     @override
     def resetCancel(self) -> None:
@@ -145,10 +138,6 @@ class BaseProgressWidget(ProgressDisplay):  # pyright: ignore[reportImplicitAbst
     @override
     def clearProgressBars(self) -> None:
         self._signal_helper.clear_signal.emit()
-
-    @override
-    def setProgressExecutor(self, executor: "ProgressExecutor") -> None:
-        self._progress_executor = executor
 
     @abstractmethod
     def _update_main_progress(self, payload: ProgressUpdate) -> None:
