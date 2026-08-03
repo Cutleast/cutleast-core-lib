@@ -66,7 +66,7 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
             )
 
         try:
-            config: Self = cls.model_validate(config_data)
+            config: Self = cls.model_validate(config_data, by_alias=True)
         except Exception as ex:  # noqa: BLE001
             cls._get_logger().error(
                 f"Failed to process user configuration: {ex}", exc_info=ex
