@@ -2,13 +2,15 @@
 Copyright (c) Cutleast
 """
 
-from typing import Any, Literal, TypeVar, get_origin
+from typing import Any, Generic, Literal, TypeVar, final, get_origin
 
 from pydantic import SerializerFunctionWrapHandler, model_serializer
 from pydantic.main import BaseModel
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
 """Type variable for a Pydantic model type."""
+
+T = TypeVar("T")
 
 
 def include_literal_defaults(cls: type[ModelType]) -> type[ModelType]:
@@ -39,3 +41,22 @@ def include_literal_defaults(cls: type[ModelType]) -> type[ModelType]:
     WrappedModel.__doc__ = cls.__doc__
 
     return WrappedModel  # pyright: ignore[reportReturnType]
+
+
+@final
+class ImmutableValue(BaseModel, Generic[T], frozen=True, arbitrary_types_allowed=True):
+    """
+    Model to wrap an immutable value in a single-field Pydantic model.
+    This is useful for locations where only Pydantic models are accepted.
+    """
+
+    value: T
+    """The wrapped value."""
+
+    def __init__(self, value: T, /) -> None:
+        """
+        Args:
+            value (T): The value to wrap in the model.
+        """
+
+        super().__init__(value=value)

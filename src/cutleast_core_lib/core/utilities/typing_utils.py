@@ -2,7 +2,8 @@
 Copyright (c) Cutleast
 """
 
-from typing import Optional, TypeVar
+from abc import abstractmethod
+from typing import Optional, Protocol, TypeVar
 
 _T = TypeVar("_T")
 
@@ -50,3 +51,14 @@ def not_none(value: Optional[_T]) -> _T:
         raise ValueError("Value cannot be None")
 
     return value
+
+
+class Comparable(Protocol):
+    """Protocol for annotating comparable types."""
+
+    @abstractmethod
+    def __lt__(self: _CT, other: _CT, /) -> bool:
+        pass
+
+
+_CT = TypeVar("_CT", bound=Comparable)
