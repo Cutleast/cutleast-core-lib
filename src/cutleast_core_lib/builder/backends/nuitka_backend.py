@@ -4,7 +4,6 @@ Copyright (c) Cutleast
 
 import shutil
 import sys
-from enum import Enum
 from pathlib import Path
 from typing import Optional, override
 
@@ -33,37 +32,6 @@ class NuitkaBackend(BuildBackend):
         "--assume-yes-for-downloads",
     ]
     """A list of base arguments passed to Nuitka."""
-
-    class ConsoleMode(Enum):
-        """Enum for Nuitka's supported console modes."""
-
-        Disabled = "disable"
-        """This disables the console window entirely."""
-
-        Attach = "attach"
-        """
-        This will attach to an existing console window (if any) but it won't open a new
-        one.
-        """
-
-        Force = "force"
-        """This will create a new console window or use the existing one."""
-
-        Hide = "hide"
-        """This will use an existing console window or creates and minimizes one."""
-
-    console_mode: ConsoleMode
-
-    def __init__(self, console_mode: ConsoleMode = ConsoleMode.Hide) -> None:
-        """
-        Args:
-            console_mode (ConsoleMode, optional):
-                Console mode that is passed to Nuitka. Defaults to ConsoleMode.Hide.
-        """
-
-        super().__init__()
-
-        self.console_mode = console_mode
 
     def get_additional_args(
         self,
@@ -100,17 +68,70 @@ class NuitkaBackend(BuildBackend):
         icon_path: Optional[Path],
         metadata: BuildMetadata,
     ) -> Path:
-        cmd = NuitkaBackend.BASE_ARGS
-        cmd += self.get_additional_args(main_module, exe_stem, icon_path, metadata)
-        cmd += [
-            f"--windows-console-mode={self.console_mode.value}",
+        output_root: Path = Path.cwd() / f"{main_module.stem}.nuitka-build"
+        shutil.rmtree(output_root, ignore_errors=True)
+
+        additional_args: list[str] = self.get_additional_args(
+            main_module, exe_stem, icon_path, metadata
+        )
+        gui_dist: Path = self.__build_target(
+            main_module,
+            exe_stem,
+            "disable",
+            output_root / "gui",
+            icon_path,
+            metadata,
+            additional_args,
+        )
+        cli_dist: Path = self.__build_target(
+            main_module,
+            f"{exe_stem}_cli",
+            "force",
+            output_root / "cli",
+            icon_path,
+            metadata,
+            additional_args,
+        )
+
+        gui_dependencies: set[Path] = self.__get_dependencies(
+            gui_dist, f"{exe_stem}.exe"
+        )
+        cli_dependencies: set[Path] = self.__get_dependencies(
+            cli_dist, f"{exe_stem}_cli.exe"
+        )
+        if gui_dependencies != cli_dependencies:
+            raise RuntimeError(
+                "Nuitka GUI and CLI builds produced different dependency layouts."
+            )
+
+        shutil.copy2(cli_dist / f"{exe_stem}_cli.exe", gui_dist)
+
+        return gui_dist
+
+    def __build_target(
+        self,
+        main_module: Path,
+        target_stem: str,
+        console_mode: str,
+        output_dir: Path,
+        icon_path: Optional[Path],
+        metadata: BuildMetadata,
+        additional_args: list[str],
+    ) -> Path:
+        """Builds one Nuitka executable target."""
+
+        cmd: list[str] = [
+            *NuitkaBackend.BASE_ARGS,
+            *additional_args,
+            f"--windows-console-mode={console_mode}",
             f"--company-name={metadata.project_author}",
             f"--copyright={metadata.project_license}",
             f"--product-name={metadata.display_name}",
             f"--file-description={metadata.display_name}",
             f"--file-version={metadata.file_version}",
             f"--product-version={metadata.file_version}",
-            f"--output-filename={exe_stem}.exe",
+            f"--output-filename={target_stem}.exe",
+            f"--output-dir={output_dir}",
         ]
 
         if icon_path is not None:
@@ -120,25 +141,25 @@ class NuitkaBackend(BuildBackend):
         self.log.info(f"Running Nuitka command: '{' '.join(cmd)}'...")
         run_process(cmd, live_output=True)
 
-        dist_folder = Path(main_module.stem + ".dist")
-
-        if not dist_folder.is_dir():
+        dist_folder: Path = output_dir / f"{main_module.stem}.dist"
+        if not (dist_folder / f"{target_stem}.exe").is_file():
             raise RuntimeError(
-                f"Nuitka failed to create a distribution folder at {dist_folder}"
+                f"Nuitka failed to create '{target_stem}.exe' in '{dist_folder}'."
             )
 
         return dist_folder
 
+    @staticmethod
+    def __get_dependencies(dist_folder: Path, executable_name: str) -> set[Path]:
+        """Returns all files in a Nuitka distribution except its main executable."""
+
+        return {
+            file.relative_to(dist_folder)
+            for file in dist_folder.rglob("*")
+            if file.is_file() and file.name != executable_name
+        }
+
     @override
     def clean(self, main_module: Path, exe_stem: str) -> None:
-        build_folder = Path(main_module.stem + ".build")
-        dist_folder = Path(main_module.stem + ".dist")
-
-        shutil.rmtree(build_folder, ignore_errors=True)
-        shutil.rmtree(dist_folder, ignore_errors=True)
-
-        # Exclude from git in case the deletion fails
-        if build_folder.is_dir():
-            (build_folder / ".gitignore").write_text("*")
-        if dist_folder.is_dir():
-            (dist_folder / ".gitignore").write_text("*")
+        output_root: Path = Path.cwd() / f"{main_module.stem}.nuitka-build"
+        shutil.rmtree(output_root, ignore_errors=True)

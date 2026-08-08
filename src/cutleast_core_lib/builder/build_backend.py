@@ -16,13 +16,41 @@ class BuildBackend(metaclass=ABCMeta):
 
     Concrete backends (Nuitka/PyInstaller/cx_Freeze) must implement `build`.
     The builder will call the `build`-method with minimal inputs and expects back
-    the folder where the built executable and dependencies live.
+    the folder where the GUI executable, CLI executable and shared dependencies live.
     """
 
     log: logging.Logger
 
     def __init__(self) -> None:  # noqa: D107
         self.log = logging.getLogger(self.__class__.__name__)
+
+    @staticmethod
+    def validate_output(output_folder: Path, exe_stem: str) -> None:
+        """
+        Validates the common backend output contract.
+
+        Args:
+            output_folder (Path): Folder returned by the backend.
+            exe_stem (str): Configured executable stem.
+
+        Raises:
+            RuntimeError: If the output folder or one of the executables is missing.
+        """
+
+        expected_files: list[Path] = [
+            output_folder / f"{exe_stem}.exe",
+            output_folder / f"{exe_stem}_cli.exe",
+        ]
+        missing_files: list[Path] = [
+            file for file in expected_files if not file.is_file()
+        ]
+
+        if missing_files:
+            missing_names: str = ", ".join(file.name for file in missing_files)
+            raise RuntimeError(
+                f"Build backend failed to create required executable(s) in "
+                f"'{output_folder}': {missing_names}"
+            )
 
     def preprocess_source(self, source_folder: Path, metadata: BuildMetadata) -> None:
         """
@@ -61,7 +89,9 @@ class BuildBackend(metaclass=ABCMeta):
             RuntimeError: When the build fails.
 
         Returns:
-            Path: Path to the folder with the built executable and dependencies.
+            Path:
+                Path to the folder with the GUI executable, CLI executable and shared
+                dependencies.
         """
 
     @abstractmethod

@@ -3,7 +3,6 @@ Copyright (c) Cutleast
 """
 
 import shutil
-import sys
 from pathlib import Path
 from typing import Any, override
 
@@ -57,7 +56,8 @@ class CxFreezeBackend(BuildBackend):
     ) -> Path:
         from cx_Freeze import Executable, setup  # pyright: ignore[reportMissingImports]
 
-        outpath: Path = Path.cwd() / f"{main_module.stem}.dist"
+        output_root: Path = Path.cwd() / f"{main_module.stem}.cx-freeze-build"
+        outpath: Path = output_root / "dist"
         build_options: dict[str, Any] = {
             "replace_paths": [("*", "")],
             "include_files": [],
@@ -95,9 +95,6 @@ class CxFreezeBackend(BuildBackend):
             ),
         ]
 
-        if "build_exe" not in sys.argv:
-            sys.argv.append("build_exe")
-
         setup(
             name=metadata.display_name,
             version=metadata.file_version,
@@ -106,16 +103,12 @@ class CxFreezeBackend(BuildBackend):
             license=metadata.project_license,
             options={"build_exe": build_options},
             executables=executables,
+            script_args=["build_exe"],
         )
 
         return outpath
 
     @override
     def clean(self, main_module: Path, exe_stem: str) -> None:
-        outpath: Path = Path.cwd() / f"{main_module.stem}.dist"
-
-        shutil.rmtree(outpath, ignore_errors=True)
-
-        # Exclude from git in case the deletion fails
-        if outpath.is_dir():
-            (outpath / ".gitignore").write_text("*")
+        output_root: Path = Path.cwd() / f"{main_module.stem}.cx-freeze-build"
+        shutil.rmtree(output_root, ignore_errors=True)

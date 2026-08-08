@@ -198,6 +198,7 @@ class Builder:
                 icon_path=self.config.icon_path,
                 metadata=self.metadata,
             )
+            self.backend.validate_output(backend_output, self.config.exe_stem)
 
             dist_folder: Path = self.config.project_root / "dist" / self.config.exe_stem
             if self.config.dist_dir is not None:
