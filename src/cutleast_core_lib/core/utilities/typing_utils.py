@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 """
 
 from abc import abstractmethod
-from typing import Optional, Protocol, TypeVar
+from typing import Optional, Protocol, Self, TypeVar
 
 _T = TypeVar("_T")
 
@@ -57,8 +57,5 @@ class Comparable(Protocol):
     """Protocol for annotating comparable types."""
 
     @abstractmethod
-    def __lt__(self: _CT, other: _CT, /) -> bool:
+    def __lt__(self, other: Self, /) -> bool:
         pass
-
-
-_CT = TypeVar("_CT", bound=Comparable)
