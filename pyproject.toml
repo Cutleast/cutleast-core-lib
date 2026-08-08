@@ -20,6 +20,11 @@ dependencies = [
 ]
 
 [dependency-groups]
+build = [
+    "cx-freeze",
+    "nuitka",
+    "pyinstaller",
+]
 dev = [
     "pyfakefs",
     "pyright",

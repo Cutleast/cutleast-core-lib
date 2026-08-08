@@ -6,8 +6,39 @@ jobs:
   lint_and_test:
     uses: ./.github/workflows/lint_and_test.yaml
 
-  build:
+  backend_contract:
     needs: lint_and_test
+    runs-on: windows-latest
+    env:
+      NUITKA_CACHE_DIR: ${{ runner.temp }}\nuitka-cache
+      RUN_BACKEND_BUILDS: "1"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Restore Nuitka cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}\nuitka-cache
+          key: nuitka-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+
+      - name: Install build backends
+        run: uv sync --frozen --group build
+
+      - name: Verify backend output contract
+        run: uv run --frozen pytest tests/builder/test_backend_integration.py -q
+
+  build:
+    needs: [lint_and_test, backend_contract]
     runs-on: windows-latest
 
     steps:

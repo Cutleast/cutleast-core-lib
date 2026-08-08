@@ -33,6 +33,16 @@ print(scale_value(1253656678)) # '1.17 GB'
 
 ## How to use the `builder`-package for building standalone executables
 
+Every build backend creates the same two executables with one shared dependency
+folder:
+
+- `<exe_stem>.exe` without a console window
+- `<exe_stem>_cli.exe` with a console window
+
+The available backends are `NuitkaBackend`, `PyInstallerBackend`, and
+`CxFreezeBackend`. Their backend-specific extension points remain separate; options
+for packages, includes, plugins, or data files are not translated between backends.
+
 An example build script in the using project could look like this:
 `<project root>/scripts/build.py`
 ```py
@@ -113,4 +123,5 @@ dev = [
 ]
 ```
 
-then run `uv run scripts/build.py` from the project's root folder to build the standalone executable in `<project root>/dist`.
+then run `uv run scripts/build.py` from the project's root folder to build both
+executables and their shared dependencies in `<project root>/dist`.

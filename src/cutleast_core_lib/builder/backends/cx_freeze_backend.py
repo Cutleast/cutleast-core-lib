@@ -58,6 +58,7 @@ class CxFreezeBackend(BuildBackend):
 
         output_root: Path = Path.cwd() / f"{main_module.stem}.cx-freeze-build"
         outpath: Path = output_root / "dist"
+        output_root.mkdir(parents=True, exist_ok=True)
         build_options: dict[str, Any] = {
             "replace_paths": [("*", "")],
             "include_files": [],
@@ -101,7 +102,10 @@ class CxFreezeBackend(BuildBackend):
             description=metadata.display_name,
             author=metadata.project_author,
             license=metadata.project_license,
-            options={"build_exe": build_options},
+            options={
+                "build_exe": build_options,
+                "egg_info": {"egg_base": str(output_root)},
+            },
             executables=executables,
             script_args=["build_exe"],
         )
