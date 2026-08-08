@@ -70,9 +70,6 @@ class NuitkaBackend(BuildBackend):
     ) -> Path:
         output_root: Path = Path.cwd() / f"{main_module.stem}.nuitka-build"
         shutil.rmtree(output_root, ignore_errors=True)
-        additional_args: list[str] = self.get_additional_args(
-            main_module, exe_stem, icon_path, metadata
-        )
 
         gui_dist: Path = self.__build_target(
             main_module,
@@ -81,7 +78,6 @@ class NuitkaBackend(BuildBackend):
             output_root / "gui",
             icon_path,
             metadata,
-            additional_args,
         )
         cli_dist: Path = self.__build_target(
             main_module,
@@ -90,7 +86,6 @@ class NuitkaBackend(BuildBackend):
             output_root / "cli",
             icon_path,
             metadata,
-            additional_args,
         )
         shutil.copy2(cli_dist / f"{exe_stem}_cli.exe", gui_dist)
 
@@ -104,13 +99,12 @@ class NuitkaBackend(BuildBackend):
         output_dir: Path,
         icon_path: Optional[Path],
         metadata: BuildMetadata,
-        additional_args: list[str],
     ) -> Path:
         """Builds one Nuitka executable target."""
 
         cmd: list[str] = [
             *NuitkaBackend.BASE_ARGS,
-            *additional_args,
+            *self.get_additional_args(main_module, target_stem, icon_path, metadata),
             f"--windows-console-mode={console_mode}",
             f"--company-name={metadata.project_author}",
             f"--copyright={metadata.project_license}",

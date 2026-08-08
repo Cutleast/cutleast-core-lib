@@ -3,6 +3,7 @@ Copyright (c) Cutleast
 """
 
 from pathlib import Path
+from typing import Optional, override
 
 from pytest import MonkeyPatch
 from semantic_version import Version
@@ -21,6 +22,19 @@ def test_build_creates_gui_and_cli_executables(
     main_module: Path = tmp_path / "main.py"
     main_module.touch()
     commands: list[list[str]] = []
+    stems: list[str] = []
+
+    class TestBackend(NuitkaBackend):
+        @override
+        def get_additional_args(
+            self,
+            main_module: Path,
+            exe_stem: str,
+            icon_path: Optional[Path],
+            metadata: BuildMetadata,
+        ) -> list[str]:
+            stems.append(exe_stem)
+            return []
 
     def run_process(command: list[str], live_output: bool = False) -> None:
         commands.append(command)
@@ -43,9 +57,10 @@ def test_build_creates_gui_and_cli_executables(
         project_license="MIT",
     )
 
-    output_folder: Path = NuitkaBackend().build(main_module, "app", None, metadata)
+    output_folder: Path = TestBackend().build(main_module, "app", None, metadata)
 
     assert (output_folder / "app.exe").is_file()
     assert (output_folder / "app_cli.exe").is_file()
     assert "--windows-console-mode=disable" in commands[0]
     assert "--windows-console-mode=force" in commands[1]
+    assert stems == ["app", "app_cli"]
