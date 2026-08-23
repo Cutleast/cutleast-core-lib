@@ -1,0 +1,39 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Scrollbars */
+QScrollBar {
+    background-color: ${colors.surface};
+}
+QScrollBar, QScrollBar::handle {
+    border-radius: ${metrics.radius_s};
+    width: ${metrics.spacing};
+}
+QScrollBar::handle {
+    background-color: ${colors.surface_hover};
+    min-height: 42px;
+    width: ${metrics.spacing_ms};
+}
+QScrollBar::handle:hover {
+    background-color: ${colors.surface_pressed};
+}
+QScrollBar::handle:pressed {
+    background-color: ${primary_palette.tone_50};
+}
+QScrollBar::up-arrow,
+QScrollBar::down-arrow,
+QScrollBar::add-line,
+QScrollBar::sub-line,
+QScrollBar::add-page,
+QScrollBar::sub-page {
+    border: none;
+    height: 0px;
+    background-color: transparent;
+}
+
+/* Scrollareas */
+QScrollArea {
+    background-color: transparent;
+    border: none;
+}

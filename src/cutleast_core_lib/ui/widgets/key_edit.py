@@ -5,10 +5,10 @@ Copyright (c) Cutleast
 from typing import Any, override
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QPushButton
 
 from ..utilities.icon_provider import IconProvider
+from .icon_button import IconButton
 
 
 class KeyLineEdit(QLineEdit):
@@ -18,16 +18,11 @@ class KeyLineEdit(QLineEdit):
     """
 
     __visibility_button: QPushButton
-
-    __visible_icon: QIcon
-    __hidden_icon: QIcon
+    __visibility_icon: IconProvider.ThemeIconBinding
 
     @override
     def __init__(self, *args: Any, **kwargs: dict[str, Any]) -> None:
         super().__init__(*args, **kwargs)
-
-        self.__visible_icon = IconProvider.get_qta_icon("mdi6.eye-off")
-        self.__hidden_icon = IconProvider.get_qta_icon("mdi6.eye")
 
         self.__init_ui()
 
@@ -47,7 +42,14 @@ class KeyLineEdit(QLineEdit):
         # Push button to the right-hand side
         hlayout.addStretch()
 
-        self.__visibility_button = QPushButton()
+        self.__visibility_button = IconButton()
+        self.__visibility_icon = IconProvider.bind_custom_icon(
+            self.__visibility_button,
+            self.__visibility_button.setIcon,
+            lambda: IconProvider.get_qta_icon(
+                "mdi6.eye-off" if self.__visibility_button.isChecked() else "mdi6.eye"
+            ),
+        )
         self.__visibility_button.setToolTip(self.tr("Toggle password visibility"))
         self.__visibility_button.setObjectName("toggle_button")
         self.__visibility_button.setCursor(Qt.CursorShape.ArrowCursor)
@@ -58,7 +60,7 @@ class KeyLineEdit(QLineEdit):
     def __toggle_visibility(self) -> None:
         if self.__visibility_button.isChecked():
             self.setEchoMode(QLineEdit.EchoMode.Normal)
-            self.__visibility_button.setIcon(self.__visible_icon)
         else:
             self.setEchoMode(QLineEdit.EchoMode.Password)
-            self.__visibility_button.setIcon(self.__hidden_icon)
+
+        self.__visibility_icon.refresh()

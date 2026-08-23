@@ -12,6 +12,9 @@ from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
 from cutleast_core_lib.core.utilities.qt_res_provider import read_resource
 from cutleast_core_lib.core.utilities.typing_utils import not_none
 
+from ..theme.manager import ThemeManager
+from ..theme.models.theme import Theme
+
 
 class SpinnerWidget(QWidget):
     """
@@ -34,21 +37,15 @@ class SpinnerWidget(QWidget):
 
         self.__update_signal.connect(self.__update_progress)
 
-    def __init_ui(self) -> None:
-        self.setContentsMargins(0, 0, 0, 0)
+        ThemeManager.get().theme_changed.connect(self.__on_theme_changed)
 
+    def __init_ui(self) -> None:
         hlayout = QHBoxLayout()
         hlayout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(hlayout)
 
         self.__spinner = QSvgWidget()
-        svg = read_resource(":/icons/spinner.svg")
-        svg = svg.replace(  # Apply accent color to spinner
-            ' stroke="#ff0000" ',
-            f' stroke="{self.palette().accent().color().name()}" ',
-        ).encode()
-        self.__spinner.load(svg)
-        self.__spinner.setFixedSize(24, 24)
+        self.__on_theme_changed(ThemeManager.get().theme)
         hlayout.addWidget(self.__spinner)
 
         self.__label = QLabel()
@@ -79,9 +76,18 @@ class SpinnerWidget(QWidget):
 
         self.setText(text)
 
+    def __on_theme_changed(self, theme: Theme) -> None:
+        svg = read_resource(":/core-lib/icons/spinner.svg")
+        svg = svg.replace(  # Apply accent color to spinner
+            ' stroke="#ff0000" ', f' stroke="{theme.resolve(theme.colors.primary)}" '
+        ).encode()
+        self.__spinner.load(svg)
+        self.__spinner.setFixedSize(theme.metrics.icon_l, theme.metrics.icon_l)
+
     def setSpinnerSize(self, w: int, h: int) -> None:
         """
-        Sets the size of the spinner.
+        Sets the size of the spinner. It is reset to the default size when the theme
+        changes.
 
         Args:
             w (int): New width.

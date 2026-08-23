@@ -106,28 +106,34 @@ class TreeWidgetEditor(QWidget, Generic[T]):
             self.__init_ui()
 
         def __init_ui(self) -> None:
-            self.__duplicate_action = self.addAction(
-                IconProvider.get_qta_icon("fa6s.clone"), self.tr("Duplicate item")
+            self.__duplicate_action = self.addAction(self.tr("Duplicate item"))
+            IconProvider.bind_qta_icon(
+                self.__duplicate_action,
+                self.__duplicate_action.setIcon,
+                "mdi6.content-duplicate",
             )
             self.__duplicate_action.setShortcut("Ctrl+D")
             self.__duplicate_action.triggered.connect(self.duplicateRequested.emit)
 
             self.addSeparator()
 
-            self.__cut_action = self.addAction(
-                IconProvider.get_qta_icon("mdi6.content-cut"), self.tr("Cut item")
+            self.__cut_action = self.addAction(self.tr("Cut item"))
+            IconProvider.bind_qta_icon(
+                self.__cut_action, self.__cut_action.setIcon, "mdi6.content-cut"
             )
             self.__cut_action.setShortcut("Ctrl+X")
             self.__cut_action.triggered.connect(self.cutRequested.emit)
 
-            self.__copy_action = self.addAction(
-                IconProvider.get_qta_icon("mdi6.content-copy"), self.tr("Copy item")
+            self.__copy_action = self.addAction(self.tr("Copy item"))
+            IconProvider.bind_qta_icon(
+                self.__copy_action, self.__copy_action.setIcon, "mdi6.content-copy"
             )
             self.__copy_action.setShortcut("Ctrl+C")
             self.__copy_action.triggered.connect(self.copyRequested.emit)
 
-            self.__paste_action = self.addAction(
-                IconProvider.get_qta_icon("mdi6.content-paste"), self.tr("Paste item")
+            self.__paste_action = self.addAction(self.tr("Paste item"))
+            IconProvider.bind_qta_icon(
+                self.__paste_action, self.__paste_action.setIcon, "mdi6.content-paste"
             )
             self.__paste_action.setShortcut("Ctrl+V")
             self.__paste_action.triggered.connect(self.pasteRequested.emit)
@@ -246,22 +252,25 @@ class TreeWidgetEditor(QWidget, Generic[T]):
         self._tool_bar.setFixedWidth(132)
         hlayout.addWidget(self._tool_bar)
 
-        add_action: QAction = self._tool_bar.addAction(
-            IconProvider.get_qta_icon("mdi6.plus"), self.tr("Add new item...")
-        )
+        add_action: QAction = self._tool_bar.addAction(self.tr("Add new item..."))
+        IconProvider.bind_qta_icon(add_action, add_action.setIcon, "mdi6.plus")
         add_action.triggered.connect(self.onAdd.emit)
 
         self._remove_action = self._tool_bar.addAction(
-            IconProvider.get_qta_icon("mdi6.minus"),
-            self.tr("Remove selected item(s)...") + " (" + self.tr("Del") + ")",
+            self.tr("Remove selected item(s)...") + " (" + self.tr("Del") + ")"
+        )
+        IconProvider.bind_qta_icon(
+            self._remove_action, self._remove_action.setIcon, "mdi6.minus"
         )
         self._remove_action.setDisabled(True)
         self._remove_action.setShortcut("Delete")
         self._remove_action.triggered.connect(self.__remove_selected_items)
 
         self._edit_action = self._tool_bar.addAction(
-            IconProvider.get_qta_icon("mdi6.pencil"),
-            self.tr("Edit selected item...") + " (" + self.tr("Double click") + ")",
+            self.tr("Edit selected item...") + " (" + self.tr("Double click") + ")"
+        )
+        IconProvider.bind_qta_icon(
+            self._edit_action, self._edit_action.setIcon, "mdi6.pencil"
         )
         self._edit_action.setDisabled(True)
         self._edit_action.triggered.connect(self.__edit_selected_item)
@@ -271,6 +280,7 @@ class TreeWidgetEditor(QWidget, Generic[T]):
 
     def __init_tree_widget(self) -> None:
         self._tree_widget = TreeWidgetEditor.TreeWidget()
+        self._tree_widget.setProperty("no_header", True)
         self._tree_widget.setTextElideMode(Qt.TextElideMode.ElideMiddle)
         self._tree_widget.setHeaderHidden(True)
         self._tree_widget.setSelectionMode(QTreeWidget.SelectionMode.ExtendedSelection)

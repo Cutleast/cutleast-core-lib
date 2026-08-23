@@ -5,23 +5,25 @@ Copyright (c) Cutleast
 """
 
 import os
+import sys
 from abc import ABCMeta
 from collections.abc import Generator
 from pathlib import Path
 
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem
+from PySide6.QtWidgets import QApplication
 
 from cutleast_core_lib.core.cache.cache import Cache
 from cutleast_core_lib.core.config.app_config import AppConfig
+from cutleast_core_lib.test.utils import Utils
+from cutleast_core_lib.ui.theme.manager import ThemeManager
+from cutleast_core_lib.ui.theme.ui_mode import UiMode
 from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
-from cutleast_core_lib.ui.utilities.ui_mode import UIMode
 
 from .setup.clipboard_mock import ClipboardMock
 
 os.environ["QT_QPA_PLATFORM"] = "offscreen"  # render widgets off-screen
-
-IconProvider(UIMode.Dark, "#ffffff")  # make sure that the icon provider is initialized
 
 
 class BaseTest(metaclass=ABCMeta):
@@ -50,9 +52,7 @@ class BaseTest(metaclass=ABCMeta):
         return Path.cwd()
 
     @pytest.fixture(name="test_fs")
-    def _base_test_fs(
-        self, real_cwd: Path, data_folder: Path, fs: FakeFilesystem
-    ) -> FakeFilesystem:
+    def _base_test_fs(self, data_folder: Path, fs: FakeFilesystem) -> FakeFilesystem:
         """
         Creates a fake filesystem for testing and adds required files.
 
@@ -62,8 +62,8 @@ class BaseTest(metaclass=ABCMeta):
 
         fs.add_real_directory(data_folder)
 
-        # Add venv
-        fs.add_real_directory(real_cwd / ".venv")
+        # Add the active virtual environment.
+        fs.add_real_directory(Path(sys.prefix))
 
         return fs
 
@@ -77,6 +77,23 @@ class BaseTest(metaclass=ABCMeta):
         """
 
         return AppConfig.load(data_folder / "config")
+
+    @pytest.fixture(autouse=True)
+    def _theme_manager(self, qapp: QApplication) -> Generator[ThemeManager]:
+        """
+        Provides an initialized theme manager and icon provider for UI tests.
+        """
+
+        if ThemeManager.has_instance():
+            yield ThemeManager.get()
+            return
+
+        theme_manager = ThemeManager(qapp, "#ffffff", UiMode.Dark)
+
+        yield theme_manager
+
+        Utils.reset_singleton(IconProvider)
+        Utils.reset_singleton(ThemeManager)
 
     @pytest.fixture
     def cache(self, test_fs: FakeFilesystem) -> Cache:
@@ -94,9 +111,7 @@ class BaseTest(metaclass=ABCMeta):
         return Cache.get_optional() or Cache(Path("test_cache"), "development")
 
     @pytest.fixture
-    def clipboard(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> Generator[ClipboardMock, None, None]:
+    def clipboard(self, monkeypatch: pytest.MonkeyPatch) -> Generator[ClipboardMock]:
         """
         Fixture to mock the clipboard using `setup.clipboard.Clipboard`.
         Patches `QtGui.QClipboard.setText` and `QtGui.QClipboard.text`.

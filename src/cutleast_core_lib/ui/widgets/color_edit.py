@@ -4,11 +4,12 @@ Copyright (c) Cutleast
 
 from typing import Any, override
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QColorDialog, QHBoxLayout, QLineEdit, QPushButton
 
 from ..utilities.icon_provider import IconProvider
+from .icon_button import IconButton
 
 
 class ColorLineEdit(QLineEdit):
@@ -39,9 +40,7 @@ class ColorLineEdit(QLineEdit):
         # Push Choose Color Button to the right-hand side
         hlayout.addStretch()
 
-        self.__choose_color_button = QPushButton()
-        self.__choose_color_button.setIconSize(QSize(22, 22))
-        self.__choose_color_button.setIcon(
+        self.__choose_color_button = IconButton(
             IconProvider.get_qta_icon("mdi6.square-rounded")
         )
         self.__choose_color_button.clicked.connect(self.__choose_color)
@@ -60,7 +59,13 @@ class ColorLineEdit(QLineEdit):
         super().setText(text)
 
         self.__choose_color_button.setIcon(
-            IconProvider.get_qta_icon("mdi6.square-rounded", color=self.text())
+            IconProvider.get_qta_icon(
+                "mdi6.square-rounded",
+                color=self.text(),
+                color_disabled=self.text(),
+                color_active=self.text(),
+                color_selected=self.text(),
+            )
         )
 
     def __choose_color(self) -> None:

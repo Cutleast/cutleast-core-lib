@@ -1,0 +1,111 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* General */
+* {
+    color: ${texts.text.color};
+    font-family: '${texts.text.family}';
+    font-weight: ${texts.text.weight};
+    font-size: ${texts.text.size};
+}
+*:disabled {
+    color: ${texts.secondary.color};
+}
+
+[title=true] {
+    color: ${texts.title.color};
+    font-family: '${texts.title.family}';
+    font-weight: ${texts.title.weight};
+    font-size: ${texts.title.size};
+}
+
+[subtitle=true] {
+    color: ${texts.subtitle.color};
+    font-family: '${texts.subtitle.family}';
+    font-weight: ${texts.subtitle.weight};
+    font-size: ${texts.subtitle.size};
+}
+
+[emphasized=true] {
+    color: ${texts.emphasized.color};
+    font-family: '${texts.emphasized.family}';
+    font-weight: ${texts.emphasized.weight};
+    font-size: ${texts.emphasized.size};
+}
+
+[secondary=true] {
+    color: ${texts.secondary.color};
+    font-family: '${texts.secondary.family}';
+    font-weight: ${texts.secondary.weight};
+    font-size: ${texts.secondary.size};
+}
+
+[monospace=true] {
+    color: ${texts.monospace.color};
+    font-family: '${texts.monospace.family}';
+    font-weight: ${texts.monospace.weight};
+    font-size: ${texts.monospace.size};
+}
+
+[transparent=true],
+[transparent=true]:disabled {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+/* Base widgets */
+QWidget {
+    background-color: ${colors.bg_base};
+    border-color: ${colors.border};
+}
+QWidget:disabled {
+    background-color: ${colors.surface_disabled};
+    /* border-color: transparent; */
+}
+
+/* Labels */
+QLabel,
+QLabel:disabled {
+    background-color: transparent;
+}
+
+QLabel[primary=true] {
+    color: ${colors.primary_fg};
+}
+QLabel[state="error"] {
+    color: ${colors.error_fg};
+}
+QLabel[state="warning"] {
+    color: ${colors.warning_fg};
+}
+QLabel[state="success"] {
+    color: ${colors.success_fg};
+}
+QLabel[state="information"] {
+    color: ${colors.information_fg};
+}
+
+QLCDNumber {
+    background-color: transparent;
+    color: ${texts.title.color};
+    min-height: 1em;
+}
+
+/* Collapsible labels */
+CollapsibleLabel[expandable=true] {
+    padding-right: 40px;
+}
+CollapsibleLabel QPushButton#toggle_button {
+    border-color: transparent;
+}
+
+/* Windows, Messageboxes and Dialogs */
+QMainWindow,
+QDialog,
+QWidget#root,
+QMainWindow:disabled,
+QDialog:disabled,
+QWidget#root:disabled {
+    background-color: ${colors.bg_base};
+}

@@ -1,6 +1,7 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
+src/cutleast_core_lib/ui/resources_rc.py
 build/
 dist/
 wheels/

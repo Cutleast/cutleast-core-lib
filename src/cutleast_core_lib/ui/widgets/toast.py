@@ -25,7 +25,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from cutleast_core_lib.ui.utilities.position import Position
+from ..theme.manager import ThemeManager
+from ..utilities.position import Position
 
 
 class Toast(QWidget):
@@ -235,9 +236,16 @@ class Toast(QWidget):
         """
 
         if isinstance(icon, QIcon):
-            icon = icon.pixmap(24, 24)
+            icon = icon.pixmap(
+                ThemeManager.get().theme.metrics.icon_l,
+                ThemeManager.get().theme.metrics.icon_l,
+            )
         elif isinstance(icon, str):
-            icon = QIcon(icon).pixmap(24, 24)
+            icon = QIcon(icon).pixmap(
+                ThemeManager.get().theme.metrics.icon_l,
+                ThemeManager.get().theme.metrics.icon_l,
+            )
+
         self.__icon_label.setPixmap(icon)
         self.__update_size()
 

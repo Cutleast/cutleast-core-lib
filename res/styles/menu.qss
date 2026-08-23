@@ -1,0 +1,67 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Menus */
+QMenu::separator {
+    margin: ${metrics.spacing_xs};
+    height: ${metrics.border_width};
+    background-color: ${colors.border};
+}
+
+QMenu::item {
+    background-color: transparent;
+    border-radius: ${metrics.radius_ms};
+    margin: 1px;
+    padding: ${metrics.spacing_ms} ${metrics.spacing};
+    padding-left: 12px;
+    padding-right: 24px;
+}
+QMenu::item:disabled {
+    color: ${texts.secondary.color};
+}
+QMenu::item:selected:!disabled {
+    background-color: ${colors.surface_hover};
+}
+
+QMenu::icon {
+    padding-left: 10px;
+}
+
+QMenu::right-arrow {
+    width: 24px;
+    height: 24px;
+    image: url(${resources.arrow_right});
+}
+QMenu::right-arrow:disabled {
+    image: url(${resources.arrow_right_disabled});
+}
+
+/* Menu Checkboxes */
+QMenu QCheckBox {
+    border-radius: ${metrics.radius_ms};
+    padding: ${metrics.spacing_ms} ${metrics.spacing};
+}
+QMenu QCheckBox:hover {
+    background-color: ${colors.surface_hover};
+}
+QMenu QCheckBox::indicator {
+    width: 12px;
+    height: 12px;
+}
+
+/* Menubar */
+QMenuBar {
+    background-color: ${colors.bg_base};
+    padding-left: ${metrics.spacing};
+    padding-top: ${metrics.spacing_s};
+}
+
+QMenuBar::item {
+    background-color: ${colors.bg_base};
+    border-radius: ${metrics.radius};
+    padding: ${metrics.spacing_s} ${metrics.spacing};
+}
+QMenuBar::item:selected:!disabled {
+    background-color: ${colors.surface_hover};
+}

@@ -9,6 +9,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QFileDialog, QHBoxLayout, QLineEdit, QPushButton
 
 from ..utilities.icon_provider import IconProvider
+from .icon_button import IconButton
 
 
 class BrowseLineEdit(QLineEdit):
@@ -59,8 +60,10 @@ class BrowseLineEdit(QLineEdit):
         # Push Browse Button to the right-hand side
         hlayout.addStretch()
 
-        self.__browse_button = QPushButton()
-        self.__browse_button.setIcon(IconProvider.get_qta_icon("fa5s.folder-open"))
+        self.__browse_button = IconButton()
+        IconProvider.bind_qta_icon(
+            self.__browse_button, self.__browse_button.setIcon, "mdi6.folder-open"
+        )
         self.__browse_button.clicked.connect(self.__browse)
         self.__browse_button.setCursor(Qt.CursorShape.ArrowCursor)
         hlayout.addWidget(self.__browse_button)

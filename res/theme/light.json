@@ -1,0 +1,89 @@
+{
+    "ui_mode": "Light",
+    "colors": {
+        // Background colors
+        "bg_base": "${neutral_palette.tone_100}",
+        "bg_subtle": "${neutral_palette.tone_95}",
+        "bg_elevated": "${neutral_palette.tone_80}",
+        // Surface colors
+        "surface": "${neutral_palette.tone_95}",
+        "surface_hover": "${neutral_palette.tone_90}",
+        "surface_pressed": "${neutral_palette.tone_80}",
+        "surface_selected": "${colors.primary_bg}",
+        "surface_disabled": "${neutral_palette.tone_100}",
+        // Border colors
+        "border": "${neutral_palette.tone_80}",
+        "border_strong": "${neutral_palette.tone_60}",
+        // Effect colors
+        "shadow": "#46000000",
+        // Primary colors
+        "primary": "${primary_palette.tone_50}",
+        "primary_fg": "${primary_palette.tone_40}",
+        "primary_bg": "${primary_palette.tone_90}",
+        "primary_bg_hover": "${primary_palette.tone_80}",
+        "primary_bg_pressed": "${primary_palette.tone_70}",
+        "primary_bg_disabled": "${colors.surface_disabled}",
+        // Status colors
+        "error": "${error_palette.tone_50}",
+        "error_fg": "${error_palette.tone_40}",
+        "error_bg": "${error_palette.tone_90}",
+        "error_bg_hover": "${error_palette.tone_80}",
+        "error_bg_pressed": "${error_palette.tone_70}",
+        "error_bg_disabled": "${colors.surface_disabled}",
+        "caution": "${caution_palette.tone_50}",
+        "caution_fg": "${caution_palette.tone_40}",
+        "caution_bg": "${caution_palette.tone_90}",
+        "caution_bg_hover": "${caution_palette.tone_80}",
+        "caution_bg_pressed": "${caution_palette.tone_70}",
+        "caution_bg_disabled": "${colors.surface_disabled}",
+        "warning": "${warning_palette.tone_50}",
+        "warning_fg": "${warning_palette.tone_40}",
+        "warning_bg": "${warning_palette.tone_95}",
+        "warning_bg_hover": "${warning_palette.tone_90}",
+        "warning_bg_pressed": "${warning_palette.tone_80}",
+        "warning_bg_disabled": "${colors.surface_disabled}",
+        "success": "${success_palette.tone_50}",
+        "success_fg": "${success_palette.tone_40}",
+        "success_bg": "${success_palette.tone_95}",
+        "success_bg_hover": "${success_palette.tone_90}",
+        "success_bg_pressed": "${success_palette.tone_80}",
+        "success_bg_disabled": "${colors.surface_disabled}",
+        "information": "${information_palette.tone_50}",
+        "information_fg": "${information_palette.tone_40}",
+        "information_bg": "${information_palette.tone_90}",
+        "information_bg_hover": "${information_palette.tone_80}",
+        "information_bg_pressed": "${information_palette.tone_70}",
+        "information_bg_disabled": "${colors.surface_disabled}"
+    },
+    "texts": {
+        "title": {
+            "color": "${neutral_palette.tone_0}"
+        },
+        "subtitle": {
+            "color": "${neutral_palette.tone_10}"
+        },
+        "text": {
+            "color": "${neutral_palette.tone_20}"
+        },
+        "secondary": {
+            "color": "${neutral_palette.tone_40}"
+        }
+    },
+    "resources": {
+        "arrow_down": ":/core-lib/icons/light/arrow_down.svg",
+        "arrow_down_disabled": ":/core-lib/icons/disabled/arrow_down.svg",
+        "arrow_left": ":/core-lib/icons/light/arrow_left.svg",
+        "arrow_left_disabled": ":/core-lib/icons/disabled/arrow_left.svg",
+        "arrow_right": ":/core-lib/icons/light/arrow_right.svg",
+        "arrow_right_disabled": ":/core-lib/icons/disabled/arrow_right.svg",
+        "arrow_up": ":/core-lib/icons/light/arrow_up.svg",
+        "arrow_up_disabled": ":/core-lib/icons/disabled/arrow_up.svg",
+        "checkmark": ":/core-lib/icons/light/checkmark.svg"
+    },
+    "meta": {
+        "checked_bg": "${primary_palette.tone_70}",
+        "checked_bg_hover": "${primary_palette.tone_80}",
+        "checked_bg_disabled": "${neutral_palette.tone_50}",
+        "window_bg": "#ffffff"
+    }
+}

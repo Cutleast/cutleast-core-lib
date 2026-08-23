@@ -1,0 +1,49 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Toolbars */
+QToolBar {
+    background-color: ${colors.surface};
+    border: ${metrics.border_width} solid ${colors.border};
+    border-radius: ${metrics.radius_l};
+    padding: ${metrics.spacing_xs};
+}
+QToolBar::separator {
+    margin: ${metrics.spacing_xs};
+    width: ${metrics.border_width};
+    background-color: ${colors.border};
+}
+
+QToolBar > QToolButton {
+    border-color: transparent;
+    border-radius: ${metrics.radius_l};
+    padding: ${metrics.spacing_xs};
+}
+
+QToolBar > QToolButton:disabled {
+    background-color: ${colors.surface};
+    border-color: ${colors.surface};
+}
+
+QToolBar > QToolButton[highlighted=true] {
+    background-color: ${colors.primary_bg};
+    color: ${colors.primary_fg};
+}
+
+QToolBar > QToolButton[highlighted=true]:hover {
+    background-color: ${colors.primary_bg_hover};
+}
+
+QToolBar > QLabel {
+    margin: 0 ${metrics.spacing_s};
+}
+
+QToolButton::menu-button:hover,
+QToolButton::menu-button:selected,
+QToolButton::menu-button:pressed {
+    background-color: transparent;
+}
+QToolButton::menu-arrow {
+    image: url(${resources.arrow_down});
+}

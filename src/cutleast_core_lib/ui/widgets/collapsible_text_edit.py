@@ -5,10 +5,12 @@ Copyright (c) Cutleast
 from typing import Optional, override
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon, QResizeEvent
+from PySide6.QtGui import QResizeEvent
 from PySide6.QtWidgets import QPlainTextEdit, QPushButton, QSizePolicy, QWidget
 
-from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
+from ..theme.manager import ThemeManager
+from ..utilities.icon_provider import IconProvider
+from .icon_button import IconButton
 
 
 class CollapsibleTextEdit(QPlainTextEdit):
@@ -27,16 +29,12 @@ class CollapsibleTextEdit(QPlainTextEdit):
         bool: `True` if expanded, `False` if collapsed.
     """
 
-    __expand_icon: QIcon
-    __collapse_icon: QIcon
     __toggle_button: QPushButton
+    __toggle_icon: IconProvider.ThemeIconBinding
 
     @override
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
-
-        self.__expand_icon = IconProvider.get_icon("arrow_down")
-        self.__collapse_icon = IconProvider.get_icon("arrow_up")
 
         self.__init_ui()
 
@@ -45,12 +43,18 @@ class CollapsibleTextEdit(QPlainTextEdit):
         self.adjustSize()
 
     def __init_ui(self) -> None:
-        self.__toggle_button = QPushButton(self)
+        self.__toggle_button = IconButton()
+        self.__toggle_icon = IconProvider.bind_custom_icon(
+            self.__toggle_button,
+            self.__toggle_button.setIcon,
+            lambda: IconProvider.get_icon(
+                "arrow_up" if self.isExpanded() else "arrow_down"
+            ),
+        )
         self.__toggle_button.setObjectName("toggle_button")
-        self.__toggle_button.setIcon(self.__collapse_icon)
         self.__toggle_button.setCheckable(True)
         self.__toggle_button.setChecked(True)
-        self.__toggle_button.setFixedSize(39, 36)
+        # self.__toggle_button.setFixedSize(39, 36)
         self.__toggle_button.show()
 
     @override
@@ -64,7 +68,6 @@ class CollapsibleTextEdit(QPlainTextEdit):
 
     def __toggle(self, expanded: bool) -> None:
         if expanded:
-            self.__toggle_button.setIcon(self.__collapse_icon)
             self.__toggle_button.setToolTip(self.tr("Reduce"))
             self.setMinimumHeight(70)
             self.setMaximumHeight(CollapsibleTextEdit.MAX_HEIGHT)
@@ -73,15 +76,15 @@ class CollapsibleTextEdit(QPlainTextEdit):
             )
             self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         else:
-            self.__toggle_button.setIcon(self.__expand_icon)
             self.__toggle_button.setToolTip(self.tr("Expand"))
             self.setFixedHeight(36)
             self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             self.verticalScrollBar().setValue(0)
 
+        self.__toggle_icon.refresh()
         self.setProperty("expanded", expanded)
-        self.style().unpolish(self)
-        self.style().polish(self)
+        ThemeManager.update_widget_styles(self)
+
         self.toggled.emit(expanded)
 
     def setExpanded(self, expanded: bool) -> None:

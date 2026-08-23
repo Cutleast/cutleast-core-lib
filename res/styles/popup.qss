@@ -1,0 +1,42 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Tooltips & Popups */
+QToolTip,
+Popup QFrame#content_frame,
+TooltipPopup QFrame#content_frame {
+    background-color: ${colors.surface};
+    color: ${texts.text.color};
+    border: ${metrics.border_width} solid ${colors.border};
+    padding: ${metrics.spacing_s} ${metrics.spacing};
+    border-radius: ${metrics.radius};
+}
+
+/* Toast */
+Toast, Toast QLabel {
+    background: transparent;
+    color: ${texts.text.color};
+    border: none;
+    padding: 0px;
+    margin: 0px;
+}
+Toast QFrame {
+    background: ${colors.surface};
+    border-radius: ${metrics.radius};
+    padding: ${metrics.spacing};
+}
+Toast QFrame#content_frame {
+    border: ${metrics.border_width} solid ${colors.border};
+}
+
+/* About Dialog */
+AboutDialog [title=true] {
+    font-size: ${meta.about_dialog_title_size};
+    font-weight: 400;
+}
+
+/* Messagebox */
+QMessageBox QAbstractButton {
+    min-width: 50px;
+}

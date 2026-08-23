@@ -1,0 +1,33 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Popup surfaces */
+QComboBox QAbstractItemView,
+QMenu,
+QMenu:disabled {
+    background-color: ${colors.surface};
+    color: ${texts.text.color};
+    border: ${metrics.border_width} solid ${colors.border};
+    border-radius: ${metrics.radius};
+    padding: ${metrics.spacing_xs};
+}
+
+/* Checkable indicator foundation */
+QGroupBox::indicator,
+QCheckBox::indicator,
+QRadioButton::indicator {
+    width: 16px;
+    height: 16px;
+    background-color: ${colors.surface};
+    margin-right: ${metrics.spacing_s};
+    border-radius: ${metrics.radius_s};
+    padding: ${metrics.spacing_xs};
+}
+
+QGroupBox::indicator:hover,
+QCheckBox::indicator:hover,
+QRadioButton::indicator:hover {
+    background-color: ${colors.surface_hover};
+    border-color: ${colors.surface_hover};
+}

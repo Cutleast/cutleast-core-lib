@@ -10,17 +10,18 @@ from argparse import Namespace
 from pathlib import Path
 from typing import Optional, override
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QMainWindow
-
-from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
-from cutleast_core_lib.ui.utilities.ui_mode import UIMode
 
 from .core.config.app_config import AppConfig
 from .core.utilities.exception_handler import ExceptionHandler
 from .core.utilities.exe_info import get_current_path, get_execution_info
 from .core.utilities.logger import Logger
 from .core.utilities.updater import Updater
-from .ui.utilities.theme_manager import ThemeManager
+from .ui.utilities.state_manager import WidgetStateManager
+from .ui.utilities.tooltip_manager import TooltipManager
+from .ui.utilities.window_manager import WindowManager
+from .ui.widgets.stylesheet_editor import StylesheetEditorWidget
 
 
 class ABCQtMeta(type(QApplication), ABCMeta):  # pyright: ignore[reportGeneralTypeIssues]
@@ -67,11 +68,11 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
     main_window: QMainWindow
     """The main window of the application."""
 
-    theme_manager: Optional[ThemeManager]
-    """The theme manager."""
-
     exception_handler: ExceptionHandler
     """The custom sys.excepthook handler redirecting exceptions to an ErrorDialog."""
+
+    state_manager: WidgetStateManager
+    """The widget state manager for saving and restoring widget states."""
 
     def __init__(self, args: Namespace) -> None:
         """
@@ -82,6 +83,7 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
         super().__init__()
 
         self.args = args
+        self.state_manager = WidgetStateManager(self.data_path)
 
         self._init()
 
@@ -108,23 +110,25 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
         )
         self.logger.setLevel(self.app_config.log_level)
         self.exception_handler = ExceptionHandler(self)
-
-        self.theme_manager = self._get_theme_manager()
-        if self.theme_manager is not None:
-            self.theme_manager.apply_to_app(self)
-        # Make sure that the icon provider is initialized without a theme manager
-        else:
-            ui_mode = self.app_config.ui_mode
-            if ui_mode == UIMode.System:
-                ui_mode = ThemeManager.detect_system_ui_mode()
-
-            IconProvider(ui_mode, "#ffffff" if ui_mode == UIMode.Dark else "#000000")
-
         self.main_window = self._init_main_window()
+
+        TooltipManager(self)
+        WindowManager()
 
         self._log_basic_info()
         self.app_config.print_settings_to_log()
         self.log.info("App started.")
+
+        compiled: bool = get_execution_info()[1]
+        if not compiled:
+            style_editor_window = StylesheetEditorWidget()
+            style_editor_window.setWindowTitle(self.tr("Stylesheet Editor"))
+            style_editor_window.setWindowFlag(Qt.WindowType.Window, True)
+            style_editor_window.resize(1400, 800)
+            WidgetStateManager.get().register_geometry(
+                "stylesheet_editor", style_editor_window
+            )
+            WindowManager.get().show(style_editor_window)
 
     @abstractmethod
     def _load_app_config(self) -> AppConfig:
@@ -133,15 +137,6 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
 
         Returns:
             AppConfig: The application config.
-        """
-
-    @abstractmethod
-    def _get_theme_manager(self) -> Optional[ThemeManager]:
-        """
-        Gets the theme manager.
-
-        Returns:
-            Optional[ThemeManager]: The theme manager.
         """
 
     @abstractmethod
@@ -214,6 +209,7 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
 
         retcode: int = super().exec()
 
+        self.state_manager.save()
         self._shutdown()
         self.clean()
 

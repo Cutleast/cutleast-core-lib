@@ -33,15 +33,19 @@ class TreeMenu(Menu):
         self.__init_item_actions()
 
     def __init_item_actions(self) -> None:
-        self._expand_all_action = self.addAction(
-            IconProvider.get_qta_icon("mdi6.arrow-expand-vertical"),
-            self.tr("Expand all"),
+        self._expand_all_action = self.addAction(self.tr("Expand all"))
+        IconProvider.bind_qta_icon(
+            self._expand_all_action,
+            self._expand_all_action.setIcon,
+            "mdi6.arrow-expand-vertical",
         )
         self._expand_all_action.triggered.connect(self.expand_all_clicked.emit)
 
-        self._collapse_all_action = self.addAction(
-            IconProvider.get_qta_icon("mdi6.arrow-collapse-vertical"),
-            self.tr("Collapse all"),
+        self._collapse_all_action = self.addAction(self.tr("Collapse all"))
+        IconProvider.bind_qta_icon(
+            self._collapse_all_action,
+            self._collapse_all_action.setIcon,
+            "mdi6.arrow-collapse-vertical",
         )
         self._collapse_all_action.triggered.connect(self.collapse_all_clicked.emit)
 

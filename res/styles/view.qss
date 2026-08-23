@@ -1,0 +1,143 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* List Widget & Treeview */
+QListWidget,
+QTreeView {
+    border: ${metrics.border_width} solid ${colors.border};
+    border-radius: ${metrics.radius};
+    alternate-background-color: ${colors.bg_subtle};
+}
+QListWidget::item {
+    color: ${texts.text.color};
+    padding: ${metrics.spacing_s};
+}
+QListWidget::item:first {
+    border-top-left-radius: ${metrics.radius};
+    border-top-right-radius: ${metrics.radius};
+}
+QListWidget::item:last {
+    border-bottom-left-radius: ${metrics.radius};
+    border-bottom-right-radius: ${metrics.radius};
+}
+QListWidget::item:selected,
+QTreeView::item:selected {
+    color: ${colors.primary_fg};
+}
+QListWidget::item:selected,
+QListWidget::item:hover,
+QTreeView::item:selected,
+QTreeView::item:hover {
+    background-color: ${colors.surface_hover};
+}
+QListWidget::item:disabled,
+QTreeView::item:disabled {
+    background-color: transparent;
+    color: ${texts.secondary.color};
+}
+
+QTreeView::branch {
+    padding: ${metrics.spacing_xs};
+    border: none;
+    background-color: transparent;
+}
+QTreeView::branch:has-children {
+    image: url(${resources.arrow_right});
+}
+QTreeView::branch:has-children:open {
+    image: url(${resources.arrow_down});
+}
+QTreeView::item {
+    border: none;
+    padding: ${metrics.spacing_xs} ${metrics.spacing_s};
+}
+QTreeView > * > QScrollBar:vertical {
+    margin-top: 32px;
+    margin-bottom: 0;
+}
+QTreeView[no_header=true] > * > QScrollBar:vertical {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* TreeWidgetEditor */
+TreeWidgetEditor > QToolBar {
+    padding: 0px;
+    background-color: ${colors.surface};
+}
+TreeWidgetEditor > QToolBar,
+TreeWidgetEditor > QToolBar:disabled,
+TreeWidgetEditor > QToolBar > QToolButton:disabled {
+    background-color: ${colors.surface};
+}
+TreeWidgetEditor > QToolBar > QToolButton {
+    margin: ${metrics.spacing_xs};
+    border-radius: ${metrics.radius};
+}
+TreeWidgetEditor > QToolBar > QToolButton:disabled {
+    border-color: ${colors.surface};
+}
+
+/* Header View */
+QHeaderView {
+    background-color: ${colors.surface};
+    border-top-left-radius: ${metrics.radius};
+    border-top-right-radius: ${metrics.radius};
+    border-bottom: ${metrics.border_width} solid ${colors.border};
+    color: ${texts.subtitle.color};
+    font-weight: ${texts.emphasized.weight};
+}
+QHeaderView::section {
+    background-color: transparent;
+    border: ${metrics.border_width} solid ${colors.border};
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    border-top-color: transparent;
+    padding: ${metrics.spacing_s} ${metrics.spacing_l};
+}
+QHeaderView::section:first {
+    border-top-left-radius: ${metrics.radius};
+}
+QHeaderView::section:last {
+    border-right-color: transparent;
+    border-top-right-radius: ${metrics.radius};
+}
+QHeaderView::down-arrow,
+QHeaderView::up-arrow {
+    width: 20px;
+    height: 20px;
+}
+QHeaderView::down-arrow {
+    image: url(${resources.arrow_down});
+}
+QHeaderView::up-arrow {
+    image: url(${resources.arrow_up});
+}
+
+/* Checkbox Indicators */
+QAbstractItemView::indicator,
+QAbstractItemView QCheckBox::indicator {
+    width: 12px;
+    height: 12px;
+    background-color: ${colors.bg_subtle};
+    margin-right: ${metrics.spacing_s};
+    border-radius: 3px;
+    padding: ${metrics.spacing_xs};
+}
+QAbstractItemView::indicator:hover {
+    background-color: ${colors.surface_hover};
+}
+QAbstractItemView::indicator:checked {
+    image: url(${resources.checkmark});
+    background-color: ${meta.checked_bg};
+}
+QAbstractItemView::indicator:checked:hover {
+    background-color: ${meta.checked_bg_hover};
+}
+QAbstractItemView::indicator:disabled {
+    background-color: transparent;
+}
+QAbstractItemView::indicator:checked:disabled {
+    background-color: ${colors.surface_disabled};
+}

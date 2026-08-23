@@ -5,19 +5,19 @@ Copyright (c) Cutleast
 import webbrowser
 from typing import Optional
 
-from PySide6.QtCore import QSize, Qt
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QDialog,
     QHBoxLayout,
     QLabel,
     QListWidget,
-    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
 
 from ..utilities.icon_provider import IconProvider
+from .tab_widget import TabWidget
 
 
 class AboutDialog(QDialog):
@@ -54,16 +54,15 @@ class AboutDialog(QDialog):
         vlayout = QVBoxLayout()
         self.setLayout(vlayout)
 
-        tab_widget = QTabWidget()
-        tab_widget.tabBar().setExpanding(True)
-        tab_widget.setObjectName("centered_tab")
-        tab_widget.setIconSize(QSize(16, 16))
+        tab_widget = TabWidget()
+        tab_widget.setTabBarAlignment(Qt.AlignmentFlag.AlignHCenter)
         vlayout.addWidget(tab_widget)
 
         about_tab = QWidget()
-        about_tab.setObjectName("transparent")
         tab_widget.addTab(about_tab, self.tr("About"))
-        tab_widget.setTabIcon(0, IconProvider.get_qta_icon("fa5s.info-circle"))
+        IconProvider.bind_qta_icon(
+            tab_widget, lambda icon: tab_widget.setTabIcon(0, icon), "mdi6.information"
+        )
 
         hlayout = QHBoxLayout()
         about_tab.setLayout(hlayout)
@@ -83,7 +82,7 @@ class AboutDialog(QDialog):
         vlayout.addSpacing(25)
 
         title_label = QLabel(f"{app_name} v{app_version}")
-        title_label.setObjectName("h1")
+        title_label.setProperty("title", True)
         vlayout.addWidget(title_label)
 
         if text is None:
@@ -108,9 +107,10 @@ class AboutDialog(QDialog):
 
         licenses_tab = QListWidget()
         tab_widget.addTab(licenses_tab, self.tr("Used Software"))
-        tab_widget.setTabIcon(
-            1,
-            IconProvider.get_qta_icon("mdi6.script-text-outline"),
+        IconProvider.bind_qta_icon(
+            tab_widget,
+            lambda icon: tab_widget.setTabIcon(1, icon),
+            "mdi6.script-text-outline",
         )
 
         licenses_tab.addItems(list(licenses.keys()))

@@ -49,8 +49,6 @@ class ProgressWidget(BaseProgressWidget, QWidget):
         self._start_update_timer()
 
     def __init_ui(self) -> None:
-        self.setContentsMargins(0, 0, 0, 0)
-
         self.__vlayout = QVBoxLayout(self)
         self.__vlayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__vlayout.setContentsMargins(0, 0, 0, 0)
@@ -59,12 +57,8 @@ class ProgressWidget(BaseProgressWidget, QWidget):
         self.__main_progress = ProgressBarWidget()
 
         self.__additional_progress_scroll_area = SmoothScrollArea()
-        self.__additional_progress_scroll_area.setProperty("transparent", True)
         self.__additional_progress_scroll_area.setWidgetResizable(True)
-        self.__additional_progress_scroll_area.setContentsMargins(0, 0, 0, 0)
         self.__additional_progress_widget = QWidget()
-        self.__additional_progress_widget.setProperty("transparent", True)
-        self.__additional_progress_widget.setContentsMargins(0, 0, 0, 0)
         self.__additional_progress_vlayout = QVBoxLayout()
         self.__additional_progress_vlayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__additional_progress_vlayout.setContentsMargins(0, 0, 0, 0)

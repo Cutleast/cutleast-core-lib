@@ -1,0 +1,15 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Splitter */
+QSplitter,
+QSplitter::handle {
+    background-color: transparent;
+}
+QSplitter::handle:vertical {
+    margin: 0 ${metrics.spacing_xs};
+}
+QSplitter::handle:horizontal {
+    margin: ${metrics.spacing_xs} 0;
+}

@@ -4,8 +4,6 @@ Copyright (c) Cutleast
 
 from typing import Optional, override
 
-from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
-from cutleast_core_lib.ui.utilities.position import Position
 from PySide6.QtCore import (
     QAbstractAnimation,
     QByteArray,
@@ -18,13 +16,11 @@ from PySide6.QtCore import (
     Qt,
     QTimer,
 )
-from PySide6.QtWidgets import (
-    QFrame,
-    QHBoxLayout,
-    QPushButton,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QPushButton, QVBoxLayout, QWidget
+
+from ..utilities.icon_provider import IconProvider
+from ..utilities.position import Position
+from .icon_button import IconButton
 
 
 class Popup(QWidget):
@@ -114,8 +110,10 @@ class Popup(QWidget):
         header_layout.setContentsMargins(0, 0, 0, 0)
         header_layout.setSpacing(0)
         header_layout.addStretch()
-        self._dismiss_button = QPushButton()
-        self._dismiss_button.setIcon(IconProvider.get_qta_icon("mdi6.close"))
+        self._dismiss_button = IconButton()
+        IconProvider.bind_qta_icon(
+            self._dismiss_button, self._dismiss_button.setIcon, "mdi6.close"
+        )
         self._dismiss_button.setObjectName("popup_dismiss_button")
         self._dismiss_button.setFixedSize(20, 20)
         self._dismiss_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)

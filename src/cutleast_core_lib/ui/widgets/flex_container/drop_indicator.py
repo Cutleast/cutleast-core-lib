@@ -8,7 +8,7 @@ from PySide6.QtCore import Property, Qt
 from PySide6.QtGui import QColor, QPainter, QPaintEvent, QPen
 from PySide6.QtWidgets import QWidget
 
-from cutleast_core_lib.ui.utilities.theme import HexColorStr
+from cutleast_core_lib.ui.theme.models.types import HexColorStr
 
 from .drop_zone import DropZone
 

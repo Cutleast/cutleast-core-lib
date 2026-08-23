@@ -1,0 +1,160 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Regular buttons */
+QAbstractButton {
+    background-color: ${colors.surface};
+    border: ${metrics.border_width} solid ${colors.surface};
+    border-radius: ${metrics.radius};
+    padding: ${metrics.spacing_ms} ${metrics.spacing_l};
+}
+QAbstractButton,
+QAbstractButton > QLabel {
+    font-family: ${texts.subtitle.family};
+    font-weight: ${texts.subtitle.weight};
+}
+QAbstractButton > QLabel {
+    background-color: transparent;
+}
+QAbstractButton:hover {
+    background-color: ${colors.surface_hover};
+    border-color: ${colors.surface_hover};
+}
+QAbstractButton:pressed {
+    background-color: ${colors.surface_pressed};
+    border-color: ${colors.surface_pressed};
+}
+QAbstractButton:checked {
+    border-color: ${colors.primary};
+}
+QAbstractButton:disabled {
+    background-color: ${colors.surface_disabled};
+    color: ${texts.secondary.color};
+}
+
+/* Icon buttons */
+IconButton {
+    padding: ${metrics.spacing_ms};
+}
+
+/* Primary buttons */
+QAbstractButton[default=true],
+QAbstractButton[primary=true] {
+    background-color: ${colors.primary_bg};
+    border-color: ${colors.primary_bg};
+    color: ${colors.primary_fg};
+}
+QAbstractButton[default=true] > QLabel:enabled,
+QAbstractButton[primary=true] > QLabel:enabled {
+    color: ${colors.primary_fg};
+}
+QAbstractButton[default=true]:hover,
+QAbstractButton[primary=true]:hover {
+    background-color: ${colors.primary_bg_hover};
+    border-color: ${colors.primary_bg_hover};
+}
+QAbstractButton[default=true]:disabled,
+QAbstractButton[primary=true]:disabled {
+    background-color: ${colors.surface_disabled};
+    border-color: ${colors.border};
+    color: ${texts.secondary.color};
+}
+/* Shortcut buttons */
+ShortcutButton #icon_label {
+    margin-left: ${metrics.spacing};
+}
+ShortcutButton #text_label {
+    margin: 0;
+}
+ShortcutButton[has_icon=false] #text_label {
+    margin-left: ${metrics.spacing};
+}
+ShortcutButton #shortcut_label {
+    color: ${texts.secondary.color};
+    font-family: ${texts.secondary.family};
+    font-size: ${texts.secondary.size};
+    font-weight: ${texts.secondary.weight};
+    margin-right: ${metrics.spacing};
+}
+
+/* Destructive buttons */
+QAbstractButton[destructive=true] {
+    background-color: ${colors.error_bg};
+    border-color: ${colors.error_bg};
+    color: ${colors.error_fg};
+}
+QAbstractButton[destructive=true] > QLabel:enabled {
+    color: ${colors.error_fg};
+}
+QAbstractButton[destructive=true]:hover:!disabled {
+    background-color: ${colors.error_bg_hover};
+}
+QAbstractButton[destructive=true]:disabled {
+    background-color: ${colors.error_bg_disabled};
+    border-color: ${colors.border};
+    color: ${texts.secondary.color};
+}
+QAbstractButton[default=true] > QLabel:disabled,
+QAbstractButton[destructive=true] > QLabel:disabled {
+    color: ${texts.secondary.color};
+}
+
+/* Transparent buttons */
+QAbstractButton[default=true][transparent=true]:disabled,
+QAbstractButton[primary=true][transparent=true]:disabled,
+QAbstractButton[destructive=true][transparent=true]:disabled {
+    border-color: transparent;
+}
+QAbstractButton[transparent=true]:hover:!disabled {
+    background-color: ${colors.surface_hover};
+}
+QAbstractButton[default=true][transparent=true]:hover:!disabled,
+QAbstractButton[primary=true][transparent=true]:hover:!disabled {
+    background-color: ${colors.primary_bg};
+    border-color: ${colors.primary_bg};
+}
+QAbstractButton[destructive=true][transparent=true]:hover:!disabled {
+    background-color: ${colors.error_bg};
+    border-color: ${colors.error_bg};
+}
+
+/* Checkboxes & Radiobuttons */
+QCheckBox,
+QRadioButton,
+QCheckBox:hover,
+QRadioButton:hover,
+QCheckBox:disabled,
+QRadioButton:disabled {
+    background-color: transparent;
+    border: none;
+    color: ${texts.text.color};
+    font-family: ${texts.text.family};
+    font-size: ${texts.text.size};
+    font-weight: ${texts.text.weight};
+    padding: ${metrics.spacing_s};
+}
+
+QCheckBox::indicator:checked {
+    image: url(${resources.checkmark});
+}
+QRadioButton::indicator {
+    border-radius: 10px;
+    width: 10px;
+    height: 10px;
+    border: ${metrics.spacing_s} solid ${colors.surface};
+}
+
+QCheckBox::indicator:checked,
+QRadioButton::indicator:checked {
+    background-color: ${meta.checked_bg};
+}
+QCheckBox::indicator:checked:hover,
+QRadioButton::indicator:checked:hover {
+    background-color: ${meta.checked_bg_hover};
+    border-color: ${colors.surface_hover};
+}
+QCheckBox::indicator:checked:disabled,
+QRadioButton::indicator:checked:disabled {
+    background-color: ${meta.checked_bg_disabled};
+}

@@ -30,8 +30,6 @@ class ProgressBarWidget(QWidget):
         self.__init_ui()
 
     def __init_ui(self) -> None:
-        self.setContentsMargins(0, 0, 0, 0)
-
         self.__vlayout = QVBoxLayout()
         self.__vlayout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.__vlayout)

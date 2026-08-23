@@ -1,0 +1,66 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/core-lib">
+        <!-- Dark mode icons -->
+        <file>icons/dark/arrow_down.svg</file>
+        <file>icons/dark/arrow_left.svg</file>
+        <file>icons/dark/arrow_right.svg</file>
+        <file>icons/dark/arrow_up.svg</file>
+        <file>icons/dark/checkmark.svg</file>
+
+        <!-- Disabled icons -->
+        <file>icons/disabled/arrow_down.svg</file>
+        <file>icons/disabled/arrow_left.svg</file>
+        <file>icons/disabled/arrow_right.svg</file>
+        <file>icons/disabled/arrow_up.svg</file>
+
+        <!-- Light mode icons -->
+        <file>icons/light/arrow_down.svg</file>
+        <file>icons/light/arrow_left.svg</file>
+        <file>icons/light/arrow_right.svg</file>
+        <file>icons/light/arrow_up.svg</file>
+        <file>icons/light/checkmark.svg</file>
+
+        <!-- Other icons -->
+        <file alias="icons/arrow_down.svg">icons/dark/arrow_down.svg</file>
+        <file alias="icons/arrow_left.svg">icons/dark/arrow_left.svg</file>
+        <file alias="icons/arrow_right.svg">icons/dark/arrow_right.svg</file>
+        <file alias="icons/arrow_up.svg">icons/dark/arrow_up.svg</file>
+        <file>icons/close.svg</file>
+        <file>icons/discord.png</file>
+        <file>icons/exit.svg</file>
+        <file>icons/ko-fi.png</file>
+        <file>icons/nexus_mods.png</file>
+        <file>icons/qt.svg</file>
+        <file>icons/quick_reference.svg</file>
+        <file>icons/search.svg</file>
+        <file>icons/spinner.svg</file>
+
+        <!-- Stylesheets -->
+        <file>styles/base.qss</file>
+        <file>styles/common.qss</file>
+        <file>styles/area.qss</file>
+        <file>styles/buttons.qss</file>
+        <file>styles/inputs.qss</file>
+        <file>styles/menu.qss</file>
+        <file>styles/popup.qss</file>
+        <file>styles/progress.qss</file>
+        <file>styles/scroll.qss</file>
+        <file>styles/splitter.qss</file>
+        <file>styles/statusbar.qss</file>
+        <file>styles/tab.qss</file>
+        <file>styles/toolbar.qss</file>
+        <file>styles/view.qss</file>
+
+        <!-- Themes -->
+        <file>theme/base.json</file>
+        <file>theme/dark.json</file>
+        <file>theme/light.json</file>
+
+        <!-- Fonts -->
+        <file>fonts/Inter-VariableFont_opsz,wght.ttf</file>
+        <file>fonts/Inter-Italic-VariableFont_opsz,wght.ttf</file>
+        <file>fonts/RobotoMono-VariableFont_wght.ttf</file>
+        <file>fonts/RobotoMono-Italic-VariableFont_wght.ttf</file>
+    </qresource>
+</RCC>

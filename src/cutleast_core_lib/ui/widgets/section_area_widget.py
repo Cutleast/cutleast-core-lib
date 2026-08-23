@@ -6,10 +6,10 @@ from enum import Enum
 from typing import Optional
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QGridLayout, QPushButton, QWidget
 
 from ..utilities.icon_provider import IconProvider
+from .icon_button import IconButton
 
 
 class SectionAreaWidget(QWidget):
@@ -50,11 +50,9 @@ class SectionAreaWidget(QWidget):
     __direction: Direction
     __stretch_content: bool
 
-    __chevron_down_icon: QIcon
-    __chevron_up_icon: QIcon
-
     __glayout: QGridLayout
     __toggle_button: QPushButton
+    __toggle_icon: IconProvider.ThemeIconBinding
 
     def __init__(
         self,
@@ -88,9 +86,6 @@ class SectionAreaWidget(QWidget):
         self.__direction = direction
         self.__stretch_content = stretch_content
 
-        self.__chevron_down_icon = IconProvider.get_qta_icon("mdi6.chevron-down")
-        self.__chevron_up_icon = IconProvider.get_qta_icon("mdi6.chevron-up")
-
         self.__init_ui(toggle_position)
 
         self.__toggle_button.toggled.connect(self.__toggle)
@@ -111,13 +106,28 @@ class SectionAreaWidget(QWidget):
         self.__glayout.setColumnStretch(1, 1)
         self.__glayout.addWidget(self.__header_widget, self.__direction.value, 1)
 
-        self.__toggle_button = QPushButton()
-        self.__toggle_button.setObjectName("toggle_button")
-        self.__toggle_button.setIcon(
-            self.__chevron_down_icon
-            if self.__direction == SectionAreaWidget.Direction.Down
-            else self.__chevron_up_icon
+        self.__toggle_button = IconButton()
+
+        def get_icon_name() -> str:
+            if self.__direction == SectionAreaWidget.Direction.Down:
+                return (
+                    "mdi6.chevron-up"
+                    if self.__toggle_button.isChecked()
+                    else "mdi6.chevron-down"
+                )
+            else:
+                return (
+                    "mdi6.chevron-down"
+                    if self.__toggle_button.isChecked()
+                    else "mdi6.chevron-up"
+                )
+
+        self.__toggle_icon = IconProvider.bind_custom_icon(
+            self.__toggle_button,
+            self.__toggle_button.setIcon,
+            lambda: IconProvider.get_qta_icon(get_icon_name()),
         )
+        self.__toggle_button.setObjectName("toggle_button")
         self.__toggle_button.setCheckable(True)
         self.__toggle_button.setChecked(False)
         self.__glayout.addWidget(
@@ -132,13 +142,7 @@ class SectionAreaWidget(QWidget):
         self.__content_widget.hide()
 
     def __toggle(self, expanded: bool) -> None:
-        if (expanded and self.__direction == SectionAreaWidget.Direction.Down) or (
-            not expanded and self.__direction == SectionAreaWidget.Direction.Up
-        ):
-            self.__toggle_button.setIcon(self.__chevron_up_icon)
-        else:
-            self.__toggle_button.setIcon(self.__chevron_down_icon)
-
+        self.__toggle_icon.refresh()
         self.__content_widget.setVisible(expanded)
 
         if expanded:

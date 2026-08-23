@@ -1,0 +1,168 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Text Edits */
+QLineEdit,
+QTextEdit,
+QPlainTextEdit,
+QSpinBox,
+QDoubleSpinBox {
+    background-color: ${colors.surface};
+    border: ${metrics.border_width} solid ${colors.surface};
+    border-radius: ${metrics.radius};
+    padding: ${metrics.spacing_ms} ${metrics.spacing};
+    placeholder-text-color: ${texts.secondary.color};
+}
+QPlainTextEdit {
+    border-color: ${colors.border};
+}
+QLineEdit:read-only,
+QTextEdit:read-only,
+QPlainTextEdit:read-only {
+    background-color: ${colors.surface_disabled};
+}
+QLineEdit:hover:!read-only,
+QTextEdit:hover:!read-only,
+QPlainTextEdit:hover:!read-only,
+QSpinBox:hover,
+QDoubleSpinBox:hover {
+    background-color: ${colors.surface_hover};
+}
+QLineEdit:focus:!read-only,
+QTextEdit:focus:!read-only,
+QPlainTextEdit:focus:!read-only,
+QComboBox:editable:focus,
+QSpinBox:focus,
+QDoubleSpinBox:focus {
+    background-color: ${colors.surface};
+}
+QLineEdit:focus:!read-only,
+QComboBox:editable:focus,
+QSpinBox:focus,
+QDoubleSpinBox:focus {
+    border-color: ${colors.border_strong};
+}
+
+/* Text Edits with buttons */
+QLineEdit QPushButton,
+QTextEdit QPushButton,
+QPlainTextEdit QPushButton {
+    border-color: transparent;
+    padding: ${metrics.spacing_s};
+    margin: ${metrics.spacing_xs};
+    background-color: transparent;
+}
+QLineEdit QPushButton:disabled,
+QTextEdit QPushButton:disabled,
+QPlainTextEdit QPushButton:disabled {
+    border-color: transparent;
+    background-color: transparent;
+}
+QLineEdit:hover:!focus QPushButton:hover,
+QTextEdit:hover:!focus QPushButton:hover,
+QPlainTextEdit:hover:!focus QPushButton:hover {
+    background-color: ${colors.surface_pressed};
+}
+
+BrowseLineEdit,
+ColorLineEdit,
+CopyLineEdit,
+PasteLineEdit,
+KeyLineEdit {
+    padding-right: 38px;
+}
+SearchBar {
+    padding-right: 76px;
+}
+
+ColorLineEdit QPushButton {
+    padding: ${metrics.spacing_xs};
+}
+
+/* Comboboxes */
+QComboBox {
+    background-color: ${colors.surface};
+    border: ${metrics.border_width} solid ${colors.surface};
+    border-radius: ${metrics.radius};
+    padding: ${metrics.spacing_ms} ${metrics.spacing};
+}
+QComboBox:hover {
+    background-color: ${colors.surface_hover};
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: right;
+    padding-right: ${metrics.spacing};
+    border-radius: ${metrics.radius_s};
+    border: none;
+}
+QComboBox::down-arrow {
+    width: 1.2em;
+    height: 1.2em;
+    image: url(${resources.arrow_down});
+}
+QComboBox QAbstractItemView::item {
+    background-color: ${colors.surface};
+    border-radius: ${metrics.radius_ms};
+    padding: ${metrics.spacing_ms} ${metrics.spacing};
+}
+QComboBox QAbstractItemView::item:selected {
+    color: ${texts.text.color};
+}
+QComboBox QAbstractItemView::item:hover {
+    background-color: ${colors.surface_hover};
+}
+QComboBox QAbstractItemView::item:hover:!selected {
+    color: ${texts.text.color};
+}
+
+/* Spinboxes */
+QSpinBox::up-button,
+QSpinBox::down-button,
+QDoubleSpinBox::up-button,
+QDoubleSpinBox::down-button {
+    border: 0px;
+    border-radius: ${metrics.radius_s};
+}
+QSpinBox::up-button:hover,
+QSpinBox::down-button:hover,
+QDoubleSpinBox::up-button:hover,
+QDoubleSpinBox::down-button:hover {
+    background-color: ${colors.surface_pressed};
+}
+QSpinBox::up-button,
+QDoubleSpinBox::up-button {
+    image: url(${resources.arrow_up});
+}
+QSpinBox::down-button,
+QDoubleSpinBox::down-button {
+    image: url(${resources.arrow_down});
+}
+QSpinBox::up-button:disabled,
+QDoubleSpinBox::up-button:disabled {
+    image: url(${resources.arrow_up_disabled});
+}
+QComboBox::down-arrow:disabled,
+QSpinBox::down-button:disabled,
+QDoubleSpinBox::down-button:disabled {
+    image: url(${resources.arrow_down_disabled});
+}
+
+/* Collapsible text edit */
+CollapsibleTextEdit {
+    padding-right: 40px;
+    padding-top: ${metrics.spacing_s};
+}
+CollapsibleTextEdit[expanded=false]:focus {
+    border-color: ${colors.border_strong};
+}
+CollapsibleTextEdit QPushButton#toggle_button {
+    border-color: transparent;
+}
+
+/* Text edit with line number gutter */
+LineNumberTextEdit > #line_number_area {
+    background-color: transparent;
+    border-right: ${metrics.border_width} solid ${colors.border};
+}

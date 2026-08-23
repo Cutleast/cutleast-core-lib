@@ -5,8 +5,12 @@ Copyright (c) Cutleast
 from typing import Any, override
 
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton
 
+from cutleast_core_lib.ui.widgets.icon_button import IconButton
+
+from ..theme.manager import ThemeManager
 from ..utilities.icon_provider import IconProvider
 
 
@@ -35,22 +39,32 @@ class SearchBar(QLineEdit):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
-        self.addAction(
-            IconProvider.get_qta_icon("fa6s.magnifying-glass"),
-            QLineEdit.ActionPosition.LeadingPosition,
+        search_icon_action: QAction = self.addAction(
+            QIcon(), QLineEdit.ActionPosition.LeadingPosition
         )
+        IconProvider.bind_qta_icon(
+            search_icon_action, search_icon_action.setIcon, "fa6s.magnifying-glass"
+        )
+
         self.setPlaceholderText(self.tr("Search..."))
 
         hlayout = QHBoxLayout()
-        hlayout.setContentsMargins(0, 0, 5, 0)
+        hlayout.setContentsMargins(0, 0, 4, 0)
         self.setLayout(hlayout)
 
         hlayout.addStretch()
 
         self.__search_hint_label = QLabel()
         self.__search_hint_label.setCursor(Qt.CursorShape.ArrowCursor)
-        self.__search_hint_label.setPixmap(
-            IconProvider.get_qta_icon("mdi6.alert-outline").pixmap(20, 20)
+        IconProvider.bind_qta_icon(
+            self.__search_hint_label,
+            lambda icon: self.__search_hint_label.setPixmap(
+                icon.pixmap(
+                    ThemeManager.get().theme.metrics.icon,
+                    ThemeManager.get().theme.metrics.icon,
+                )
+            ),
+            "mdi6.alert-outline",
         )
         self.__search_hint_label.setToolTip(
             self.tr("Live search disabled. Press Enter to search.")
@@ -58,9 +72,11 @@ class SearchBar(QLineEdit):
         self.__search_hint_label.hide()
         hlayout.addWidget(self.__search_hint_label)
 
-        self.__cs_toggle = QPushButton()
+        self.__cs_toggle = IconButton()
+        IconProvider.bind_qta_icon(
+            self.__cs_toggle, self.__cs_toggle.setIcon, "mdi6.format-letter-case"
+        )
         self.__cs_toggle.setCursor(Qt.CursorShape.ArrowCursor)
-        self.__cs_toggle.setIcon(IconProvider.get_qta_icon("mdi6.format-letter-case"))
         self.__cs_toggle.setCheckable(True)
         self.__cs_toggle.clicked.connect(self.setFocus)
         self.__cs_toggle.clicked.connect(self.__on_search_change)
@@ -68,9 +84,11 @@ class SearchBar(QLineEdit):
         self.__cs_toggle.hide()
         hlayout.addWidget(self.__cs_toggle)
 
-        self.__clear_button = QPushButton()
+        self.__clear_button = IconButton()
+        IconProvider.bind_qta_icon(
+            self.__clear_button, self.__clear_button.setIcon, "mdi6.close"
+        )
         self.__clear_button.setCursor(Qt.CursorShape.ArrowCursor)
-        self.__clear_button.setIcon(IconProvider.get_qta_icon("mdi6.close"))
         self.__clear_button.clicked.connect(lambda: self.setText(""))
         self.__clear_button.clicked.connect(self.setFocus)
         self.__clear_button.clicked.connect(self.returnPressed.emit)

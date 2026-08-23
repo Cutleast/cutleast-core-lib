@@ -5,10 +5,12 @@ Copyright (c) Cutleast
 from typing import Optional, override
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon, QResizeEvent
+from PySide6.QtGui import QResizeEvent
 from PySide6.QtWidgets import QLabel, QPushButton, QSizePolicy, QWidget
 
-from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
+from ..theme.manager import ThemeManager
+from ..utilities.icon_provider import IconProvider
+from .icon_button import IconButton
 
 
 class CollapsibleLabel(QLabel):
@@ -30,9 +32,8 @@ class CollapsibleLabel(QLabel):
     __text: str = ""
     __treshold: int
 
-    __expand_icon: QIcon
-    __collapse_icon: QIcon
     __toggle_button: QPushButton
+    __toggle_icon: IconProvider.ThemeIconBinding
 
     def __init__(
         self,
@@ -53,8 +54,6 @@ class CollapsibleLabel(QLabel):
         super().__init__(parent)
 
         self.__treshold = treshold
-        self.__expand_icon = IconProvider.get_icon("arrow_down")
-        self.__collapse_icon = IconProvider.get_icon("arrow_up")
 
         self.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.setWordWrap(True)
@@ -69,12 +68,18 @@ class CollapsibleLabel(QLabel):
         self.adjustSize()
 
     def __init_ui(self) -> None:
-        self.__toggle_button = QPushButton(self)
+        self.__toggle_button = IconButton()
+        self.__toggle_icon = IconProvider.bind_custom_icon(
+            self.__toggle_button,
+            self.__toggle_button.setIcon,
+            lambda: IconProvider.get_icon(
+                "arrow_up" if self.isExpanded() else "arrow_down"
+            ),
+        )
         self.__toggle_button.setObjectName("toggle_button")
-        self.__toggle_button.setIcon(self.__collapse_icon)
         self.__toggle_button.setCheckable(True)
         self.__toggle_button.setChecked(True)
-        self.__toggle_button.setFixedSize(39, 36)
+        # self.__toggle_button.setFixedSize(39, 36)
         self.__toggle_button.show()
 
     @override
@@ -88,7 +93,6 @@ class CollapsibleLabel(QLabel):
 
     def __toggle(self, expanded: bool) -> None:
         if expanded:
-            self.__toggle_button.setIcon(self.__collapse_icon)
             self.__toggle_button.setToolTip(self.tr("Reduce"))
             self.setMinimumHeight(0)
             self.setMaximumHeight(CollapsibleLabel.MAX_HEIGHT)
@@ -96,7 +100,6 @@ class CollapsibleLabel(QLabel):
                 self.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Minimum
             )
         else:
-            self.__toggle_button.setIcon(self.__expand_icon)
             self.__toggle_button.setToolTip(self.tr("Expand"))
 
             if self.__toggle_button.isVisible():
@@ -104,9 +107,10 @@ class CollapsibleLabel(QLabel):
             else:
                 self.setMinimumHeight(0)
 
+        self.__toggle_icon.refresh()
         self.setProperty("expanded", expanded)
-        self.style().unpolish(self)
-        self.style().polish(self)
+        ThemeManager.update_widget_styles(self)
+
         self.toggled.emit(expanded)
 
         self.__update_text()

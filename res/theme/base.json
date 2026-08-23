@@ -1,0 +1,78 @@
+{
+    "neutral_palette": {
+        "tone_5": "#111111",
+        "tone_10": "#1b1b1b",
+        "tone_20": "#303030",
+        "tone_30": "#474747",
+        "tone_40": "#5e5e5e",
+        "tone_50": "#777777",
+        "tone_60": "#919191",
+        "tone_70": "#ababab",
+        "tone_80": "#c6c6c6",
+        "tone_90": "#e2e2e2",
+        "tone_95": "#f1f1f1"
+    },
+    "error_color": "#e51e1e", // red
+    "caution_color": "#a733ff", // purple
+    "warning_color": "#ffe100", // yellow
+    "success_color": "#17cd6f", // green
+    "information_color": "#1fa3fc", // blue
+    "texts": {
+        "title": {
+            "family": "Inter",
+            "size": "18px",
+            "weight": 700
+        },
+        "subtitle": {
+            "family": "Inter",
+            "size": "16px",
+            "weight": 600
+        },
+        "text": {
+            "family": "Inter",
+            "size": "12px",
+            "weight": 400
+        },
+        "emphasized": {
+            "family": "Inter",
+            "size": "12px",
+            "weight": 700,
+            "color": "${texts.subtitle.color}"
+        },
+        "secondary": {
+            "family": "Inter",
+            "size": "12px",
+            "weight": 400
+        },
+        "monospace": {
+            "family": "Roboto Mono",
+            "size": "12px",
+            "weight": 400,
+            "color": "${texts.text.color}"
+        }
+    },
+    "metrics": {
+        "spacing_xs": "2px",
+        "spacing_s": "4px",
+        "spacing_ms": "6px",
+        "spacing": "8px",
+        "spacing_l": "12px",
+        "radius_xs": "2px",
+        "radius_s": "4px",
+        "radius_ms": "6px",
+        "radius": "8px",
+        "radius_l": "12px",
+        "border_width": "1px",
+        "border_width_focus": "2px",
+        "icon_s": 8,
+        "icon_ms": 14,
+        "icon": 18,
+        "icon_l": 24,
+        "icon_xl": 32,
+        "shadow_margin": 8,
+        "shadow_size": 4
+    },
+    "meta": {
+        "about_dialog_title_size": "32px"
+    }
+}

@@ -12,15 +12,16 @@ from PySide6.QtWidgets import (
     QLabel,
     QPlainTextEdit,
     QPushButton,
-    QStyle,
     QVBoxLayout,
     QWidget,
 )
 
 from cutleast_core_lib.core.utilities.truncate import truncate_string
 
+from ..theme.manager import ThemeManager
 from ..utilities.icon_provider import IconProvider
 from .copy_button import CopyButton
+from .icon_button import IconButton
 
 
 class ErrorDialog(QDialog):
@@ -39,6 +40,7 @@ class ErrorDialog(QDialog):
 
     __details_box: QPlainTextEdit
     __toggle_details_button: QPushButton
+    __toggle_details_icon: IconProvider.ThemeIconBinding
 
     def __init__(
         self,
@@ -77,10 +79,16 @@ class ErrorDialog(QDialog):
         self.__vlayout.addLayout(hlayout)
 
         icon_label = QLabel()
-        icon_label.setPixmap(
-            self.style()
-            .standardIcon(QStyle.StandardPixmap.SP_MessageBoxCritical)
-            .pixmap(32, 32)
+        IconProvider.bind_qta_icon(
+            icon_label,
+            lambda icon: icon_label.setPixmap(
+                icon.pixmap(
+                    ThemeManager.get().theme.metrics.icon_xl,
+                    ThemeManager.get().theme.metrics.icon_xl,
+                )
+            ),
+            "mdi6.close-circle-outline",
+            color=IconProvider.Color.Error,
         )
         hlayout.addWidget(icon_label)
 
@@ -96,7 +104,7 @@ class ErrorDialog(QDialog):
         text_label.setMinimumWidth(width_hint)
 
         self.__details_box = QPlainTextEdit(self.__details)
-        self.__details_box.setObjectName("monospace")
+        self.__details_box.setProperty("monospace", True)
         self.__details_box.setMinimumHeight(50)
         self.__details_box.setReadOnly(True)
         self.__vlayout.addWidget(self.__details_box, stretch=1)
@@ -105,7 +113,29 @@ class ErrorDialog(QDialog):
         hlayout = QHBoxLayout()
         self.__vlayout.addLayout(hlayout)
 
+        if self.__details:
+            self.__toggle_details_button = IconButton()
+            self.__toggle_details_button.setToolTip(self.tr("Show details..."))
+            self.__toggle_details_icon = IconProvider.bind_custom_icon(
+                self.__toggle_details_button,
+                self.__toggle_details_button.setIcon,
+                lambda: IconProvider.get_qta_icon(
+                    "mdi6.chevron-up"
+                    if self.__details_box.isVisible()
+                    else "mdi6.chevron-down"
+                ),
+            )
+            self.__toggle_details_button.clicked.connect(self.__toggle_details)
+            hlayout.addWidget(self.__toggle_details_button)
+
         hlayout.addStretch()
+
+        copy_button = CopyButton()
+        copy_button.setToolTip(self.tr("Copy error details..."))
+        copy_button.clicked.connect(
+            lambda: QApplication.clipboard().setText(self.__details)
+        )
+        hlayout.addWidget(copy_button)
 
         if self.__yesno:
             yes_button = QPushButton(self.tr("Continue"))
@@ -122,34 +152,14 @@ class ErrorDialog(QDialog):
             ok_button.clicked.connect(self.reject)
             hlayout.addWidget(ok_button)
 
-        copy_button = CopyButton()
-        copy_button.setToolTip(self.tr("Copy error details..."))
-        copy_button.clicked.connect(
-            lambda: QApplication.clipboard().setText(self.__details)
-        )
-        hlayout.addWidget(copy_button)
-
-        if self.__details:
-            self.__toggle_details_button = QPushButton()
-            self.__toggle_details_button.setToolTip(self.tr("Show details..."))
-            self.__toggle_details_button.setIcon(
-                IconProvider.get_qta_icon("fa5s.chevron-down")
-            )
-            self.__toggle_details_button.clicked.connect(self.__toggle_details)
-            hlayout.addWidget(self.__toggle_details_button)
-
     def __toggle_details(self) -> None:
         if not self.__details_box.isVisible():
             self.__details_box.show()
-            self.__toggle_details_button.setIcon(
-                IconProvider.get_qta_icon("fa5s.chevron-up")
-            )
             self.__toggle_details_button.setToolTip(self.tr("Hide details..."))
         else:
             self.__details_box.hide()
-            self.__toggle_details_button.setIcon(
-                IconProvider.get_qta_icon("fa5s.chevron-down")
-            )
             self.__toggle_details_button.setToolTip(self.tr("Show details..."))
+
+        self.__toggle_details_icon.refresh()
 
         self.adjustSize()

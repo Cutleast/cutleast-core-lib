@@ -27,6 +27,9 @@ class SettingsPage(SmoothScrollArea, Generic[T]):
     restart_required_signal = Signal()
     """This signal gets emitted when a setting requires a restart."""
 
+    theme_update_required_signal = Signal()
+    """This signal gets emitted when a setting requires a theme update."""
+
     _initial_config: T
 
     def __init__(self, initial_config: T) -> None:
@@ -38,8 +41,6 @@ class SettingsPage(SmoothScrollArea, Generic[T]):
         super().__init__()
 
         self._initial_config = initial_config
-
-        self.setObjectName("transparent")
 
         self._init_ui()
 

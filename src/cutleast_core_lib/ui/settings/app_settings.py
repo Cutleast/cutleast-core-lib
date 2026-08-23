@@ -22,7 +22,7 @@ from cutleast_core_lib.core.config.validation_utils import ValidationUtils
 from cutleast_core_lib.core.filesystem.scanner import DirectoryScanner
 from cutleast_core_lib.core.utilities.logger import Logger
 from cutleast_core_lib.core.utilities.scale import scale_value
-from cutleast_core_lib.ui.utilities.ui_mode import UIMode
+from cutleast_core_lib.ui.theme.ui_mode import UiMode
 
 from ..widgets.color_edit import ColorLineEdit
 from ..widgets.enum_dropdown import EnumDropdown
@@ -43,7 +43,7 @@ class AppSettings(SettingsPage[AppConfig]):
     __log_level_box: EnumDropdown[Logger.Level]
     __log_visible: QCheckBox
     __accent_color_entry: ColorLineEdit
-    __ui_mode_box: EnumDropdown[UIMode]
+    __ui_mode_box: EnumDropdown[UiMode]
     __clear_cache_button: QPushButton
 
     @override
@@ -70,13 +70,13 @@ class AppSettings(SettingsPage[AppConfig]):
             lambda _: self.changed_signal.emit()
         )
         self.__accent_color_entry.textChanged.connect(
-            lambda _: self.restart_required_signal.emit()
+            lambda _: self.theme_update_required_signal.emit()
         )
         self.__ui_mode_box.currentValueChanged.connect(
             lambda _: self.changed_signal.emit()
         )
         self.__ui_mode_box.currentValueChanged.connect(
-            lambda _: self.restart_required_signal.emit()
+            lambda _: self.theme_update_required_signal.emit()
         )
 
         self.__clear_cache_button.setVisible(self.cache is not None)
@@ -85,7 +85,6 @@ class AppSettings(SettingsPage[AppConfig]):
     @override
     def _init_ui(self) -> None:
         scroll_widget = QWidget()
-        scroll_widget.setObjectName("transparent")
         self.setWidget(scroll_widget)
 
         self._vlayout = QVBoxLayout()
@@ -121,14 +120,13 @@ class AppSettings(SettingsPage[AppConfig]):
             [self._initial_config.__class__.get_default_value("accent_color", str)]
         )
         self.__accent_color_entry.setText(self._initial_config.accent_color)
-        self._basic_flayout.addRow(
-            "*" + self.tr("Accent Color"), self.__accent_color_entry
-        )
+        self._basic_flayout.addRow(self.tr("Accent Color"), self.__accent_color_entry)
 
-        self.__ui_mode_box = EnumDropdown(UIMode, self._initial_config.ui_mode)
-        self._basic_flayout.addRow("*" + self.tr("UI Mode"), self.__ui_mode_box)
+        self.__ui_mode_box = EnumDropdown(UiMode, self._initial_config.ui_mode)
+        self._basic_flayout.addRow(self.tr("UI Mode"), self.__ui_mode_box)
 
         self.__clear_cache_button = QPushButton(self.tr("Clear Cache"))
+        self.__clear_cache_button.setProperty("destructive", True)
         self.__clear_cache_button.setEnabled(
             self.cache is not None and self.cache.path.is_dir()
         )

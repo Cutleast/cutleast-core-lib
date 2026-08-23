@@ -7,13 +7,21 @@ from enum import Enum
 from typing import Any, Generic, Optional, Self, TypeAlias, TypeVar, cast, override
 
 from pydantic import BaseModel
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QBrush, QColor, QFont, QIcon
-from PySide6.QtWidgets import QHeaderView, QTreeWidget, QTreeWidgetItem
+from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
+from PySide6.QtGui import QBrush, QColor, QFont, QFontMetrics, QIcon, QPainter, QPen
+from PySide6.QtWidgets import (
+    QApplication,
+    QHeaderView,
+    QStyle,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
+    QTreeWidget,
+    QTreeWidgetItem,
+)
 
 from cutleast_core_lib.core.utilities.typing_utils import Comparable
 
-from .theme import HexColorStr
+from ..theme.models.types import HexColorStr
 
 # required as Nuitka does not support the new generic class syntax yet
 # TODO: Remove this once Nuitka supports it
@@ -21,6 +29,8 @@ M = TypeVar("M", bound=BaseModel)
 
 Color: TypeAlias = QColor | Qt.GlobalColor | HexColorStr
 """Alias for all accepted types of colors."""
+
+HOVER_BACKGROUND_ROLE: int = Qt.ItemDataRole.UserRole + 1
 
 
 class CellValue(BaseModel, arbitrary_types_allowed=True, frozen=True):
@@ -57,6 +67,14 @@ class ColumnConfig(BaseModel, Generic[M], arbitrary_types_allowed=True, frozen=T
 
     icon_getter: Optional[Callable[[M], Optional[QIcon]]] = None
     """A callable that returns the icon for a model instance."""
+
+    background_color_getter: Optional[Callable[[M], Optional[Color]]] = None
+    """A callable that returns the background color for a model instance."""
+
+    hover_background_color_getter: Optional[Callable[[M], Optional[Color]]] = None
+    """
+    A callable that returns the background color for a hovered or selected model instance.
+    """
 
     foreground_color_getter: Optional[Callable[[M], Optional[Color]]] = None
     """A callable that returns the foreground color for a model instance."""
@@ -137,6 +155,35 @@ class ColumnConfig(BaseModel, Generic[M], arbitrary_types_allowed=True, frozen=T
 
         return None
 
+    def get_background_color(self, item: M) -> Optional[Color]:
+        """
+        Args:
+            item (M): Model instance whose background color should be returned.
+
+        Returns:
+            Optional[Color]: Background color for the model instance.
+        """
+
+        if self.background_color_getter is not None:
+            return self.background_color_getter(item)
+
+        return None
+
+    def get_hover_background_color(self, item: M) -> Optional[Color]:
+        """
+        Args:
+            item (M): Model instance whose background color should be returned.
+
+        Returns:
+            Optional[Color]:
+                Background color for the model instance if it is hovered or selected.
+        """
+
+        if self.hover_background_color_getter is not None:
+            return self.hover_background_color_getter(item)
+
+        return None
+
     def get_foreground_color(self, item: M) -> Optional[Color]:
         """
         Args:
@@ -197,6 +244,8 @@ class ColumnEnum(Enum):
         """
         Applies the column configuration to the given tree widget.
         Columns are ordered by their definition order in the enum.
+        In addition, a delegate is set to ensure that the background role of items is
+        prioritized over QSS stylesheets.
 
         Args:
             tree_widget: The tree widget to apply the column configuration to.
@@ -208,6 +257,7 @@ class ColumnEnum(Enum):
         tree_widget.setHeaderLabels(
             [column.value.get_title() for column in columns],
         )
+        tree_widget.setItemDelegate(_ItemColorDelegate(tree_widget))
 
         for col in columns:
             if col.value.initial_width is not None:
@@ -369,9 +419,23 @@ class TreeItem(QTreeWidgetItem, Generic[M]):
             icon: Optional[QIcon] = config.get_icon(self._item)
             self.setIcon(column.index, icon if icon is not None else QIcon())
 
-            color: Optional[Color] = config.get_foreground_color(self._item)
+            bg_color: Optional[Color] = config.get_background_color(self._item)
+            self.setBackground(
+                column.index, QBrush(bg_color) if bg_color is not None else QBrush()
+            )
+
+            hover_bg_color: Optional[Color] = config.get_hover_background_color(
+                self._item
+            )
+            self.setData(
+                column.index,
+                HOVER_BACKGROUND_ROLE,
+                QBrush(hover_bg_color) if hover_bg_color is not None else QBrush(),
+            )
+
+            fg_color: Optional[Color] = config.get_foreground_color(self._item)
             self.setForeground(
-                column.index, QBrush(color) if color is not None else QBrush()
+                column.index, QBrush(fg_color) if fg_color is not None else QBrush()
             )
 
             font: Optional[QFont] = config.get_font(self._item)
@@ -455,3 +519,140 @@ class TreeItem(QTreeWidgetItem, Generic[M]):
         return self._get_sort_key_for_column(column) < other._get_sort_key_for_column(
             column
         )
+
+
+class _ItemColorDelegate(QStyledItemDelegate):
+    """
+    Delegate that prioritizes an item's programmatically set colors.
+    """
+
+    @override
+    def paint(
+        self,
+        painter: QPainter,
+        option: QStyleOptionViewItem,
+        index: QModelIndex | QPersistentModelIndex,
+    ) -> None:
+        """
+        Paints an item with its programmatically set colors taking precedence.
+
+        Args:
+            painter (QPainter): Painter used for rendering.
+            option (QStyleOptionViewItem): Current style option.
+            index (QModelIndex | QPersistentModelIndex): Index being rendered.
+        """
+
+        background: Optional[QBrush] = self.__get_brush(
+            index.data(Qt.ItemDataRole.BackgroundRole)
+        )
+        if background is not None:
+            painter.fillRect(option.rect, background)
+
+        hover_background: Optional[QBrush] = self.__get_brush(
+            index.data(HOVER_BACKGROUND_ROLE)
+        )
+        has_custom_hover_background: bool = hover_background is not None and bool(
+            option.state
+            & (QStyle.StateFlag.State_Selected | QStyle.StateFlag.State_MouseOver)
+        )
+        if has_custom_hover_background:
+            painter.fillRect(option.rect, hover_background)
+
+        item_option = QStyleOptionViewItem(option)
+        self.initStyleOption(item_option, index)
+
+        if has_custom_hover_background:
+            item_option.backgroundBrush = cast(QBrush, hover_background)
+
+        state: QStyle.StateFlag = QStyle.StateFlag.State_None
+
+        for flag in (
+            QStyle.StateFlag.State_Enabled,
+            QStyle.StateFlag.State_Selected,
+            QStyle.StateFlag.State_MouseOver,
+        ):
+            if option.state & flag and not (
+                has_custom_hover_background
+                and flag
+                in (QStyle.StateFlag.State_Selected, QStyle.StateFlag.State_MouseOver)
+            ):
+                state |= flag
+
+        item_option.state = state
+        foreground: Optional[QBrush] = self.__get_brush(
+            index.data(Qt.ItemDataRole.ForegroundRole)
+        )
+        text_option = QStyleOptionViewItem(item_option)
+
+        if foreground is not None:
+            item_option.text = ""
+
+        style: QStyle = (
+            item_option.widget.style() if item_option.widget else QApplication.style()
+        )
+        style.drawControl(
+            QStyle.ControlElement.CE_ItemViewItem,
+            item_option,
+            painter,
+            item_option.widget,
+        )
+
+        if foreground is not None:
+            self.__paint_foreground(painter, text_option, foreground)
+
+    @staticmethod
+    def __get_brush(value: Any) -> Optional[QBrush]:
+        """
+        Returns a valid brush from item data.
+
+        Args:
+            value (Any): Item data to convert to a brush.
+
+        Returns:
+            Optional[QBrush]: A valid brush, or None if the data has no brush.
+        """
+
+        if isinstance(value, QBrush) and value.style() != Qt.BrushStyle.NoBrush:
+            return value
+
+        if isinstance(value, QColor) and value.isValid():
+            return QBrush(value)
+
+        return None
+
+    @staticmethod
+    def __paint_foreground(
+        painter: QPainter,
+        option: QStyleOptionViewItem,
+        foreground: QBrush,
+    ) -> None:
+        """
+        Paints item text with its foreground role after QSS has painted the item.
+
+        Args:
+            painter (QPainter): Painter used for rendering.
+            option (QStyleOptionViewItem): Initialized option containing the item text.
+            foreground (QBrush): Brush used to paint the item text.
+        """
+
+        if not option.text:
+            return
+
+        style: QStyle = option.widget.style() if option.widget else QApplication.style()
+        text_rect = style.subElementRect(
+            QStyle.SubElement.SE_ItemViewItemText, option, option.widget
+        )
+        text: str = QFontMetrics(option.font).elidedText(
+            option.text,
+            option.textElideMode,
+            text_rect.width(),
+            int(Qt.TextFlag.TextSingleLine),
+        )
+
+        painter.save()
+        painter.setFont(option.font)
+        painter.setPen(QPen(foreground, 1))
+        painter.drawText(
+            text_rect, int(option.displayAlignment | Qt.AlignmentFlag.AlignVCenter), text
+        )
+        painter.restore()

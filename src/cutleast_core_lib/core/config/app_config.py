@@ -6,8 +6,8 @@ from typing import Annotated, override
 
 from pydantic import Field
 
-from cutleast_core_lib.ui.utilities.theme import HexColorStr
-from cutleast_core_lib.ui.utilities.ui_mode import UIMode
+from cutleast_core_lib.ui.theme.models.types import HexColorStr
+from cutleast_core_lib.ui.theme.ui_mode import UiMode
 
 from ..utilities.logger import Logger
 from .base_config import BaseConfig
@@ -54,7 +54,7 @@ class AppConfig(BaseConfig):
     accent_color: Annotated[HexColorStr, Field(alias="ui.accent_color")] = "#00ffff"
     """Accent color"""
 
-    ui_mode: Annotated[UIMode, Field(alias="ui.mode")] = UIMode.System
+    ui_mode: Annotated[UiMode, Field(alias="ui.mode")] = UiMode.System
     """UI mode"""
 
     @override

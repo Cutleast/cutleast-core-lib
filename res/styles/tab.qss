@@ -1,0 +1,71 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Tab Widget & Tab Bar */
+QTabWidget::pane {
+    background-color: ${colors.bg_base};
+    border: none;
+    padding-top: ${metrics.spacing};
+}
+
+QTabBar {
+    background-color: ${colors.surface};
+    border: ${metrics.border_width} solid ${colors.border};
+    border-radius: ${metrics.radius_l};    
+}
+QTabBar::tab {
+    background-color: ${colors.surface};
+    border: none;
+    border-radius: ${metrics.radius};
+    color: ${texts.subtitle.color};
+    font-weight: ${texts.subtitle.weight};
+    font-family: ${texts.subtitle.family};
+    font-size: ${texts.text.size};
+    margin: ${metrics.spacing_s};
+}
+QTabBar::tab:hover {
+    background-color: ${colors.surface_hover};
+}
+QTabBar::tab:selected {
+    background-color: ${colors.primary_bg};
+    color: ${colors.primary_fg};
+}
+QTabBar::tab:disabled {
+    background-color: transparent;
+    color: ${texts.secondary.color};
+}
+QTabBar::tab:disabled:selected {
+    background-color: ${colors.surface};
+}
+QTabBar::tab:top,
+QTabBar::tab:bottom {
+    padding: ${metrics.spacing_ms} ${metrics.spacing_l};
+}
+QTabBar::tab:top:!last,
+QTabBar::tab:bottom:!last {
+    margin-right: 0px;
+}
+QTabBar::tab:left,
+QTabBar::tab:right {
+    padding: ${metrics.spacing_l} ${metrics.spacing_ms};
+}
+QTabBar::tab:left:!last,
+QTabBar::tab:right:!last {
+    margin-bottom: 0px;
+}
+QTabWidget::tab-bar#centered_tab,
+QTabWidget::tab-bar#icon_bar,
+QTabBar#centered_tab,
+QTabBar#icon_bar {
+    alignment: center;
+}
+QTabBar#icon_bar {
+    padding: ${metrics.spacing_s};
+    width: 40px;
+    height: 40px;
+}
+QTabBar#icon_bar::tab:left {
+    padding-top: -8px;
+    padding-bottom: 8px;
+}

@@ -4,7 +4,7 @@ Copyright (c) Cutleast
 
 from typing import Optional, override
 
-from PySide6.QtCore import QEvent, QMargins, QSize, Qt
+from PySide6.QtCore import QEvent, QMargins, QRect, QSize, Qt
 from PySide6.QtGui import QFontMetrics, QResizeEvent
 from PySide6.QtWidgets import QLabel, QSizePolicy, QWidget
 
@@ -44,7 +44,7 @@ class ElidedLabel(QLabel):
         self.__tooltip_text = tooltip_text
         self.__elide_mode = elide_mode
 
-        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
 
         self.__update_elided_text()
 
@@ -56,6 +56,7 @@ class ElidedLabel(QLabel):
     def setText(self, text: str) -> None:
         self.__full_text = text
 
+        self.updateGeometry()
         self.__update_elided_text()
 
     @override
@@ -75,26 +76,44 @@ class ElidedLabel(QLabel):
         super().changeEvent(event)
 
         if event.type() == QEvent.Type.FontChange:
+            self.updateGeometry()
             self.__update_elided_text()
+
+    @override
+    def setMaximumWidth(self, maxw: int, /) -> None:
+        self.setSizePolicy(
+            QSizePolicy.Policy.Maximum, self.sizePolicy().verticalPolicy()
+        )
+
+        return super().setMaximumWidth(maxw)
 
     @override
     def sizeHint(self) -> QSize:
         metrics = QFontMetrics(self.font())
         margins: QMargins = self.contentsMargins()
+
+        text_rect: QRect = metrics.boundingRect(self.__full_text)
+
+        width: int = text_rect.width() + margins.left() + margins.right()
         height: int = metrics.height() + margins.top() + margins.bottom()
 
-        return QSize(0, height)
-
-    @override
-    def minimumSizeHint(self) -> QSize:
-        return self.sizeHint()
+        return QSize(min(width, self.maximumWidth()), height)
 
     def __update_elided_text(self) -> None:
         metrics = QFontMetrics(self.font())
+
+        available_width: int = self.contentsRect().width()
+
+        # elidedText() works with advances, while glyphs may extend beyond their
+        # advance width. Reserve the difference between both measurements.
+        advance_width: int = metrics.horizontalAdvance(self.__full_text)
+        bounding_width: int = metrics.boundingRect(self.__full_text).width()
+        overhang: int = max(0, bounding_width - advance_width)
+
         elided: str = metrics.elidedText(
             self.__full_text,
             self.__elide_mode,
-            self.width(),
+            max(0, available_width - overhang),
         )
 
         super().setText(elided)

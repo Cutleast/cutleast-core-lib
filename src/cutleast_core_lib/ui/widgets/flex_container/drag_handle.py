@@ -22,6 +22,7 @@ class DragHandle(QLabel):
 
     DEFAULT_HANDLE_SIZE: int = 12
 
+    __drag_icon: IconProvider.ThemeIconBinding
     __handle_size: int
     __press_pos: Optional[QPoint]
     __content_identifier: str
@@ -42,10 +43,12 @@ class DragHandle(QLabel):
         self.__press_pos = None
         self.__content_identifier = content_identifier
 
-        self.setPixmap(
-            IconProvider.get_qta_icon("mdi6.drag").pixmap(
-                self.__handle_size, self.__handle_size
-            )
+        self.__drag_icon = IconProvider.bind_qta_icon(
+            self,
+            lambda icon: self.setPixmap(
+                icon.pixmap(self.__handle_size, self.__handle_size)
+            ),
+            "mdi6.drag",
         )
         self.setCursor(Qt.CursorShape.OpenHandCursor)
         self.setFixedSize(self.__handle_size, self.__handle_size)
@@ -61,11 +64,7 @@ class DragHandle(QLabel):
     def handleSize(self, size: int) -> None:
         self.__handle_size = size
 
-        self.setPixmap(
-            IconProvider.get_qta_icon("mdi6.drag").pixmap(
-                self.__handle_size, self.__handle_size
-            )
-        )
+        self.__drag_icon.refresh()
         self.setFixedSize(size, size)
 
     @override

@@ -1,0 +1,25 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Progressbars */
+QProgressBar {
+    background-color: ${colors.surface};
+    max-height: ${metrics.spacing_s};
+    border-radius: ${metrics.radius_xs};
+}
+QProgressBar::chunk {
+    background-color: ${colors.primary};
+    border-radius: ${metrics.radius_xs};
+}
+QProgressBar#error::chunk,
+QProgressBar[failed="true"]::chunk {
+    background-color: ${colors.error};
+}
+
+/* Spinners */
+SpinnerWidget,
+SpinnerWidget > QSvgWidget,
+SpinnerWidget > QLabel {
+    background-color: transparent;
+}

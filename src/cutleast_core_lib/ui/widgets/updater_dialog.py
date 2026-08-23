@@ -43,7 +43,7 @@ class UpdaterDialog(QDialog):
         self.setLayout(vlayout)
 
         title_label = QLabel(self.tr("An Update is available to download!"))
-        title_label.setObjectName("h2")
+        title_label.setProperty("title", True)
         vlayout.addWidget(title_label)
 
         version_label = QLabel(
@@ -63,11 +63,10 @@ class UpdaterDialog(QDialog):
         vlayout.addSpacing(15)
 
         changelog_label = QLabel(self.tr("What's new?"))
-        changelog_label.setObjectName("h3")
+        changelog_label.setProperty("subtitle", True)
         vlayout.addWidget(changelog_label)
 
         changelog_box = QTextBrowser()
-        changelog_box.setObjectName("transparent")
         changelog_box.setOpenExternalLinks(True)
         changelog_box.setMarkdown(changelog)
         vlayout.addWidget(changelog_box, 1)

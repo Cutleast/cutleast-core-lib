@@ -1,0 +1,17 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Statusbar */
+QStatusBar {
+    background-color: transparent;
+    border-top: ${metrics.border_width} solid ${colors.border};
+}
+QStatusBar QAbstractButton {
+    background-color: transparent;
+    padding: ${metrics.spacing_xs};
+    margin: 0px;
+}
+QStatusBar::item {
+    border: 0px;
+}

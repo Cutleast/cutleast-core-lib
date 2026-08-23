@@ -1,1 +1,3 @@
-recursive-include src/cutleast_core_lib/res *
+recursive-include res *
+recursive-include scripts *
+include hatch_build.py
