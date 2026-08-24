@@ -2,6 +2,8 @@
 Copyright (c) Cutleast
 """
 
+from __future__ import annotations
+
 from collections.abc import Callable
 from enum import Enum
 from typing import Optional, override

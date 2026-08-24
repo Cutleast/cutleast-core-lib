@@ -2,6 +2,8 @@
 Copyright (c) Cutleast
 """
 
+from __future__ import annotations
+
 from typing import Optional, override
 
 from PySide6.QtCore import QRect, QSize, Qt
