@@ -100,7 +100,7 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
         self.__vlayout.addSpacing(5)
 
         self.__cancel_button = QPushButton(self.tr("Cancel"))
-        self.__cancel_button.setObjectName("cancel_button")
+        self.__cancel_button.setProperty("transparent", True)
         self.__cancel_button.setSizePolicy(
             QSizePolicy.Policy.Minimum,
             self.__cancel_button.sizePolicy().verticalPolicy(),

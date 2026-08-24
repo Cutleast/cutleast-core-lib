@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from enum import Enum
-from typing import Optional, override
+from typing import Optional, cast, override
 
 from PySide6.QtCore import QEasingCurve, QPoint, Qt, QVariantAnimation
 from PySide6.QtGui import QMouseEvent, QPainter, QPaintEvent, QPalette, QPixmap
@@ -332,7 +332,7 @@ class StackedWidget(QStackedWidget):
         self._active = True
         current_index: int = self.currentIndex()
         next_index: int = self.indexOf(nextWidget)
-        current_widget: QWidget = self.currentWidget()
+        current_widget: QWidget = cast(QWidget, self.currentWidget())
         next_widget: QWidget = nextWidget
 
         if current_index == next_index:
