@@ -59,6 +59,9 @@ class ColumnConfig(BaseModel, Generic[M], arbitrary_types_allowed=True, frozen=T
     display_text_getter: Callable[[M], str]
     """A callable that returns the display text for a model instance."""
 
+    copy_text_getter: Optional[Callable[[M], str]] = None
+    """A callable that returns the text to copy for a model instance."""
+
     sort_key_getter: Optional[Callable[[M], Comparable]] = None
     """A callable that returns the value used for sorting a model instance."""
 
@@ -110,6 +113,20 @@ class ColumnConfig(BaseModel, Generic[M], arbitrary_types_allowed=True, frozen=T
         Returns:
             str: Display text for the model instance.
         """
+
+        return self.display_text_getter(item)
+
+    def get_copy_text(self, item: M) -> str:
+        """
+        Args:
+            item (M): Model instance whose copy text should be returned.
+
+        Returns:
+            str: Text to copy for the model instance.
+        """
+
+        if self.copy_text_getter is not None:
+            return self.copy_text_getter(item)
 
         return self.display_text_getter(item)
 
