@@ -10,7 +10,7 @@ from collections.abc import Callable
 from threading import Lock
 from typing import Generic, Optional, TypeVar, override
 
-from PySide6.QtCore import QCoreApplication, Qt, QTimerEvent, SignalInstance
+from PySide6.QtCore import Qt, QTimerEvent, SignalInstance
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
     QApplication,
@@ -26,6 +26,7 @@ from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
 from cutleast_core_lib.core.utilities.datetime import format_duration
 from cutleast_core_lib.core.utilities.thread import Thread
 
+from ..theme.manager import ThemeManager
 from .display import ProgressDisplay
 from .taskbar import TaskbarProgressDisplay
 from .widget import ProgressWidget
@@ -245,10 +246,7 @@ class ProgressDialog(ProgressDisplay, QDialog, Generic[T]):
             message_box.button(QMessageBox.StandardButton.No).setText(self.tr("No"))
             message_box.button(QMessageBox.StandardButton.Yes).setText(self.tr("Yes"))
 
-            # Reapply stylesheet as setDefaultButton() doesn't update the style by itself
-            app: Optional[QCoreApplication] = QApplication.instance()
-            if isinstance(app, QApplication):
-                message_box.setStyleSheet(app.styleSheet())
+            ThemeManager.update_widget_styles(message_box)
 
             confirmation = message_box.exec() == QMessageBox.StandardButton.Yes
 
