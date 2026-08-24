@@ -44,6 +44,8 @@ QMenu QCheckBox {
 }
 QMenu QCheckBox:hover {
     background-color: ${colors.surface_hover};
+    /* required as padding is somehow lost on hover otherwise */
+    padding: ${metrics.spacing_ms} ${metrics.spacing};
 }
 QMenu QCheckBox::indicator {
     width: 12px;
