@@ -30,8 +30,8 @@ class UrlEdit(QLineEdit):
         hlayout.addStretch()
 
         self.__open_url_button = IconButton()
-        IconProvider.bind_qta_icon(
-            self.__open_url_button, self.__open_url_button.setIcon, "mdi6.open-in-new"
+        IconProvider.bind_icon(
+            self.__open_url_button, self.__open_url_button.setIcon, "open_in_browser"
         )
         self.__open_url_button.setToolTip(self.tr("Open URL in default browser..."))
         self.__open_url_button.clicked.connect(self.__open_url)

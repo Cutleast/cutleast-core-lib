@@ -1,20 +1,20 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/core-lib">
-        <!-- Dark mode icons -->
+        <!-- Dark mode icons for QSS -->
         <file>icons/dark/arrow_down.svg</file>
         <file>icons/dark/arrow_left.svg</file>
         <file>icons/dark/arrow_right.svg</file>
         <file>icons/dark/arrow_up.svg</file>
         <file>icons/dark/checkmark.svg</file>
 
-        <!-- Disabled icons -->
+        <!-- Disabled icons for QSS -->
         <file>icons/disabled/arrow_down.svg</file>
         <file>icons/disabled/arrow_left.svg</file>
         <file>icons/disabled/arrow_right.svg</file>
         <file>icons/disabled/arrow_up.svg</file>
 
-        <!-- Light mode icons -->
+        <!-- Light mode icons for QSS -->
         <file>icons/light/arrow_down.svg</file>
         <file>icons/light/arrow_left.svg</file>
         <file>icons/light/arrow_right.svg</file>
@@ -31,6 +31,7 @@
         <file>icons/exit.svg</file>
         <file>icons/ko-fi.png</file>
         <file>icons/nexus_mods.png</file>
+        <file>icons/open_in_browser.svg</file>
         <file>icons/qt.svg</file>
         <file>icons/quick_reference.svg</file>
         <file>icons/search.svg</file>
