@@ -3,13 +3,12 @@ Copyright (c) Cutleast
 """
 
 import pytest
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QPushButton
-from pytestqt.qtbot import QtBot
-
 from cutleast_core_lib.test.base_test import BaseTest
 from cutleast_core_lib.test.utils import Utils
 from cutleast_core_lib.ui.widgets.search_bar import SearchBar
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QPushButton
+from pytestqt.qtbot import QtBot
 
 
 class TestSearchBar(BaseTest):
@@ -120,32 +119,35 @@ class TestSearchBar(BaseTest):
         assert not cs_toggle.isChecked()
         assert not widget.getCaseSensitivity()
 
-    def test_live_mode_signal_emission(self, widget: SearchBar, qtbot: QtBot) -> None:
+    def test_text_change_debounces_signal_emission(
+        self, widget: SearchBar, qtbot: QtBot
+    ) -> None:
         """
-        Test that the `searchChanged` signal is emitted in live mode.
+        Tests that text changes emit the latest search after the debounce interval.
         """
-
-        # given
-        widget.setLiveMode(True)
 
         # when
         with qtbot.waitSignal(widget.searchChanged, timeout=1000) as signal:
-            widget.setText("Live Test")
+            widget.setText("First")
+            qtbot.wait(SearchBar.DEBOUNCE_INTERVAL_MS // 2)
+            widget.setText("Final")
 
         # then
-        assert signal.args == ["Live Test", False]
+        assert signal.args == ["Final", False]
 
-    def test_return_pressed_signal(self, widget: SearchBar, qtbot: QtBot) -> None:
+    def test_return_pressed_emits_signal_immediately(
+        self, widget: SearchBar, qtbot: QtBot
+    ) -> None:
         """
-        Test that pressing return emits the searchChanged signal in non-live mode.
+        Tests that pressing return emits the search signal without waiting for debounce.
         """
 
         # given
-        widget.setLiveMode(False)
+        widget.setText("Search Text")
 
         # when
         with qtbot.waitSignal(widget.searchChanged, timeout=1000) as signal:
             qtbot.keyPress(widget, Qt.Key.Key_Return)
 
         # then
-        assert signal.args == ["", False]
+        assert signal.args == ["Search Text", False]
