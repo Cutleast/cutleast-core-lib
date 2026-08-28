@@ -5,7 +5,7 @@ Copyright (c) Cutleast
 from enum import Enum
 from typing import Optional
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QByteArray, Qt, Signal
 from PySide6.QtWidgets import QGridLayout, QPushButton, QWidget
 
 from ..utilities.icon_provider import IconProvider
@@ -186,6 +186,37 @@ class SectionAreaWidget(QWidget):
         """
 
         self.__toggle_button.setVisible(visible)
+
+    def saveState(self) -> QByteArray:
+        """
+        Saves the current state of the section.
+
+        Returns:
+            QByteArray: The saved state.
+        """
+
+        return QByteArray(b"1" if self.isExpanded() else b"0")
+
+    def restoreState(
+        self, state: QByteArray | bytes | bytearray | memoryview, /
+    ) -> bool:
+        """
+        Restores the state of the section.
+
+        Args:
+            state (QByteArray | bytes | bytearray | memoryview):
+                The state to restore.
+
+        Returns:
+            bool: `True` if the state was successfully restored, `False` otherwise.
+        """
+
+        try:
+            self.setExpanded(QByteArray(state) == b"1")
+        except:  # noqa: E722
+            return False
+
+        return True
 
 
 if __name__ == "__main__":
