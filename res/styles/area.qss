@@ -74,11 +74,11 @@ Divider {
 Divider[orientation="horizontal"] {
     min-height: ${metrics.border_width};
     max-height: ${metrics.border_width};
-    margin: ${metrics.spacing_xs} ${metrics.spacing};
+    margin: ${metrics.spacing} 0;
 }
 
 Divider[orientation="vertical"] {
     min-width: ${metrics.border_width};
     max-width: ${metrics.border_width};
-    margin: ${metrics.spacing} ${metrics.spacing_xs};
+    margin: 0 ${metrics.spacing};
 }
