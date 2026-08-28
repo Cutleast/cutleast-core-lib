@@ -43,6 +43,9 @@ class IconProvider(SingletonQObject):
         Primary = "${colors.primary_fg}"
         """Corresponds to the primary color of the current theme."""
 
+        Destructive = "${colors.error_fg}"
+        """Corresponds to the destructive color of the current theme."""
+
         Error = "${colors.error_fg}"
         """Corresponds to the error color of the current theme."""
 
