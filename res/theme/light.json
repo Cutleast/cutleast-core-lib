@@ -84,6 +84,6 @@
         "checked_bg": "${primary_palette.tone_70}",
         "checked_bg_hover": "${primary_palette.tone_80}",
         "checked_bg_disabled": "${neutral_palette.tone_50}",
-        "window_bg": "#ffffff"
+        "window_bg": "#f3f3f3"
     }
 }
