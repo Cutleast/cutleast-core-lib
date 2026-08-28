@@ -21,9 +21,13 @@ from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
+    QLayout,
     QVBoxLayout,
     QWidget,
 )
+
+from cutleast_core_lib.ui.theme.models.theme import Theme
+from cutleast_core_lib.ui.utilities import apply_shadow
 
 from ..theme.manager import ThemeManager
 from ..utilities.position import Position
@@ -121,6 +125,8 @@ class Toast(QWidget):
 
         self.setPosition(pos, offset_taskbar)
         self.__update_size()
+        self.__update_theme(ThemeManager.get().theme)
+        ThemeManager.get().theme_changed.connect(self.__on_theme_changed)
 
         super().hide()
 
@@ -193,6 +199,39 @@ class Toast(QWidget):
         rect.moveCenter(point)
         self.setGeometry(rect)
 
+    def __update_theme(self, theme: Theme) -> None:
+        """
+        Updates shadow settings supplied by the current theme.
+
+        Args:
+            theme (Theme): The theme supplying the shadow metrics and color.
+        """
+
+        layout: Optional[QLayout] = self.layout()
+        if layout is not None:
+            layout.setContentsMargins(
+                theme.metrics.shadow_margin,
+                theme.metrics.shadow_margin,
+                theme.metrics.shadow_margin,
+                theme.metrics.shadow_margin,
+            )
+
+        apply_shadow(
+            widget=self.__frame,
+            size=theme.metrics.shadow_size,
+            shadow_color=theme.resolve(theme.colors.shadow),
+        )
+
+    def __on_theme_changed(self, theme: Theme) -> None:
+        """
+        Updates the popup after the application theme changes.
+
+        Args:
+            theme (Theme): The newly applied application theme.
+        """
+
+        self.__update_theme(theme)
+
     @override
     def show(self) -> None:
         """
@@ -213,8 +252,7 @@ class Toast(QWidget):
         self.__text_label.adjustSize()
         self.__icon_label.adjustSize()
         self.__frame.adjustSize()
-
-        self.setFixedSize(self.__frame.sizeHint())
+        self.adjustSize()
 
     def setText(self, text: str) -> None:
         """
