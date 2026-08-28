@@ -24,7 +24,7 @@ Toast, Toast QLabel {
 Toast QFrame {
     background: ${colors.surface};
     border-radius: ${metrics.radius};
-    padding: ${metrics.spacing};
+    padding: ${metrics.spacing_s};
 }
 Toast QFrame#content_frame {
     border: ${metrics.border_width} solid ${colors.border};
