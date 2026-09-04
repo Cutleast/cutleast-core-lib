@@ -39,8 +39,10 @@ QToolBar > QLabel {
     margin: 0 ${metrics.spacing_s};
 }
 
+QToolButton::menu-button,
 QToolButton::menu-button:hover,
 QToolButton::menu-button:selected,
+QToolButton::menu-button:checked,
 QToolButton::menu-button:pressed {
     background-color: transparent;
 }
