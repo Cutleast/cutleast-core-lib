@@ -358,6 +358,9 @@ class TreeItem(QTreeWidgetItem, Generic[M]):
     _cell_values: dict[ColumnEnum, CellValue]
     """Values supplied externally for individual cells."""
 
+    _sort_keys: dict[ColumnEnum, Comparable]
+    """Cached sort keys derived from the current model values."""
+
     def __init__(
         self, item: M, columns: type[ColumnEnum], checkable: bool = False
     ) -> None:
@@ -374,6 +377,7 @@ class TreeItem(QTreeWidgetItem, Generic[M]):
         self._columns = columns
         self._checkable = checkable
         self._cell_values = {}
+        self._sort_keys = {}
 
         if checkable:
             self.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsSelectable)
@@ -402,7 +406,7 @@ class TreeItem(QTreeWidgetItem, Generic[M]):
             raise ValueError("The column does not belong to this tree item.")
 
         self._cell_values[column] = value
-        self.setText(column.index, value.display_text)
+        self._sort_keys[column] = value.sort_key
 
     def clearValue(self, column: ColumnEnum) -> None:
         """
@@ -427,42 +431,64 @@ class TreeItem(QTreeWidgetItem, Generic[M]):
         Updates the item according to the current model values.
         """
 
+        self._sort_keys.clear()
+
         for column in self._columns:
             config: ColumnConfig[M] = column.config_for(type(self._item))
-
-            self.setText(column.index, config.get_display_text(self._item))
-            self.setToolTip(column.index, config.get_tooltip(self._item))
-
-            icon: Optional[QIcon] = config.get_icon(self._item)
-            self.setIcon(column.index, icon if icon is not None else QIcon())
-
-            bg_color: Optional[Color] = config.get_background_color(self._item)
-            self.setBackground(
-                column.index, QBrush(bg_color) if bg_color is not None else QBrush()
-            )
-
-            hover_bg_color: Optional[Color] = config.get_hover_background_color(
-                self._item
-            )
-            self.setData(
-                column.index,
-                HOVER_BACKGROUND_ROLE,
-                QBrush(hover_bg_color) if hover_bg_color is not None else QBrush(),
-            )
-
-            fg_color: Optional[Color] = config.get_foreground_color(self._item)
-            self.setForeground(
-                column.index, QBrush(fg_color) if fg_color is not None else QBrush()
-            )
-
-            font: Optional[QFont] = config.get_font(self._item)
-            self.setFont(column.index, font if font is not None else QFont())
-
-            self.setTextAlignment(column.index, config.get_alignment(self._item))
-
+            column_index: int = column.index
             cell_value: Optional[CellValue] = self._cell_values.get(column)
-            if cell_value is not None:
-                self.setText(column.index, cell_value.display_text)
+            display_text: str = (
+                cell_value.display_text
+                if cell_value is not None
+                else config.get_display_text(self._item)
+            )
+
+            self._sort_keys[column] = (
+                cell_value.sort_key
+                if cell_value is not None
+                else (
+                    config.sort_key_getter(self._item)
+                    if config.sort_key_getter is not None
+                    else display_text.lower()
+                )
+            )
+            self.setText(column_index, display_text)
+
+            if config.tooltip_getter is not None:
+                self.setToolTip(column_index, config.get_tooltip(self._item))
+
+            if config.icon_getter is not None:
+                icon: Optional[QIcon] = config.get_icon(self._item)
+                self.setIcon(column_index, icon if icon is not None else QIcon())
+
+            if config.background_color_getter is not None:
+                bg_color: Optional[Color] = config.get_background_color(self._item)
+                self.setBackground(
+                    column_index, QBrush(bg_color) if bg_color is not None else QBrush()
+                )
+
+            if config.hover_background_color_getter is not None:
+                hover_bg_color: Optional[Color] = config.get_hover_background_color(
+                    self._item
+                )
+                self.setData(
+                    column_index,
+                    HOVER_BACKGROUND_ROLE,
+                    QBrush(hover_bg_color) if hover_bg_color is not None else QBrush(),
+                )
+
+            if config.foreground_color_getter is not None:
+                fg_color: Optional[Color] = config.get_foreground_color(self._item)
+                self.setForeground(
+                    column_index, QBrush(fg_color) if fg_color is not None else QBrush()
+                )
+
+            if config.font_getter is not None:
+                font: Optional[QFont] = config.get_font(self._item)
+                self.setFont(column_index, font if font is not None else QFont())
+
+            if config.alignment_getter is not None:
+                self.setTextAlignment(column_index, config.get_alignment(self._item))
 
     def setChecked(self, checked: bool) -> None:
         """
@@ -504,8 +530,11 @@ class TreeItem(QTreeWidgetItem, Generic[M]):
         if cell_value is not None:
             return cell_value.sort_key
 
-        config: ColumnConfig[M] = column.config_for(type(self._item))
-        return config.get_sort_key(self._item)
+        if column not in self._sort_keys:
+            config: ColumnConfig[M] = column.config_for(type(self._item))
+            self._sort_keys[column] = config.get_sort_key(self._item)
+
+        return self._sort_keys[column]
 
     @override
     def __lt__(self, other: QTreeWidgetItem) -> bool:
