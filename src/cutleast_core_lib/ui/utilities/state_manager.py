@@ -25,6 +25,7 @@ class WidgetStateManager(SingletonQObject):
 
     STATE_PREFIX = "state-"
     GEOMETRY_PREFIX = "geometry-"
+    CUSTOM_PREFIX = "custom-"
 
     class _StateRegistration(QObject):
         """
@@ -164,6 +165,37 @@ class WidgetStateManager(SingletonQObject):
 
         registration = WidgetStateManager._StateRegistration(
             self, state_id, widget.saveState, cast(QObject, widget)
+        )
+        self.save_requested.connect(registration.save_state)
+
+    def register_custom(
+        self,
+        widget_id: str,
+        state_getter: Callable[[], QByteArray],
+        state_setter: Callable[[QByteArray], None],
+        widget: QWidget,
+    ) -> None:
+        """
+        Registers a custom widget state for management.
+
+        Args:
+            widget_id (str): The unique identifier for the widget.
+            state_getter (Callable[[], QByteArray]):
+                A callable that returns the state as a byte array.
+            state_setter (Callable[[QByteArray], None]):
+                A callable that applies a byte array to the state.
+            widget (QWidget): The widget to be registered.
+        """
+
+        state_id: str = WidgetStateManager.STATE_PREFIX + widget_id
+
+        # Restore the saved state if available
+        state: Optional[QByteArray] = self.get_state(state_id)
+        if state is not None:
+            state_setter(state)
+
+        registration = WidgetStateManager._StateRegistration(
+            self, state_id, state_getter, widget
         )
         self.save_requested.connect(registration.save_state)
 
