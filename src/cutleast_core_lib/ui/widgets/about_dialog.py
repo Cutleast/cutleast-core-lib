@@ -6,8 +6,8 @@ import webbrowser
 from typing import Optional
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
+    QApplication,
     QDialog,
     QHBoxLayout,
     QLabel,
@@ -27,9 +27,6 @@ class AboutDialog(QDialog):
 
     def __init__(
         self,
-        app_name: str,
-        app_version: str,
-        app_icon: QIcon,
         app_license: str,
         licenses: dict[str, str],
         text: Optional[str] = None,
@@ -37,9 +34,6 @@ class AboutDialog(QDialog):
     ) -> None:
         """
         Args:
-            app_name (str): Application name.
-            app_version (str): Application version.
-            app_icon (QIcon): Application icon.
             app_license (str): Name of the app's license.
             licenses (dict[str, str]):
                 Dictionary of used libraries and URL to their license.
@@ -49,7 +43,9 @@ class AboutDialog(QDialog):
 
         super().__init__(parent)
 
-        self.setWindowTitle(self.tr("About"))
+        self.setWindowTitle(
+            self.tr("About") + " " + QApplication.applicationDisplayName()
+        )
 
         vlayout = QVBoxLayout()
         self.setLayout(vlayout)
@@ -70,7 +66,7 @@ class AboutDialog(QDialog):
         hlayout.addSpacing(25)
 
         icon_label = QLabel()
-        icon_label.setPixmap(app_icon.pixmap(128, 128))
+        icon_label.setPixmap(QApplication.windowIcon().pixmap(128, 128))
         hlayout.addWidget(icon_label)
 
         hlayout.addSpacing(15)
@@ -81,7 +77,7 @@ class AboutDialog(QDialog):
         hlayout.addSpacing(25)
         vlayout.addSpacing(25)
 
-        title_label = QLabel(f"{app_name} v{app_version}")
+        title_label = QLabel(QApplication.applicationDisplayName())
         title_label.setProperty("title", True)
         vlayout.addWidget(title_label)
 

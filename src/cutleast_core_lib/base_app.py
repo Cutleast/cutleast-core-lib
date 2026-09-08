@@ -98,9 +98,10 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
         - `applicationVersion()`: The application version.
         """
 
-        self.setApplicationDisplayName(
-            f"{self.applicationName()} v{self.applicationVersion()}"
-        )
+        if self.applicationVersion() != "development":
+            self.setApplicationDisplayName(
+                f"{self.applicationName()} v{self.applicationVersion()}"
+            )
 
         self.app_config = self._load_app_config()
 
