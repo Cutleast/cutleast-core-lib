@@ -43,6 +43,17 @@ def include_literal_defaults(cls: type[ModelType]) -> type[ModelType]:
     return WrappedModel  # pyright: ignore[reportReturnType]
 
 
+def check_validity(obj: BaseModel) -> None:
+    """
+    Checks the validity of a Pydantic object by running a full revalidation.
+
+    Raises:
+        ValidationError: If the object is invalid in its current state.
+    """
+
+    obj.__class__.model_validate(obj.model_dump())
+
+
 @final
 class ImmutableValue(BaseModel, Generic[T], frozen=True, arbitrary_types_allowed=True):
     """
