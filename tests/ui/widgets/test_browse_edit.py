@@ -5,13 +5,12 @@ Copyright (c) Cutleast
 from pathlib import Path
 from typing import Optional
 
-from pyfakefs.fake_filesystem import FakeFilesystem
-from PySide6.QtWidgets import QFileDialog, QPushButton
-from pytestqt.qtbot import QtBot
-
 from cutleast_core_lib.test.base_test import BaseTest
 from cutleast_core_lib.test.utils import Utils
 from cutleast_core_lib.ui.widgets.browse_edit import BrowseLineEdit
+from pyfakefs.fake_filesystem import FakeFilesystem
+from PySide6.QtWidgets import QFileDialog, QPushButton
+from pytestqt.qtbot import QtBot
 
 
 class TestBrowseLineEdit(BaseTest):
@@ -98,6 +97,6 @@ class TestBrowseLineEdit(BaseTest):
         widget.setPath(Path("test/file.txt"))
 
         # then
-        assert widget.text() == "test\\file.txt"
+        assert widget.text() == str(Path("test/file.txt"))
         assert widget.getPath() == Path("test/file.txt")
         assert widget.getPath(absolute=True) == Path("test/file.txt")

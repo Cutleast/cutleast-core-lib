@@ -5,6 +5,7 @@ Copyright (c) Cutleast
 import os
 from pathlib import Path
 
+import pytest
 from cutleast_core_lib.core.utilities.env_resolver import resolve
 
 
@@ -13,6 +14,7 @@ class TestEnvResolver:
     Tests `core.utilities.env_resolver`.
     """
 
+    @pytest.mark.skipif(os.name != "nt", reason="Windows environment variable syntax")
     def test_resolve_path_temp(self) -> None:
         """
         Tests `core.utilities.env_resolver.resolve()` on a path containing `%temp%`.
@@ -48,6 +50,7 @@ class TestEnvResolver:
         # then
         assert expected_output == real_output
 
+    @pytest.mark.skipif(os.name != "nt", reason="Windows environment variable syntax")
     def test_resolve_str_path(self) -> None:
         """
         Tests `core.utilities.env_resolver.resolve()` on a string containing `%path%`.

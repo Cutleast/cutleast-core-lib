@@ -24,8 +24,7 @@ def get_execution_info() -> tuple[list[str], bool]:
     else:
         cmd: list[str] = [
             sys.executable,
-            # Normalize path to script
-            sys.argv[0].replace("/", "\\"),
+            str(Path(sys.argv[0])),
             *sys.argv[1:],
         ]
         return cmd, compiled

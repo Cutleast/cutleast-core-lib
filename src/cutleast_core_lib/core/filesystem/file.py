@@ -9,7 +9,7 @@ from typing import Self, override
 from pydantic import BaseModel
 
 from ..utilities.scale import scale_value
-from .utils import get_file_identifier, open_in_explorer
+from .utils import get_file_identifier, open_in_explorer, open_with_default_application
 
 
 class File(BaseModel, frozen=True):
@@ -90,7 +90,7 @@ class File(BaseModel, frozen=True):
         Opens this file with the system's default applicaton.
         """
 
-        os.startfile(self.path)
+        open_with_default_application(self.path)
 
     def open_in_explorer(self) -> None:
         """

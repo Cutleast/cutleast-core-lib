@@ -3,6 +3,7 @@ Copyright (c) Cutleast
 """
 
 import logging
+import sys
 from enum import IntEnum
 from typing import Optional
 
@@ -13,18 +14,21 @@ from cutleast_core_lib.core.utilities.typing_utils import not_none
 tlb_path: str = f"{get_current_path()}/res/TaskbarLib.tlb"
 tlb_error: Optional[Exception] = None
 
-try:
-    import comtypes.client as cc
+if sys.platform == "win32":
+    try:
+        import comtypes.client as cc
 
-    cc.GetModule(tlb_path)
+        cc.GetModule(tlb_path)
 
-    import comtypes.gen.TaskbarLib as tbl  # noqa: E402, RUF100
+        import comtypes.gen.TaskbarLib as tbl  # noqa: E402, RUF100
 
-    tlb = cc.CreateObject(
-        "{56FDF344-FD6D-11d0-958A-006097C9A090}", interface=tbl.ITaskbarList3
-    )
-except Exception as ex:  # noqa: BLE001
-    tlb_error = ex
+        tlb = cc.CreateObject(
+            "{56FDF344-FD6D-11d0-958A-006097C9A090}", interface=tbl.ITaskbarList3
+        )
+    except Exception as ex:  # noqa: BLE001
+        tlb_error = ex
+        tlb = None
+else:
     tlb = None
 
 

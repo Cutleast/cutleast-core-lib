@@ -2,15 +2,15 @@
 Copyright (c) Cutleast
 """
 
+import os
 from pathlib import Path
 from typing import NoReturn
 
 import pytest
-from pyfakefs.fake_filesystem import FakeFilesystem
-
 from cutleast_core_lib.core.filesystem.file import File
 from cutleast_core_lib.core.filesystem.scanner import DirectoryScanner
 from cutleast_core_lib.test.base_test import BaseTest
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 
 class TestDirectoryScanner(BaseTest):
@@ -91,6 +91,7 @@ class TestDirectoryScanner(BaseTest):
         with pytest.raises(PermissionError):
             DirectoryScanner.scan_folder(base, ignore_errors=False)
 
+    @pytest.mark.skipif(os.name != "nt", reason="Windows filesystem behavior")
     def test_glob_folder_case_insensitive_windows(
         self, test_fs: FakeFilesystem
     ) -> None:

@@ -7,7 +7,13 @@ import sys
 from collections.abc import Callable
 from types import TracebackType
 from typing import override
-from winsound import MessageBeep as alert
+
+if sys.platform == "win32":
+    from winsound import MessageBeep as alert
+else:
+
+    def alert() -> None:
+        """Leaves the audible alert to the desktop environment on non-Windows hosts."""
 
 from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QApplication

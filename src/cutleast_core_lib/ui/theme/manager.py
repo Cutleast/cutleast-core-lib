@@ -3,6 +3,7 @@ Copyright (c) Cutleast
 """
 
 import logging
+import sys
 from typing import Optional, cast, final
 
 from PySide6.QtCore import Signal
@@ -199,7 +200,7 @@ class ThemeManager(SingletonQObject):
             self.__qss_files, self.__cur_theme
         )
 
-        self.__app.setStyle("windowsvista")
+        self.__app.setStyle("windowsvista" if sys.platform == "win32" else "Fusion")
         self.__app.setStyleSheet(self.__cur_stylesheet)
         self.__app.setPalette(self.__cur_theme.to_qpalette(self.__app.palette()))
 

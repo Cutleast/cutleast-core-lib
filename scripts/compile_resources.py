@@ -24,7 +24,7 @@ def compile_resources() -> None:
         subprocess.CalledProcessError: When pyside6-rcc fails.
     """
 
-    rcc_executable: Path = Path(sys.executable).with_name("pyside6-rcc.exe")
+    rcc_executable: Path = Path(sys.executable).with_name("pyside6-rcc")
     subprocess.run(
         [str(rcc_executable), str(RESOURCE_FILE), "-o", str(OUTPUT_FILE)], check=True
     )

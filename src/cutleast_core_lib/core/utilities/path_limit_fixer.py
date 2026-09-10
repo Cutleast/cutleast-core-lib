@@ -3,8 +3,11 @@ Copyright (c) Cutleast
 """
 
 import os
-import winreg
+import sys
 from pathlib import Path
+
+if sys.platform == "win32":
+    import winreg
 
 
 class PathLimitFixer:
@@ -22,6 +25,9 @@ class PathLimitFixer:
         Returns:
             bool: `True` if the limit is enabled, `False` otherwise
         """
+
+        if sys.platform != "win32":
+            return False
 
         try:
             with winreg.OpenKey(
@@ -42,6 +48,9 @@ class PathLimitFixer:
         Args:
             res_path (Path): Path with app resources.
         """
+
+        if sys.platform != "win32":
+            return
 
         reg_file: Path = res_path / "path_limit.reg"
 

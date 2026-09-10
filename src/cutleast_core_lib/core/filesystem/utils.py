@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 from virtual_glob import InMemoryPath
@@ -146,14 +147,37 @@ def glob(pattern: str, files: list[Path], case_sensitive: bool = False) -> list[
 
 def open_in_explorer(path: Path) -> None:
     """
-    Opens the specified path in the Windows Explorer by opening the parent folder and
-    selecting the item.
+    Opens the specified path in the platform's file manager.
+
+    Windows selects the item; Linux and macOS open its parent directory because their
+    standard launchers do not provide a portable way to select an individual item.
 
     Args:
         path (Path): The path to open.
     """
 
-    subprocess.run(f'explorer.exe /select,"{path}"', check=False)
+    if os.name == "nt":
+        subprocess.run(["explorer.exe", "/select," + str(path)], check=False)
+    elif sys.platform == "darwin":
+        subprocess.run(["open", str(path.parent)], check=False)
+    else:
+        subprocess.run(["xdg-open", str(path.parent)], check=False)
+
+
+def open_with_default_application(path: Path) -> None:
+    """
+    Opens a file with the platform's registered default application.
+
+    Args:
+        path (Path): The file to open.
+    """
+
+    if os.name == "nt":
+        os.startfile(path)
+    elif sys.platform == "darwin":
+        subprocess.run(["open", str(path)], check=False)
+    else:
+        subprocess.run(["xdg-open", str(path)], check=False)
 
 
 def add_suffix(path: Path, suffix: str) -> Path:
