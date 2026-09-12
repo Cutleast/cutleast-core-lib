@@ -12,7 +12,8 @@ from cutleast_core_lib.test.setup.clipboard_mock import ClipboardMock
 from cutleast_core_lib.test.utils import Utils
 from cutleast_core_lib.ui.widgets.tree_widget_editor import TreeWidgetEditor
 from pydantic import BaseModel
-from PySide6.QtGui import QAction
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QAction, QShortcut
 from PySide6.QtWidgets import QTreeWidgetItem
 from pytestqt.qtbot import QtBot
 
@@ -76,6 +77,35 @@ class TestTreeWidgetEditor(BaseTest):
         assert not remove_action.isEnabled()
         assert widget.getItems() == []
         assert tree_widget.topLevelItemCount() == 0
+
+    def test_toggles_clipboard_actions(
+        self, widget: TreeWidgetEditor[SampleObject]
+    ) -> None:
+        """Tests toggling the clipboard context menu and shortcuts."""
+
+        # given
+        tree_widget: TreeWidgetEditor.TreeWidget = Utils.get_protected_field(
+            widget, *TestTreeWidgetEditor.TREE_WIDGET
+        )
+        shortcuts: list[QShortcut] = widget.findChildren(QShortcut)
+
+        # when
+        widget.setClipboardActionsEnabled(False)
+
+        # then
+        assert tree_widget.contextMenuPolicy() == Qt.ContextMenuPolicy.NoContextMenu
+        assert shortcuts
+        assert all(not shortcut.isEnabled() for shortcut in shortcuts)
+
+        # when
+        widget.setClipboardActionsEnabled(True)
+
+        # then
+        assert (
+            tree_widget.contextMenuPolicy()
+            == Qt.ContextMenuPolicy.CustomContextMenu
+        )
+        assert all(shortcut.isEnabled() for shortcut in shortcuts)
 
     def test_cut_item(
         self, widget: TreeWidgetEditor[SampleObject], clipboard: ClipboardMock

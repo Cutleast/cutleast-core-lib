@@ -11,7 +11,6 @@ from pydantic import BaseModel
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QAction, QCursor, QDropEvent, QShortcut
 from PySide6.QtWidgets import (
-    QHBoxLayout,
     QMenu,
     QToolBar,
     QTreeWidget,
@@ -24,6 +23,7 @@ from cutleast_core_lib.core.utilities.clipboard import Clipboard
 from cutleast_core_lib.core.utilities.filter import matches_filter
 from cutleast_core_lib.core.utilities.reference_dict import ReferenceDict
 from cutleast_core_lib.core.utilities.reverse_dict import reverse_dict
+from cutleast_core_lib.core.utilities.typing_utils import not_none
 from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
 from cutleast_core_lib.ui.utilities.tree_widget import (
     get_item_text,
@@ -189,6 +189,7 @@ class TreeWidgetEditor(QWidget, Generic[T]):
 
     _vlayout: QVBoxLayout
     _tool_bar: QToolBar
+    _add_action: QAction
     _remove_action: QAction
     _edit_action: QAction
     __search_bar: SearchBar
@@ -218,6 +219,9 @@ class TreeWidgetEditor(QWidget, Generic[T]):
         for item in initial_items:
             self._add_item(item)
 
+        self._add_action.triggered.connect(self.onAdd.emit)
+        self._remove_action.triggered.connect(self._remove_selected_items)
+        self._edit_action.triggered.connect(self.__edit_selected_item)
         self.__search_bar.searchChanged.connect(self._filter)
         self._tree_widget.itemDoubleClicked.connect(self.__item_double_clicked)
         self._tree_widget.itemSelectionChanged.connect(self._on_selection_change)
@@ -245,16 +249,13 @@ class TreeWidgetEditor(QWidget, Generic[T]):
         self.__init_shortcuts()
 
     def __init_header(self) -> None:
-        hlayout = QHBoxLayout()
-        self._vlayout.addLayout(hlayout)
-
         self._tool_bar = QToolBar()
-        self._tool_bar.setFixedWidth(132)
-        hlayout.addWidget(self._tool_bar)
+        self._vlayout.addWidget(self._tool_bar)
 
-        add_action: QAction = self._tool_bar.addAction(self.tr("Add new item..."))
-        IconProvider.bind_qta_icon(add_action, add_action.setIcon, "mdi6.plus")
-        add_action.triggered.connect(self.onAdd.emit)
+        self._add_action = self._tool_bar.addAction(self.tr("Add new item..."))
+        IconProvider.bind_qta_icon(
+            self._add_action, self._add_action.setIcon, "mdi6.plus"
+        )
 
         self._remove_action = self._tool_bar.addAction(
             self.tr("Remove selected item(s)...") + " (" + self.tr("Del") + ")"
@@ -264,7 +265,6 @@ class TreeWidgetEditor(QWidget, Generic[T]):
         )
         self._remove_action.setDisabled(True)
         self._remove_action.setShortcut("Delete")
-        self._remove_action.triggered.connect(self.__remove_selected_items)
 
         self._edit_action = self._tool_bar.addAction(
             self.tr("Edit selected item...") + " (" + self.tr("Double click") + ")"
@@ -273,10 +273,11 @@ class TreeWidgetEditor(QWidget, Generic[T]):
             self._edit_action, self._edit_action.setIcon, "mdi6.pencil"
         )
         self._edit_action.setDisabled(True)
-        self._edit_action.triggered.connect(self.__edit_selected_item)
+
+        self._tool_bar.addSeparator()
 
         self.__search_bar = SearchBar()
-        hlayout.addWidget(self.__search_bar)
+        self._tool_bar.addWidget(self.__search_bar)
 
     def __init_tree_widget(self) -> None:
         self._tree_widget = TreeWidgetEditor.TreeWidget()
@@ -326,10 +327,13 @@ class TreeWidgetEditor(QWidget, Generic[T]):
             item: edited_item for edited_item, item in self._items.items()
         }
 
-        if self._tree_widget.currentItem() is not None:  # type: ignore
-            self.currentItemChanged.emit(items[self._tree_widget.currentItem()])
+        current_item: Optional[QTreeWidgetItem] = self._tree_widget.currentItem()
+        if current_item is not None:
+            self.currentItemChanged.emit(items[current_item])
 
-    def __remove_selected_items(self) -> None:
+    def _remove_selected_items(self) -> None:
+        """Removes all currently selected items from the tree widget."""
+
         items: dict[QTreeWidgetItem, T] = {
             item: edited_item
             for edited_item, item in self._items.items()
@@ -346,7 +350,7 @@ class TreeWidgetEditor(QWidget, Generic[T]):
             self.changed.emit()
 
     def __edit_selected_item(self) -> None:
-        self.__item_double_clicked(self._tree_widget.currentItem(), 0)
+        self.__item_double_clicked(not_none(self._tree_widget.currentItem()), 0)
 
     def _filter(self, text: str, case_sensitive: bool) -> None:
         for item in iter_toplevel_items(self._tree_widget):
@@ -498,8 +502,9 @@ class TreeWidgetEditor(QWidget, Generic[T]):
             Optional[T]: The currently selected item or None.
         """
 
-        if self._tree_widget.currentItem() is not None:  # type: ignore
-            return reverse_dict(self._items)[self._tree_widget.currentItem()]
+        current_item: Optional[QTreeWidgetItem] = self._tree_widget.currentItem()
+        if current_item is not None:
+            return reverse_dict(self._items)[current_item]
 
     def setCurrentItem(self, item: T) -> None:
         """
@@ -519,13 +524,9 @@ class TreeWidgetEditor(QWidget, Generic[T]):
             list[T]: List of items currently in the tree widget
         """
 
-        return list(
-            sorted(
-                self._items.keys(),
-                key=lambda item: self._tree_widget.indexOfTopLevelItem(
-                    self._items[item]
-                ),
-            )
+        return sorted(
+            self._items.keys(),
+            key=lambda item: self._tree_widget.indexOfTopLevelItem(self._items[item]),
         )
 
     def setEditItemEnabled(self, enabled: bool) -> None:
@@ -538,4 +539,30 @@ class TreeWidgetEditor(QWidget, Generic[T]):
 
         self._items_editable = enabled
         self._edit_action.setVisible(enabled)
-        self._tool_bar.setFixedWidth(132 if enabled else 90)
+
+    def setClipboardActionsEnabled(self, enabled: bool) -> None:
+        """
+        Toggles the context menu and shortcuts for clipboard operations.
+
+        Args:
+            enabled (bool): Whether copy, cut, paste, and duplicate are enabled.
+        """
+
+        context_policy: Qt.ContextMenuPolicy = (
+            Qt.ContextMenuPolicy.CustomContextMenu
+            if enabled
+            else Qt.ContextMenuPolicy.NoContextMenu
+        )
+        self._tree_widget.setContextMenuPolicy(context_policy)
+        self.__duplicate_shortcut.setEnabled(enabled)
+        self.__cut_shortcut.setEnabled(enabled)
+        self.__copy_shortcut.setEnabled(enabled)
+        self.__paste_shortcut.setEnabled(enabled)
+
+    def toolBar(self) -> QToolBar:
+        """
+        Returns:
+            QToolBar: The tool bar.
+        """
+
+        return self._tool_bar
