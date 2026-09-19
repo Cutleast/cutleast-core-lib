@@ -9,6 +9,7 @@ from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
 
 from cutleast_core_lib.core.utilities.filter import matches_filter
+from cutleast_core_lib.core.utilities.typing_utils import not_none
 
 from .text_width import measure_text_width
 
@@ -25,7 +26,7 @@ def iter_children(item: QTreeWidgetItem) -> Generator[QTreeWidgetItem]:
     """
 
     for i in range(item.childCount()):
-        yield item.child(i)
+        yield not_none(item.child(i))
 
 
 def iter_toplevel_items(widget: QTreeWidget) -> Generator[QTreeWidgetItem]:
