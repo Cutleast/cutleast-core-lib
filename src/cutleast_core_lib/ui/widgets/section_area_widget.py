@@ -92,6 +92,9 @@ class SectionAreaWidget(QWidget):
 
     def __init_ui(self, toggle_position: TogglePosition) -> None:
         self.__glayout = QGridLayout()
+        self.__glayout.setContentsMargins(0, 0, 0, 0)
+        self.__glayout.setHorizontalSpacing(0)
+
         if self.__direction == SectionAreaWidget.Direction.Down:
             self.__glayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         else:
