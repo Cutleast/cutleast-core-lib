@@ -6,7 +6,6 @@ from typing import Optional, override
 
 from PySide6.QtCore import QByteArray, QPoint, QPropertyAnimation, QRect, Qt
 from PySide6.QtGui import QGuiApplication, QScreen
-from PySide6.QtGui import Qt as QtG
 from PySide6.QtWidgets import QFrame, QLabel, QLayout, QVBoxLayout, QWidget
 
 from ..theme.manager import ThemeManager
@@ -18,6 +17,9 @@ class TooltipPopup(QWidget):
     """
     A transparent top-level window used to display an application tooltip.
     """
+
+    MAX_WIDTH: int = 800
+    """Maximum width of the complete tooltip window in pixels."""
 
     CURSOR_X_OFFSET: int = 2
     """Horizontal offset in pixels from the tooltip anchor position."""
@@ -82,7 +84,6 @@ class TooltipPopup(QWidget):
         self.__anchor_position = QPoint(position)
         self.__source = source
         self.__text_label.setText(text)
-        self.__text_label.setWordWrap(QtG.mightBeRichText(text))
 
         self.__update_size(position, source)
         self.move(self.__get_position(position, source))
@@ -153,6 +154,9 @@ class TooltipPopup(QWidget):
         """
         Updates the popup size for its text and target screen.
 
+        Text is displayed at its natural width until the maximum tooltip width
+        is reached. Only then is word wrapping enabled.
+
         Args:
             position (QPoint): Global position that anchors the tooltip.
             source (Optional[QWidget]): Widget associated with the tooltip.
@@ -162,9 +166,29 @@ class TooltipPopup(QWidget):
         if screen is None and source is not None:
             screen = source.screen()
 
+        max_label_width: int = max(
+            1,
+            TooltipPopup.MAX_WIDTH - 2 * self.__shadow_margin,
+        )
+
         if screen is not None:
-            max_width: int = max(1, screen.geometry().width() - 2 * self.__shadow_margin)
-            self.__text_label.setMaximumWidth(max_width)
+            screen_label_width: int = max(
+                1,
+                screen.geometry().width() - 2 * self.__shadow_margin,
+            )
+            max_label_width = min(max_label_width, screen_label_width)
+
+        # Measure the label without wrapping first. QLabel's size hint with
+        # wrapping enabled tends to prefer a substantially narrower width.
+        self.__text_label.setWordWrap(False)
+        self.__text_label.setMinimumWidth(0)
+        self.__text_label.setMaximumWidth(-1)
+
+        natural_width: int = self.__text_label.sizeHint().width()
+        target_width: int = min(natural_width, max_label_width)
+
+        self.__text_label.setWordWrap(natural_width > max_label_width)
+        self.__text_label.setFixedWidth(target_width)
 
         self.__content_frame.adjustSize()
         self.adjustSize()
