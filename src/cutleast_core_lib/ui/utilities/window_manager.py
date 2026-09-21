@@ -42,10 +42,18 @@ class WindowManager(SingletonQObject):
 
         window.show()
 
-    def close_all(self) -> None:
+    def close_all(self) -> bool:
         """
         Closes all managed windows.
+
+        Returns:
+            bool: If all windows were successfully closed.
         """
 
+        all_closed: bool = True
+
         for window in list(self.__windows.values()):
-            window.close()
+            if not window.close():
+                all_closed = False
+
+        return all_closed
