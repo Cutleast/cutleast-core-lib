@@ -26,8 +26,8 @@ class HelpLabel(QLabel):
         # TODO: Use an icon binding that updates the icon when the theme changes
         self.setPixmap(
             IconProvider.get_qta_icon("mdi6.information").pixmap(
-                ThemeManager.get().theme.metrics.icon_l,
-                ThemeManager.get().theme.metrics.icon_l,
+                ThemeManager.get().theme.metrics.icon,
+                ThemeManager.get().theme.metrics.icon,
             )
         )
 
@@ -39,8 +39,8 @@ class HelpLabel(QLabel):
             IconProvider.get_qta_icon(
                 "mdi6.information", color=self.palette().accent().color().name()
             ).pixmap(
-                ThemeManager.get().theme.metrics.icon_l,
-                ThemeManager.get().theme.metrics.icon_l,
+                ThemeManager.get().theme.metrics.icon,
+                ThemeManager.get().theme.metrics.icon,
             )
         )
 
@@ -50,7 +50,7 @@ class HelpLabel(QLabel):
 
         self.setPixmap(
             IconProvider.get_qta_icon("mdi6.information").pixmap(
-                ThemeManager.get().theme.metrics.icon_l,
-                ThemeManager.get().theme.metrics.icon_l,
+                ThemeManager.get().theme.metrics.icon,
+                ThemeManager.get().theme.metrics.icon,
             )
         )
