@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 """
 
 from abc import abstractmethod
-from typing import Optional, Protocol, Self, TypeVar
+from typing import Optional, Protocol, Self, TypeVar, cast, get_origin
 
 _T = TypeVar("_T")
 
@@ -12,6 +12,10 @@ def checked_cast(type_hint: type[_T], value: object) -> _T:
     """
     Similar to `typing.cast` but checks the type of the specified value and raises a
     `TypeError` if the value does not conform the specified type.
+
+    For generic types, this only checks the origin's type. For example, for `list[str]`,
+    it is only checked, if the value is of type `list`. The subtype is neither
+    inspectable nor checkable during runtime.
 
     Args:
         type_hint (type[_T]): Type to cast to.
@@ -24,13 +28,13 @@ def checked_cast(type_hint: type[_T], value: object) -> _T:
         _T: The cast value.
     """
 
-    if not isinstance(value, type_hint):
+    if not isinstance(value, get_origin(type_hint) or type_hint):
         raise TypeError(
             f"Cannot cast value of type '{type(value).__name__}'"
             f" to '{type_hint.__name__}': {value!r}"
         )
 
-    return value
+    return cast(_T, value)
 
 
 def not_none(value: Optional[_T]) -> _T:
