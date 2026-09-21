@@ -82,7 +82,7 @@ class SpinnerWidget(QWidget):
             ' stroke="#ff0000" ', f' stroke="{theme.resolve(theme.colors.primary)}" '
         ).encode()
         self.__spinner.load(svg)
-        self.__spinner.setFixedSize(theme.metrics.icon_l, theme.metrics.icon_l)
+        self.__spinner.setFixedSize(theme.metrics.icon, theme.metrics.icon)
 
     def setSpinnerSize(self, w: int, h: int) -> None:
         """
