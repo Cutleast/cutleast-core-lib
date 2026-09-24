@@ -77,31 +77,45 @@ class ColorPalette(ThemeModel):
             Self: A new color palette with generated tones.
         """
 
-        seed = Hct(seed_color)
-
-        def get_color(tone: int) -> HexColorStr:
-            color = Hct(seed_color)
-            color.tone = tone
-
-            if ui_mode == UiMode.Dark:
-                color.chroma = seed.chroma * cls.DARK_CHROMA_FACTORS[tone]
-            else:
-                color.chroma = seed.chroma * cls.LIGHT_CHROMA_FACTORS[tone]
-
-            return cast(HexColorStr, color.hex)
-
         return cls(
-            tone_0=get_color(0),
-            tone_5=get_color(5),
-            tone_10=get_color(10),
-            tone_20=get_color(20),
-            tone_30=get_color(30),
-            tone_40=get_color(40),
-            tone_50=get_color(50),
-            tone_60=get_color(60),
-            tone_70=get_color(70),
-            tone_80=get_color(80),
-            tone_90=get_color(90),
-            tone_95=get_color(95),
-            tone_100=get_color(100),
+            tone_0=cls.get_color(seed_color, 0, ui_mode),
+            tone_5=cls.get_color(seed_color, 5, ui_mode),
+            tone_10=cls.get_color(seed_color, 10, ui_mode),
+            tone_20=cls.get_color(seed_color, 20, ui_mode),
+            tone_30=cls.get_color(seed_color, 30, ui_mode),
+            tone_40=cls.get_color(seed_color, 40, ui_mode),
+            tone_50=cls.get_color(seed_color, 50, ui_mode),
+            tone_60=cls.get_color(seed_color, 60, ui_mode),
+            tone_70=cls.get_color(seed_color, 70, ui_mode),
+            tone_80=cls.get_color(seed_color, 80, ui_mode),
+            tone_90=cls.get_color(seed_color, 90, ui_mode),
+            tone_95=cls.get_color(seed_color, 95, ui_mode),
+            tone_100=cls.get_color(seed_color, 100, ui_mode),
         )
+
+    @classmethod
+    def get_color(
+        cls, seed_color: HexColorStr, tone: int, ui_mode: ResolvedUiMode
+    ) -> HexColorStr:
+        """
+        Calculates a color tone from a base seed color.
+
+        Args:
+            seed_color (HexColorStr): The base color to calculate the color tone from.
+            tone (int): The color tone to return.
+            ui_mode (ResolvedUiMode):
+                The UI mode for the color. Determines the chroma factors used for tone
+                generation.
+
+        Returns:
+            HexColorStr: The calculated color.
+        """
+
+        color = Hct(seed_color)
+        color.tone = tone
+        if ui_mode == UiMode.Dark:
+            color.chroma *= cls.DARK_CHROMA_FACTORS[tone]
+        else:
+            color.chroma *= cls.LIGHT_CHROMA_FACTORS[tone]
+
+        return cast(HexColorStr, color.hex)
