@@ -36,13 +36,18 @@ class PanelTile(QWidget):
     __root_container: FlexContainer
     __content: FlexContent
     __drop_indicator: DropIndicator
-    __drag_handle: DragHandle
+    __drag_handle: Optional[DragHandle]
+    __editable: bool
+    __headers_visible: bool
 
     def __init__(
         self,
         content: FlexContent,
         root_container: FlexContainer,
         parent: Optional[QWidget] = None,
+        *,
+        editable: bool = True,
+        headers_visible: bool = True,
     ) -> None:
         """
         Args:
@@ -52,39 +57,48 @@ class PanelTile(QWidget):
                 operations.
             parent (Optional[QWidget], optional):
                 Optional parent widget. Defaults to None.
+            editable (bool, optional):
+                Whether drag-and-drop editing is enabled. Defaults to True.
+            headers_visible (bool, optional):
+                Whether the tile header is shown. Defaults to True.
         """
 
         super().__init__(parent)
 
         self.__root_container = root_container
         self.__content = content
+        self.__editable = editable
+        self.__headers_visible = headers_visible
+        self.__drag_handle = None
 
         self.__init_ui()
 
     def __init_ui(self) -> None:
-        self.setAcceptDrops(True)
+        self.setAcceptDrops(self.__editable)
 
         outer_vlayout = QVBoxLayout()
         outer_vlayout.setContentsMargins(0, 0, 0, 0)
         outer_vlayout.setSpacing(0)
         self.setLayout(outer_vlayout)
 
-        header_widget = QWidget()
-        header_widget.setObjectName("flex_tile_header")
-        outer_vlayout.addWidget(header_widget)
+        if self.__headers_visible:
+            header_widget = QWidget()
+            header_widget.setObjectName("flex_tile_header")
+            outer_vlayout.addWidget(header_widget)
 
-        header_hlayout = QHBoxLayout()
-        header_hlayout.setAlignment(
-            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-        )
-        header_widget.setLayout(header_hlayout)
+            header_hlayout = QHBoxLayout()
+            header_hlayout.setAlignment(
+                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+            )
+            header_widget.setLayout(header_hlayout)
 
-        self.__drag_handle = DragHandle(self.content_identifier, self)
-        header_hlayout.addWidget(self.__drag_handle)
+            if self.__editable:
+                self.__drag_handle = DragHandle(self.content_identifier, self)
+                header_hlayout.addWidget(self.__drag_handle)
 
-        title_label = QLabel(self.content_title)
-        title_label.setObjectName("flex_tile_title")
-        header_hlayout.addWidget(title_label)
+            title_label = QLabel(self.content_title)
+            title_label.setObjectName("flex_tile_title")
+            header_hlayout.addWidget(title_label)
 
         outer_vlayout.addWidget(self.__content, stretch=1)
 
@@ -120,7 +134,7 @@ class PanelTile(QWidget):
 
     @override
     def dragEnterEvent(self, event: QDragEnterEvent) -> None:
-        if event.mimeData().hasFormat(FLEX_MIME_TYPE):
+        if self.__editable and event.mimeData().hasFormat(FLEX_MIME_TYPE):
             source_id: str = event.mimeData().data(FLEX_MIME_TYPE).toStdString()
 
             if source_id != self.content_identifier:
@@ -131,7 +145,7 @@ class PanelTile(QWidget):
 
     @override
     def dragMoveEvent(self, event: QDragMoveEvent) -> None:
-        if not event.mimeData().hasFormat(FLEX_MIME_TYPE):
+        if not self.__editable or not event.mimeData().hasFormat(FLEX_MIME_TYPE):
             event.ignore()
             return
 
@@ -154,7 +168,7 @@ class PanelTile(QWidget):
     def dropEvent(self, event: QDropEvent) -> None:
         self.__drop_indicator.setZone(None)
 
-        if not event.mimeData().hasFormat(FLEX_MIME_TYPE):
+        if not self.__editable or not event.mimeData().hasFormat(FLEX_MIME_TYPE):
             event.ignore()
             return
 

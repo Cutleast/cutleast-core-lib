@@ -37,15 +37,26 @@ class FlexContainer(QWidget):
 
     __root: RootNode
     __vlayout: QVBoxLayout
+    __editable: bool
+    __headers_visible: bool
 
     def __init__(
-        self, panels: Sequence[FlexContent], parent: Optional[QWidget] = None
+        self,
+        panels: Sequence[FlexContent],
+        parent: Optional[QWidget] = None,
+        *,
+        editable: bool = True,
+        headers_visible: bool = True,
     ) -> None:
         """
         Args:
             panels (Sequence[FlexContent]): The panel widgets to arrange.
             parent (Optional[QWidget], optional):
                 Optional parent widget. Defaults to None.
+            editable (bool, optional):
+                Whether drag-and-drop editing is enabled. Defaults to True.
+            headers_visible (bool, optional):
+                Whether tile headers are shown. Defaults to True.
 
         Raises:
             ValueError: If `panels` is empty.
@@ -55,6 +66,9 @@ class FlexContainer(QWidget):
 
         if not panels:
             raise ValueError("panels must not be empty")
+
+        self.__editable = editable
+        self.__headers_visible = headers_visible
 
         self.__vlayout = QVBoxLayout()
         self.__vlayout.setContentsMargins(0, 0, 0, 0)
@@ -83,7 +97,9 @@ class FlexContainer(QWidget):
             PanelTile: The new tile wrapping `panel`.
         """
 
-        return PanelTile(panel, self)
+        return PanelTile(
+            panel, self, editable=self.__editable, headers_visible=self.__headers_visible
+        )
 
     def _set_root(self, widget: RootNode) -> None:
         """
@@ -196,6 +212,9 @@ class FlexContainer(QWidget):
             target_id (str): Identifier of the panel being hovered over.
             zone (DropZone): The drop zone relative to the target tile.
         """
+
+        if not self.__editable:
+            return
 
         new_orientation: Qt.Orientation
         new_splitter: FlexSplitter
