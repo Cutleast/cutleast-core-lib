@@ -47,6 +47,7 @@
         <file>styles/popup.qss</file>
         <file>styles/progress.qss</file>
         <file>styles/scroll.qss</file>
+        <file>styles/slider.qss</file>
         <file>styles/splitter.qss</file>
         <file>styles/statusbar.qss</file>
         <file>styles/tab.qss</file>

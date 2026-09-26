@@ -35,6 +35,7 @@ class ThemeManager(SingletonQObject):
         ":/core-lib/styles/popup.qss",
         ":/core-lib/styles/progress.qss",
         ":/core-lib/styles/scroll.qss",
+        ":/core-lib/styles/slider.qss",
         ":/core-lib/styles/splitter.qss",
         ":/core-lib/styles/statusbar.qss",
         ":/core-lib/styles/tab.qss",

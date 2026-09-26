@@ -1,0 +1,32 @@
+/* 
+ * Copyright (c) Cutleast
+ */
+
+/* Slider */
+QSlider::groove {
+    background-color: ${colors.border};
+}
+QSlider::groove:horizontal {
+    height: ${metrics.border_width_focus};
+    margin: ${metrics.spacing_xs} 0;
+}
+QSlider::groove:vertical {
+    margin: 0 ${metrics.spacing_xs};
+    width: ${metrics.border_width_focus};
+}
+
+QSlider::handle {
+    background-color: ${meta.checked_bg};
+    border-radius: ${metrics.radius_s};
+}
+QSlider::handle:hover {
+    background-color: ${meta.checked_bg_hover};
+}
+QSlider::handle:horizontal {
+    margin: -${metrics.spacing} 0;
+    width: ${metrics.spacing};
+}
+QSlider::handle:vertical {
+    margin: 0 -${metrics.spacing};
+    height: ${metrics.spacing};
+}
