@@ -182,7 +182,7 @@ class TooltipPopup(QWidget):
         # wrapping enabled tends to prefer a substantially narrower width.
         self.__text_label.setWordWrap(False)
         self.__text_label.setMinimumWidth(0)
-        self.__text_label.setMaximumWidth(-1)
+        self.__text_label.setMaximumWidth(16777215)  # = QWIDGETSIZE_MAX
 
         natural_width: int = self.__text_label.sizeHint().width()
         target_width: int = min(natural_width, max_label_width)
