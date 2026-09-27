@@ -52,7 +52,7 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
 
         user_config_file_path: Path = user_config_path / cls.get_config_name()
 
-        cls._get_logger().info(
+        cls._get_logger().debug(
             f"Loading configuration from '{user_config_file_path}'..."
         )
 
@@ -60,7 +60,7 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
         if user_config_file_path.is_file():
             config_data = json.loads(user_config_file_path.read_text(encoding="utf8"))
         else:
-            cls._get_logger().info(
+            cls._get_logger().debug(
                 f"No config file at '{user_config_file_path}'. Falling back to "
                 "default configuration..."
             )
@@ -89,7 +89,7 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
 
         user_config_file_path: Path = self._config_path / self.get_config_name()
 
-        self._get_logger().info(f"Saving configuration to '{user_config_file_path}'...")
+        self._get_logger().debug(f"Saving configuration to '{user_config_file_path}'...")
 
         user_config_file_path.parent.mkdir(parents=True, exist_ok=True)
         serialized: str = self.model_dump_json(
@@ -97,10 +97,10 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
         )
         if serialized != r"{}":
             user_config_file_path.write_text(serialized, encoding="utf8")
-            self._get_logger().info("Configuration saved.")
+            self._get_logger().debug("Configuration saved.")
         else:
             user_config_file_path.unlink(missing_ok=True)
-            self._get_logger().info("Deleted empty configuration file.")
+            self._get_logger().debug("Deleted empty configuration file.")
 
     @staticmethod
     @abstractmethod
