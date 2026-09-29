@@ -4,21 +4,19 @@ Copyright (c) Cutleast
 
 from __future__ import annotations
 
-import logging
 from abc import ABCMeta, abstractmethod
+from collections.abc import Callable
 from enum import Enum, auto
-from pathlib import Path
-from typing import Any, Self, TypeVar, get_origin, get_type_hints
+from typing import Any, Optional, TypeVar, get_origin, get_type_hints, override
 
-import jstyleson as json
-from pydantic import ConfigDict
+from pydantic import ConfigDict, PrivateAttr
 from pydantic.fields import FieldInfo
 
-from ..cache.function_cache import FunctionCache
 from ..utilities.dynamic_default_model import DynamicDefaultModel
 
 T = TypeVar("T", bound="BaseConfig")
 V = TypeVar("V")
+_MISSING = object()
 
 
 class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
@@ -34,73 +32,37 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
 
     model_config = ConfigDict(validate_assignment=True)
 
-    _config_path: Path
+    _change_callback: Optional[Callable[[], None]] = PrivateAttr(default=None)
 
-    @classmethod
-    def load(cls, user_config_path: Path, log_settings: bool = True) -> Self:
+    def set_change_callback(self, callback: Callable[[], None]) -> None:
         """
-        Loads configuration.
+        Sets a callback function to be called when the configuration changes.
 
         Args:
-            user_config_path (Path): Path to folder with user configuration.
-            log_settings (bool, optional):
-                Whether to print loaded config to log. Defaults to True.
-
-        Returns:
-            Self: Loaded configuration.
+            callback (Callable[[], None]): Callback function to be called.
         """
 
-        user_config_file_path: Path = user_config_path / cls.get_config_name()
+        self._change_callback = callback
 
-        cls._get_logger().debug(
-            f"Loading configuration from '{user_config_file_path}'..."
-        )
-
-        config_data: dict[str, Any] = {}
-        if user_config_file_path.is_file():
-            config_data = json.loads(user_config_file_path.read_text(encoding="utf8"))
-        else:
-            cls._get_logger().debug(
-                f"No config file at '{user_config_file_path}'. Falling back to "
-                "default configuration..."
-            )
-
-        try:
-            config: Self = cls.model_validate(config_data, by_alias=True)
-        except Exception as ex:  # noqa: BLE001
-            cls._get_logger().error(
-                f"Failed to process user configuration: {ex}", exc_info=ex
-            )
-            config = cls.model_validate({})
-
-        config._config_path = user_config_path
-
-        cls._get_logger().info("Configuration loaded.")
-
-        if log_settings:
-            config.print_settings_to_log()
-
-        return config
-
-    def save(self) -> None:
+    def notify_changes(self) -> None:
         """
-        Saves configuration.
+        Notifies registered consumers about configuration changes.
         """
 
-        user_config_file_path: Path = self._config_path / self.get_config_name()
+        if self._change_callback is not None:
+            self._change_callback()
 
-        self._get_logger().debug(f"Saving configuration to '{user_config_file_path}'...")
+    @override
+    def __setattr__(self, name: str, value: object) -> None:
+        old_value: object = getattr(self, name, _MISSING)
 
-        user_config_file_path.parent.mkdir(parents=True, exist_ok=True)
-        serialized: str = self.model_dump_json(
-            indent=4, by_alias=True, exclude_defaults=True
-        )
-        if serialized != r"{}":
-            user_config_file_path.write_text(serialized, encoding="utf8")
-            self._get_logger().debug("Configuration saved.")
-        else:
-            user_config_file_path.unlink(missing_ok=True)
-            self._get_logger().debug("Deleted empty configuration file.")
+        super().__setattr__(name, value)
+
+        if name not in type(self).model_fields:
+            return
+
+        if old_value != getattr(self, name):
+            self.notify_changes()
 
     @staticmethod
     @abstractmethod
@@ -111,18 +73,6 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
         Returns:
             str: Name of the configuration file.
         """
-
-    @classmethod
-    @FunctionCache.cache
-    def _get_logger(cls) -> logging.Logger:
-        """
-        Returns the config's logger.
-
-        Returns:
-            logging.Logger: Config's logger.
-        """
-
-        return logging.getLogger(cls.__name__)
 
     @classmethod
     def get_property_markers(cls, field_name: str) -> list[PropertyMarker]:
@@ -183,22 +133,3 @@ class BaseConfig(DynamicDefaultModel, metaclass=ABCMeta):
             )
 
         return default_value
-
-    def print_settings_to_log(self) -> None:
-        """
-        Prints current settings to log.
-        """
-
-        self._get_logger().debug("Current Configuration:")
-        keys: list[str] = list(
-            filter(
-                lambda f: (
-                    BaseConfig.PropertyMarker.ExcludeFromLogging
-                    not in self.__class__.get_property_markers(f)
-                ),
-                self.__class__.model_fields.keys(),
-            )
-        )
-        indent: int = max(len(key) + 1 for key in keys)
-        for key in keys:
-            self._get_logger().debug(f"{key.rjust(indent)} = '{getattr(self, key)}'")

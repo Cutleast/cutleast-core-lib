@@ -13,6 +13,8 @@ from typing import Optional, override
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QMainWindow
 
+from cutleast_core_lib.core.config.manager import ConfigManager
+
 from .core.config.app_config import AppConfig
 from .core.utilities.exception_handler import ExceptionHandler
 from .core.utilities.exe_info import get_current_path, get_execution_info
@@ -43,6 +45,9 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
     The current path to the application (working dir in source form and executable path
     when compiled).
     """
+
+    app_config_manager: ConfigManager[AppConfig]
+    """The application configuration manager."""
 
     app_config: AppConfig
     """The application config."""
@@ -105,7 +110,8 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
         else:
             self.setApplicationDisplayName(self.applicationName())
 
-        self.app_config = self._load_app_config()
+        self.app_config_manager = self._init_app_config_manager()
+        self.app_config = self.app_config_manager.config
 
         log_file: Path = self.log_path / time.strftime(self.app_config.log_file_name)
         self.logger = Logger(
@@ -119,7 +125,6 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
         WindowManager()
 
         self._log_basic_info()
-        self.app_config.print_settings_to_log()
         self.log.info("App started.")
 
         compiled: bool = get_execution_info()[1]
@@ -134,12 +139,12 @@ class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImpli
             WindowManager.get().show(style_editor_window)
 
     @abstractmethod
-    def _load_app_config(self) -> AppConfig:
+    def _init_app_config_manager(self) -> ConfigManager[AppConfig]:
         """
-        Loads the application config.
+        Initializes the application configuration manager.
 
         Returns:
-            AppConfig: The application config.
+            ConfigManager[AppConfig]: The application configuration manager.
         """
 
     @abstractmethod

@@ -16,6 +16,7 @@ from PySide6.QtWidgets import QApplication
 
 from cutleast_core_lib.core.cache.cache import Cache
 from cutleast_core_lib.core.config.app_config import AppConfig
+from cutleast_core_lib.core.config.manager import ConfigManager
 from cutleast_core_lib.test.utils import Utils
 from cutleast_core_lib.ui.theme.manager import ThemeManager
 from cutleast_core_lib.ui.theme.ui_mode import UiMode
@@ -67,8 +68,37 @@ class BaseTest(metaclass=ABCMeta):
 
         return fs
 
+    @pytest.fixture(autouse=True)
+    def clear_config_managers(self) -> Generator[None]:
+        """
+        Clears the config managers dict after each test.
+        """
+
+        yield
+
+        from cutleast_core_lib.core.config.manager import (
+            _config_managers,  # pyright: ignore[reportPrivateUsage]
+        )
+
+        _config_managers.clear()
+
+    @pytest.fixture(name="app_config_manager")
+    def _base_app_config_manager(
+        self, data_folder: Path, qapp: QApplication
+    ) -> Generator[ConfigManager[AppConfig]]:
+        """
+        Returns the application config manager for the tests.
+
+        Yields:
+            Generator[ConfigManager[AppConfig], None, None]: The application config manager.
+        """
+
+        yield ConfigManager(AppConfig, data_folder / "config", qapp)
+
     @pytest.fixture(name="app_config")
-    def _base_app_config(self, data_folder: Path) -> AppConfig:
+    def _base_app_config(
+        self, app_config_manager: ConfigManager[AppConfig]
+    ) -> Generator[AppConfig]:
         """
         Returns the application config for the tests.
 
@@ -76,7 +106,7 @@ class BaseTest(metaclass=ABCMeta):
             AppConfig: The application config.
         """
 
-        return AppConfig.load(data_folder / "config")
+        yield app_config_manager.config
 
     @pytest.fixture(autouse=True)
     def _theme_manager(self, qapp: QApplication) -> Generator[ThemeManager]:

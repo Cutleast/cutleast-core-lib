@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 from cutleast_core_lib.core.cache.cache import Cache
 from cutleast_core_lib.core.config.app_config import AppConfig
 from cutleast_core_lib.core.config.exceptions import ConfigValidationError
+from cutleast_core_lib.core.config.manager import ConfigManager
 from cutleast_core_lib.core.config.validation_utils import ValidationUtils
 from cutleast_core_lib.core.filesystem.scanner import DirectoryScanner
 from cutleast_core_lib.core.utilities.logger import Logger
@@ -156,8 +157,9 @@ class AppSettings(SettingsPage[AppConfig]):
 
     @override
     def apply(self, config: AppConfig) -> None:
-        config.log_num_of_files = self.__logs_num_box.value()
-        config.log_level = self.__log_level_box.getCurrentValue()
-        config.log_visible = self.__log_visible.isChecked()
-        config.accent_color = self.__accent_color_entry.text()
-        config.ui_mode = self.__ui_mode_box.getCurrentValue()
+        with ConfigManager.for_config_class(config.__class__).edit():
+            config.log_num_of_files = self.__logs_num_box.value()
+            config.log_level = self.__log_level_box.getCurrentValue()
+            config.log_visible = self.__log_visible.isChecked()
+            config.accent_color = self.__accent_color_entry.text()
+            config.ui_mode = self.__ui_mode_box.getCurrentValue()
