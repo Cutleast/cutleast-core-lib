@@ -36,7 +36,7 @@ class AppSettings(SettingsPage[AppConfig]):
     Page for application settings.
     """
 
-    cache: Optional[Cache]
+    _cache: Optional[Cache]
 
     _vlayout: QVBoxLayout
     _basic_flayout: QFormLayout
@@ -48,10 +48,10 @@ class AppSettings(SettingsPage[AppConfig]):
     __clear_cache_button: QPushButton
 
     @override
-    def __init__(self, initial_config: AppConfig) -> None:
-        self.cache = Cache.get_optional()
+    def __init__(self, config_manager: ConfigManager[AppConfig]) -> None:
+        self._cache = Cache.get_optional()
 
-        super().__init__(initial_config)
+        super().__init__(config_manager)
 
         self.__logs_num_box.valueChanged.connect(lambda _: self.changed_signal.emit())
         self.__logs_num_box.valueChanged.connect(
@@ -80,7 +80,7 @@ class AppSettings(SettingsPage[AppConfig]):
             lambda _: self.theme_update_required_signal.emit()
         )
 
-        self.__clear_cache_button.setVisible(self.cache is not None)
+        self.__clear_cache_button.setVisible(self._cache is not None)
         self.__clear_cache_button.clicked.connect(self.__clear_cache)
 
     @override
@@ -102,47 +102,47 @@ class AppSettings(SettingsPage[AppConfig]):
 
         self.__logs_num_box = SpinBox()
         self.__logs_num_box.setRange(-1, 100)
-        self.__logs_num_box.setValue(self._initial_config.log_num_of_files)
+        self.__logs_num_box.setValue(self._config.log_num_of_files)
         self._basic_flayout.addRow(
             "*" + self.tr("Number of newest log files to keep"), self.__logs_num_box
         )
 
-        self.__log_level_box = EnumDropdown(Logger.Level, self._initial_config.log_level)
+        self.__log_level_box = EnumDropdown(Logger.Level, self._config.log_level)
         self._basic_flayout.addRow("*" + self.tr("Log Level"), self.__log_level_box)
 
         self.__log_visible = QCheckBox()
-        self.__log_visible.setChecked(self._initial_config.log_visible)
+        self.__log_visible.setChecked(self._config.log_visible)
         self._basic_flayout.addRow(
             "*" + self.tr("Display log at the bottom of the main window"),
             self.__log_visible,
         )
 
         self.__accent_color_entry = ColorLineEdit(
-            [self._initial_config.__class__.get_default_value("accent_color", str)]
+            [self._config.__class__.get_default_value("accent_color", str)]
         )
-        self.__accent_color_entry.setText(self._initial_config.accent_color)
+        self.__accent_color_entry.setText(self._config.accent_color)
         self._basic_flayout.addRow(self.tr("Accent Color"), self.__accent_color_entry)
 
-        self.__ui_mode_box = EnumDropdown(UiMode, self._initial_config.ui_mode)
+        self.__ui_mode_box = EnumDropdown(UiMode, self._config.ui_mode)
         self._basic_flayout.addRow(self.tr("UI Mode"), self.__ui_mode_box)
 
         self.__clear_cache_button = QPushButton(self.tr("Clear Cache"))
         self.__clear_cache_button.setProperty("destructive", True)
         self.__clear_cache_button.setEnabled(
-            self.cache is not None and self.cache.path.is_dir()
+            self._cache is not None and self._cache.path.is_dir()
         )
-        if self.cache is not None and self.cache.path.is_dir():
+        if self._cache is not None and self._cache.path.is_dir():
             self.__clear_cache_button.setText(
                 self.__clear_cache_button.text()
-                + f" ({scale_value(DirectoryScanner.get_folder_size(self.cache.path))})"
+                + f" ({scale_value(DirectoryScanner.get_folder_size(self._cache.path))})"
             )
         self._basic_flayout.addRow(self.__clear_cache_button)
 
     def __clear_cache(self) -> None:
-        if self.cache is None:
+        if self._cache is None:
             return
 
-        self.cache.clear_caches()
+        self._cache.clear_caches()
         self.__clear_cache_button.setText(self.tr("Clear Cache"))
         self.__clear_cache_button.setEnabled(False)
 
@@ -156,10 +156,10 @@ class AppSettings(SettingsPage[AppConfig]):
             )
 
     @override
-    def apply(self, config: AppConfig) -> None:
-        with ConfigManager.for_config_class(config.__class__).edit():
-            config.log_num_of_files = self.__logs_num_box.value()
-            config.log_level = self.__log_level_box.getCurrentValue()
-            config.log_visible = self.__log_visible.isChecked()
-            config.accent_color = self.__accent_color_entry.text()
-            config.ui_mode = self.__ui_mode_box.getCurrentValue()
+    def apply(self) -> None:
+        with self._config_manager.edit():
+            self._config.log_num_of_files = self.__logs_num_box.value()
+            self._config.log_level = self.__log_level_box.getCurrentValue()
+            self._config.log_visible = self.__log_visible.isChecked()
+            self._config.accent_color = self.__accent_color_entry.text()
+            self._config.ui_mode = self.__ui_mode_box.getCurrentValue()

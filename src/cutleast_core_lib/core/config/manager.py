@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 """
 
 import logging
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Generic, Optional, TypeVar
@@ -34,6 +34,7 @@ class ConfigManager(QObject, Generic[T]):
     __config_path: Path
     __config: T
 
+    __dirty: bool
     __batch_edit_level: int
 
     log: logging.Logger
@@ -68,6 +69,7 @@ class ConfigManager(QObject, Generic[T]):
         self.__config_path = config_path
         self.__config = self.__load()
 
+        self.__dirty = False
         self.__batch_edit_level = 0
 
         self.__config.set_change_callback(self.__on_config_changed)
@@ -129,6 +131,7 @@ class ConfigManager(QObject, Generic[T]):
             config_file_path.unlink(missing_ok=True)
             self.log.debug("Deleted empty configuration file.")
 
+        self.__dirty = False
         self.saved.emit()
 
     @contextmanager
@@ -150,7 +153,19 @@ class ConfigManager(QObject, Generic[T]):
             new_config: str = self.__config.model_dump_json()
 
             if self.__batch_edit_level == 0 and old_config != new_config:
+                self.__dirty = True
                 self.changed.emit()
+
+    def edit_wrap(self, callable: Callable[[], None]) -> None:
+        """
+        Calls a function or method in an edit block.
+
+        Args:
+            callable (Callable[[], None]): The function or method to call.
+        """
+
+        with self.edit():
+            callable()
 
     def __on_config_changed(self) -> None:
         """
@@ -158,7 +173,14 @@ class ConfigManager(QObject, Generic[T]):
         """
 
         if not self.__batch_edit_level:
+            self.__dirty = True
             self.changed.emit()
+
+    @property
+    def dirty(self) -> bool:
+        """If the configuration has unsaved changes."""
+
+        return self.__dirty
 
     def print_settings_to_log(self) -> None:
         """

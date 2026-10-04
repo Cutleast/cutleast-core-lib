@@ -10,6 +10,7 @@ from PySide6.QtGui import QWheelEvent
 from PySide6.QtWidgets import QComboBox, QDoubleSpinBox, QSpinBox
 
 from cutleast_core_lib.core.config.base_config import BaseConfig
+from cutleast_core_lib.core.config.manager import ConfigManager
 
 from ..widgets.smooth_scroll_area import SmoothScrollArea
 
@@ -30,17 +31,20 @@ class SettingsPage(SmoothScrollArea, Generic[T]):
     theme_update_required_signal = Signal()
     """This signal gets emitted when a setting requires a theme update."""
 
-    _initial_config: T
+    _config_manager: ConfigManager[T]
+    _config: T
 
-    def __init__(self, initial_config: T) -> None:
+    def __init__(self, config_manager: ConfigManager[T]) -> None:
         """
         Args:
-            initial_config (T): The initial configuration to display.
+            config_manager (ConfigManager[T]):
+                The manager for the config that is represented by this page.
         """
 
         super().__init__()
 
-        self._initial_config = initial_config
+        self._config_manager = config_manager
+        self._config = config_manager.config
 
         self._init_ui()
 
@@ -48,12 +52,9 @@ class SettingsPage(SmoothScrollArea, Generic[T]):
     def _init_ui(self) -> None: ...
 
     @abstractmethod
-    def apply(self, config: T) -> None:
+    def apply(self) -> None:
         """
         Applies changes to the config.
-
-        Args:
-            config (T): Config to apply changes to
         """
 
     @abstractmethod

@@ -124,3 +124,39 @@ class TestConfigManager(BaseTest):
 
         # then
         assert calls == []
+
+    def test_dirty(self, tmp_path: Path, qtbot: QtBot) -> None:
+        """
+        Tests the `ConfigManager.dirty` property on changes.
+        """
+
+        # given
+        my_manager = ConfigManager(TestConfigManager._MyConfig, tmp_path)
+
+        # then
+        assert not my_manager.dirty
+
+        # when
+        my_manager.config.value1 = 43
+
+        # then
+        assert my_manager.dirty
+
+        # when
+        my_manager.save()
+
+        # then
+        assert not my_manager.dirty
+
+        # when
+        with my_manager.edit():
+            pass
+
+        # then
+        assert not my_manager.dirty
+
+        # when
+        my_manager.config.value1 = 43
+
+        # then
+        assert not my_manager.dirty
