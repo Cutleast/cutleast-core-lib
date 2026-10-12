@@ -8,6 +8,7 @@ from PySide6.QtCore import QEasingCurve, QSize, Qt, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QBoxLayout, QTabBar, QTabWidget, QWidget
 
+from .animated_tab_bar import AnimatedTabBar
 from .stacked_widget import StackedWidget
 
 
@@ -33,10 +34,11 @@ class TabWidget(QWidget):
     """
 
     __layout: QBoxLayout
-    __tab_bar: QTabBar
+    __tab_bar: AnimatedTabBar
     __pane: StackedWidget
     __tab_position: QTabWidget.TabPosition
 
+    @override
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         """
         Args:
@@ -62,7 +64,8 @@ class TabWidget(QWidget):
         self.__layout.setContentsMargins(0, 0, 0, 0)
         self.__layout.setSpacing(8)
 
-        self.__tab_bar = QTabBar(self)
+        self.__tab_bar = AnimatedTabBar(self)
+        self.__tab_bar.setMovable(False)
         self.__tab_bar.setDrawBase(False)
 
         self.__pane = StackedWidget(self, orientation=Qt.Orientation.Horizontal)
@@ -413,12 +416,12 @@ class TabWidget(QWidget):
 
         self.setCurrentIndex(self.indexOf(widget))
 
-    def tabBar(self) -> QTabBar:
+    def tabBar(self) -> AnimatedTabBar:
         """
         Returns the tab bar.
 
         Returns:
-            QTabBar: Tab bar used by this widget.
+            AnimatedTabBar: Tab bar used by this widget.
         """
 
         return self.__tab_bar
@@ -583,7 +586,10 @@ class TabWidget(QWidget):
             to_index (int): New tab index.
         """
 
+        # A fade captured before tabMoved uses the previous page order.
+        self.__pane.cancelAnimation()
         widget: Optional[QWidget] = self.__pane.widget(from_index)
         if widget is not None:
             self.__pane.removeWidget(widget)
             self.__pane.insertWidget(to_index, widget)
+            self.__pane.setCurrentIndex(self.__tab_bar.currentIndex())
