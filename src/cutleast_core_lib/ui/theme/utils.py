@@ -5,6 +5,10 @@ Copyright (c) Cutleast
 import re
 from typing import Any, Optional, TypeVar
 
+from PySide6.QtWidgets import QWidget
+
+from .models.types import QSS_SIZE_PATTERN, QssSizeStr
+
 T = TypeVar("T")
 
 
@@ -93,3 +97,35 @@ def _resolve_attr_path(root: object, path: str) -> Any:
         value = getattr(value, key)
 
     return value
+
+
+def qss_size_to_pixels(value: QssSizeStr, widget: QWidget) -> float:
+    """
+    Converts a theme size to logical pixels using a widget's DPI and font metrics.
+
+    Pixel units remain logical pixels; no device-pixel-ratio multiplication is
+    applied. Point units use logical horizontal DPI, and em uses the font height.
+    Negative values are preserved for the caller to interpret or clamp.
+
+    Args:
+        value (QssSizeStr): Theme size in px, pt or em.
+        widget (QWidget): Reference widget for logical DPI and font metrics.
+
+    Returns:
+        float: Size in logical pixels, preserving fractional values.
+
+    Raises:
+        ValueError: The value has no supported number/unit combination.
+    """
+
+    match: Optional[re.Match[str]] = QSS_SIZE_PATTERN.fullmatch(value)
+    if match is None:
+        raise ValueError(f"Invalid QSS size '{value}'.")
+
+    scale: float = {
+        "px": 1,
+        "pt": widget.logicalDpiX() / 72,
+        "em": widget.fontMetrics().height(),
+    }[match.group(2)]
+
+    return float(match.group(1)) * scale
