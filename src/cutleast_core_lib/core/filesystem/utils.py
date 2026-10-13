@@ -157,7 +157,7 @@ def open_in_explorer(path: Path) -> None:
     """
 
     if os.name == "nt":
-        subprocess.run(["explorer.exe", "/select," + str(path)], check=False)
+        subprocess.run(f'explorer.exe /select,"{path}"', check=False)
     elif sys.platform == "darwin":
         subprocess.run(["open", str(path.parent)], check=False)
     else:
