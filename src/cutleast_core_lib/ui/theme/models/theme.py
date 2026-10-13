@@ -113,7 +113,7 @@ class Theme(ThemeDefinition):
         )
         qpalette.setColor(
             QPalette.ColorRole.AlternateBase,
-            QColor(self.resolve(self.colors.bg_elevated)),
+            QColor(self.resolve(self.colors.surface)),
         )
 
         # Text

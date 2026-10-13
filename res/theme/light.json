@@ -78,7 +78,8 @@
         "arrow_right_disabled": ":/core-lib/icons/disabled/arrow_right.svg",
         "arrow_up": ":/core-lib/icons/light/arrow_up.svg",
         "arrow_up_disabled": ":/core-lib/icons/disabled/arrow_up.svg",
-        "checkmark": ":/core-lib/icons/light/checkmark.svg"
+        "checkmark": ":/core-lib/icons/light/checkmark.svg",
+        "close_icon": ":/core-lib/icons/light/close.svg"
     },
     "meta": {
         "checked_bg": "${primary_palette.tone_70}",

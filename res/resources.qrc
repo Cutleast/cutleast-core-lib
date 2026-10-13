@@ -7,6 +7,7 @@
         <file>icons/dark/arrow_right.svg</file>
         <file>icons/dark/arrow_up.svg</file>
         <file>icons/dark/checkmark.svg</file>
+        <file>icons/dark/close.svg</file>
 
         <!-- Disabled icons for QSS -->
         <file>icons/disabled/arrow_down.svg</file>
@@ -20,6 +21,7 @@
         <file>icons/light/arrow_right.svg</file>
         <file>icons/light/arrow_up.svg</file>
         <file>icons/light/checkmark.svg</file>
+        <file>icons/light/close.svg</file>
 
         <!-- Other icons -->
         <file alias="icons/arrow_down.svg">icons/dark/arrow_down.svg</file>

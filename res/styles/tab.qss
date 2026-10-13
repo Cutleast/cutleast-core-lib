@@ -54,6 +54,15 @@ QTabBar::tab:left:!last,
 QTabBar::tab:right:!last {
     margin-bottom: 0px;
 }
+QTabBar::close-button {
+    background-color: transparent;
+    border: none;
+    image: url(${resources.close_icon});
+}
+QTabBar::close-button:hover {
+    image: url(${resources.close_icon_active});
+}
+
 QTabWidget::tab-bar#centered_tab,
 QTabWidget::tab-bar#icon_bar,
 QTabBar#centered_tab,
@@ -68,4 +77,17 @@ QTabBar#icon_bar {
 QTabBar#icon_bar::tab:left {
     padding-top: -8px;
     padding-bottom: 8px;
+}
+
+QTabBar > IconButton {
+    margin-right: ${metrics.spacing_ms};
+    padding: 0px;
+}
+QTabBar > IconButton:!hover {
+    background: transparent;
+    border-color: transparent;
+}
+QTabBar > IconButton:hover {
+    background: ${colors.surface_pressed};
+    border-color: ${colors.surface_pressed};
 }

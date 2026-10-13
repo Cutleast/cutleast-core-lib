@@ -98,6 +98,7 @@ class AppSettings(SettingsPage[AppConfig]):
         basic_group = QGroupBox(self.tr("Basic App Settings"))
         self._vlayout.addWidget(basic_group)
         self._basic_flayout = QFormLayout()
+        self._basic_flayout.setContentsMargins(0, -1, 0, -1)
         basic_group.setLayout(self._basic_flayout)
 
         self.__logs_num_box = SpinBox()

@@ -72,6 +72,9 @@
         "shadow_margin": 8,
         "shadow_size": 4
     },
+    "resources": {
+        "close_icon_active": ":/core-lib/icons/close.svg"
+    },
     "meta": {
         "about_dialog_title_size": "32px"
     }
