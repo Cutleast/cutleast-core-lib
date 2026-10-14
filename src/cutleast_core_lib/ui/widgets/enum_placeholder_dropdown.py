@@ -3,7 +3,7 @@ Copyright (c) Cutleast
 """
 
 from enum import Enum
-from typing import Generic, Optional, TypeVar
+from typing import Generic, Optional, TypeVar, cast
 
 from PySide6.QtCore import Qt, Signal
 
@@ -79,7 +79,7 @@ class EnumPlaceholderDropdown(PlaceholderDropdown, Generic[E]):
         if self.currentIndex() == -1:
             return None
         elif issubclass(self.__enum_type, LocalizedEnum):
-            return self.__enum_type.get_by_localized_name(self.currentText())
+            return cast(E, self.__enum_type.get_by_localized_name(self.currentText()))
         else:
             return self.__enum_type[self.currentText()]
 

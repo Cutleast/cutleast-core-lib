@@ -55,7 +55,7 @@ class CxFreezeBackend(BuildBackend):
         icon_path: Path | None,
         metadata: BuildMetadata,
     ) -> Path:
-        from cx_Freeze import Executable, setup  # pyright: ignore[reportMissingImports]
+        from cx_Freeze import Executable, setup  # pyrefly: ignore [missing-import]
 
         outpath: Path = Path.cwd() / f"{main_module.stem}.dist"
         build_options: dict[str, Any] = {

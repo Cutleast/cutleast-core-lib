@@ -161,20 +161,12 @@ class CollapsibleLabel(QLabel):
 
 
 if __name__ == "__main__":
-    import os
-    import sys
-
     from PySide6.QtWidgets import QApplication, QVBoxLayout
 
-    from cutleast_core_lib.ui.utilities.ui_mode import UIMode
-
-    sys.path.append(os.path.join(os.getcwd(), "src"))
-
-    import resources_rc as resources_rc  # noqa: PLC0414
-
-    IconProvider(UIMode.Dark, "#ffffff")
+    from cutleast_core_lib.ui.theme.manager import ThemeManager
 
     app = QApplication()
+    ThemeManager(app, "#4411aa")
 
     window = QWidget()
     layout = QVBoxLayout()

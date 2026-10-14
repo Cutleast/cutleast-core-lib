@@ -22,7 +22,7 @@ class KeyLineEdit(QLineEdit):
 
     @override
     def __init__(self, *args: Any, **kwargs: dict[str, Any]) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # pyrefly: ignore [no-matching-overload]
 
         self.__init_ui()
 

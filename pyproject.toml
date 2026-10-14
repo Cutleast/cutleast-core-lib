@@ -24,6 +24,44 @@ dependencies = [
 requires = ["hatchling", "pyside6"]
 build-backend = "hatchling.build"
 
+[tool.pyrefly]
+project-includes = [
+    "src/**/*.py",
+    "tests/**/*.py",
+]
+project-excludes = [
+    "**/__pycache__",
+    "**/*.old",
+    "**/resources_rc.py",
+    "**/node_modules",
+    "**/.*",
+    ".venv",
+]
+site-package-path = ["./stubs"]
+infer-with-first-use = false
+
+[tool.pyrefly.errors]
+bad-override = false
+deprecated = "warn"
+inconsistent-inheritance = "warn"
+implicit-any-lambda = "ignore"
+implicit-any-parameter = "error"
+implicit-any-type-argument = "ignore"
+incompatible-comparison = "info"
+missing-import = "error"
+missing-override-decorator = "warn"
+no-access = "warn"
+non-exhaustive-match = "ignore"
+redundant-cast = "info"
+redundant-condition = "info"
+unknown-argument-type = "ignore"
+unknown-attribute-type = "ignore"
+unknown-variable-type = "ignore"
+unnecessary-comparison = "info"
+untyped-class-decorator = "error"
+untyped-function-decorator = "error"
+untyped-import = "ignore"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/cutleast_core_lib"]
 
@@ -36,7 +74,7 @@ path = "hatch_build.py"
 [dependency-groups]
 dev = [
     "pyfakefs",
-    "pyright",
+    "pyrefly",
     "pytest",
     "pytest-cov",
     "pytest-mock",
@@ -52,33 +90,3 @@ pythonpath = ["src", "tests"]
 log_cli = true
 log_cli_level = "DEBUG"
 log_cli_format = "[%(asctime)s.%(msecs)03d][%(levelname)s][%(name)s.%(funcName)s]: %(message)s"
-
-[tool.pyright]
-include = ["src", "tests"]
-typeCheckingMode = "strict"
-exclude = ["**/__pycache__", "**/*.old", "src/cutleast_core_lib/ui/resources_rc.py"]
-stubPath = "./stubs"
-extraPaths = ["src"]
-
-# Check here for a full list of options: https://github.com/microsoft/pyright/blob/main/docs/configuration.md#diagnostic-settings-defaults
-deprecateTypingAliases = false
-reportImplicitOverride = "warning"
-reportMatchNotExhaustive = false
-reportMissingTypeArgument = false
-reportMissingTypeStubs = false
-reportPropertyTypeMismatch = "warning"
-reportShadowedImports = "warning"
-reportUnknownArgumentType = false
-reportUnknownLambdaType = false
-reportUnknownMemberType = false
-reportUnknownParameterType = false
-reportUnknownVariableType = false
-reportUnnecessaryCast = "information"
-reportUnnecessaryComparison = "information"
-reportUnnecessaryContains = "information"
-reportUnnecessaryIsInstance = "information"
-reportUnnecessaryTypeIgnoreComment = "information"
-reportUnusedClass = "warning"
-reportUnusedImport = "warning"
-reportUnusedFunction = "warning"
-reportUnusedVariable = "warning"

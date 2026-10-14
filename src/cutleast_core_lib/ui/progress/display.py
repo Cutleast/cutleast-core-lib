@@ -2,21 +2,15 @@
 Copyright (c) Cutleast
 """
 
-from abc import ABC, ABCMeta, abstractmethod
+from abc import abstractmethod
 
 from PySide6.QtCore import SignalInstance
-from PySide6.QtWidgets import QWidget
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
+from cutleast_core_lib.core.utilities.typing_utils import AbstractBase
 
 
-class ABCQtMeta(type(QWidget), ABCMeta):  # pyright: ignore[reportGeneralTypeIssues]
-    """
-    Combined metaclass for ABC + PySide6 Qt types to avoid metaclass conflicts.
-    """
-
-
-class ProgressDisplay(ABC, metaclass=ABCQtMeta):
+class ProgressDisplay(AbstractBase):
     """
     Interface for all classes that can display and manage multiple progress bars including
     a main one.

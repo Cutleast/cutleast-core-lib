@@ -269,11 +269,10 @@ if __name__ == "__main__":
     import sys
     import time
 
-    from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
-    from cutleast_core_lib.ui.utilities.ui_mode import UIMode
+    from cutleast_core_lib.ui.theme.manager import ThemeManager
 
     app = QApplication(sys.argv)
-    IconProvider(UIMode.Dark, "#ffffff")
+    ThemeManager(app, "#4411aa")
 
     def process(pdisplay: ProgressDisplay) -> int:  # noqa: D103
         total = 100000

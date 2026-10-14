@@ -2,7 +2,7 @@
 Copyright (c) Cutleast
 """
 
-from typing import Any, Generic, Literal, TypeVar, final, get_origin
+from typing import Any, Generic, Literal, TypeVar, cast, final, get_origin
 
 from pydantic import SerializerFunctionWrapHandler, model_serializer
 from pydantic.main import BaseModel
@@ -21,7 +21,7 @@ def include_literal_defaults(cls: type[ModelType]) -> type[ModelType]:
 
     # this dynamic wrapper class is required in order to set the model serializer before
     # Pydantic builds the model
-    class WrappedModel(cls):
+    class WrappedModel(cls):  # pyrefly: ignore [invalid-inheritance]
         @model_serializer(mode="wrap")
         def _serialize_literals(
             self, next_serializer: SerializerFunctionWrapHandler
@@ -29,9 +29,8 @@ def include_literal_defaults(cls: type[ModelType]) -> type[ModelType]:
             dumped: dict[str, Any] = next_serializer(self)
 
             for name, field_info in cls.model_fields.items():
-                if get_origin(field_info.annotation) is Literal:
-                    if name not in dumped:
-                        dumped[name] = getattr(self, name)
+                if get_origin(field_info.annotation) is Literal and name not in dumped:
+                    dumped[name] = getattr(self, name)
 
             return dumped
 
@@ -40,7 +39,7 @@ def include_literal_defaults(cls: type[ModelType]) -> type[ModelType]:
     WrappedModel.__qualname__ = cls.__qualname__
     WrappedModel.__doc__ = cls.__doc__
 
-    return WrappedModel  # pyright: ignore[reportReturnType]
+    return cast(type[ModelType], WrappedModel)
 
 
 def check_validity(obj: BaseModel) -> None:

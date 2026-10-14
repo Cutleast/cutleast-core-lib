@@ -29,22 +29,18 @@
 		"python.testing.unittestEnabled": false,
 		"xml.format.maxLineWidth": 0,
 		"debugpy.debugJustMyCode": false,
-		"python.analysis.autoFormatStrings": true,
-		"python.analysis.autoImportCompletions": true,
-		"python.analysis.diagnosticMode": "workspace",
-		"python.analysis.generateWithTypeAnnotation": true,
-		"python.analysis.languageServerMode": "full",
-		"python.analysis.typeCheckingMode": "strict",
+		"python.pyrefly.autoFormatStrings": true,
+		"python.pyrefly.autoImportCompletions": true,
+		"python.pyrefly.diagnosticMode": "workspace",
+		"python.pyrefly.generateWithTypeAnnotation": true,
+		"python.pyrefly.languageServerMode": "full",
+		"python.pyrefly.typeCheckingMode": "strict",
 		"git.diagnosticsCommitHook.Enabled": true,
 		"python.testing.autoTestDiscoverOnSavePattern": "**/*.py",
 		"python.testing.autoTestDiscoverOnSaveEnabled": true,
 		"python.testing.pytestArgs": [
 			"-vv"
 		],
-		"todo-tree.filtering.excludeGlobs": [
-			".venv/**",
-		],
-		"todo-tree.highlights.enabled": false,
 		"autoDocstring.startOnNewLine": true
 	},
 	"launch": {

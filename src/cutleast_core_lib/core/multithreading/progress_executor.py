@@ -174,11 +174,10 @@ if __name__ == "__main__":
     from PySide6.QtWidgets import QApplication
 
     from cutleast_core_lib.ui.progress.dialog import ProgressDialog
-    from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
-    from cutleast_core_lib.ui.utilities.ui_mode import UIMode
+    from cutleast_core_lib.ui.theme.manager import ThemeManager
 
     app = QApplication(sys.argv)
-    IconProvider(UIMode.Dark, "#ffffff")
+    ThemeManager(app, "#4411aa")
 
     def example_task(update: Callable[[ProgressUpdate], None], task_id: int) -> None:
         """Simulate a long-running task with progress updates."""

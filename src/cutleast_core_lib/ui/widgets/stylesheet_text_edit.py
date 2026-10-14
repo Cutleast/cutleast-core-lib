@@ -5,7 +5,7 @@ Copyright (c) Cutleast
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Optional, override
+from typing import Optional, cast, override
 
 from PySide6.QtCore import (
     QRegularExpression,
@@ -520,12 +520,14 @@ class StylesheetTextEdit(LineNumberTextEdit):
         selections: list[QTextEdit.ExtraSelection] = []
         current_line = QTextEdit.ExtraSelection()
         theme: Theme = ThemeManager.get().theme
-        current_line.format.setBackground(
+        cast(QTextCharFormat, current_line.format).setBackground(
             QColor(theme.resolve(theme.colors.bg_elevated))
         )
-        current_line.format.setProperty(QTextFormat.Property.FullWidthSelection, True)
-        current_line.cursor = self.textCursor()
-        current_line.cursor.clearSelection()
+        cast(QTextCharFormat, current_line.format).setProperty(
+            QTextFormat.Property.FullWidthSelection, True
+        )
+        current_line.cursor = self.textCursor()  # pyrefly: ignore [bad-assignment]
+        cast(QTextCursor, current_line.cursor).clearSelection()
         selections.append(current_line)
         selections.extend(self.__bracket_selections())
         self.setExtraSelections(selections)
@@ -623,13 +625,15 @@ class StylesheetTextEdit(LineNumberTextEdit):
 
         selection = QTextEdit.ExtraSelection()
         theme: Theme = ThemeManager.get().theme
-        selection.format.setBackground(QColor(theme.resolve(theme.colors.warning_bg)))
+        cast(QTextCharFormat, selection.format).setBackground(
+            QColor(theme.resolve(theme.colors.warning_bg))
+        )
         cursor = QTextCursor(self.document())
         cursor.setPosition(position)
         cursor.movePosition(
             QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.KeepAnchor
         )
-        selection.cursor = cursor
+        selection.cursor = cursor  # pyrefly: ignore [bad-assignment]
         return selection
 
     def __on_theme_changed(self, theme: Theme) -> None:

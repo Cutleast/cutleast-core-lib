@@ -7,7 +7,7 @@ from enum import Enum
 from typing import Any, Generic, Optional, Self, TypeAlias, TypeVar, cast, override
 
 from pydantic import BaseModel
-from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
+from PySide6.QtCore import QModelIndex, QPersistentModelIndex, QRect, Qt
 from PySide6.QtGui import QBrush, QColor, QFont, QFontMetrics, QIcon, QPainter, QPen
 from PySide6.QtWidgets import (
     QApplication,
@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
     QStyleOptionViewItem,
     QTreeWidget,
     QTreeWidgetItem,
+    QWidget,
 )
 
 from cutleast_core_lib.core.utilities.typing_utils import Comparable
@@ -592,23 +593,23 @@ class _ItemColorDelegate(QStyledItemDelegate):
             index.data(Qt.ItemDataRole.BackgroundRole)
         )
         if background is not None:
-            painter.fillRect(option.rect, background)
+            painter.fillRect(cast(QRect, option.rect), background)
 
         hover_background: Optional[QBrush] = self.__get_brush(
             index.data(HOVER_BACKGROUND_ROLE)
         )
         has_custom_hover_background: bool = hover_background is not None and bool(
-            option.state
+            cast(QStyle.StateFlag, option.state)
             & (QStyle.StateFlag.State_Selected | QStyle.StateFlag.State_MouseOver)
         )
         if has_custom_hover_background:
-            painter.fillRect(option.rect, hover_background)
+            painter.fillRect(cast(QRect, option.rect), hover_background)
 
         item_option = QStyleOptionViewItem(option)
         self.initStyleOption(item_option, index)
 
         if has_custom_hover_background:
-            item_option.backgroundBrush = cast(QBrush, hover_background)
+            item_option.backgroundBrush = hover_background  # pyrefly: ignore [bad-assignment]
 
         state: QStyle.StateFlag = QStyle.StateFlag.State_None
 
@@ -617,30 +618,32 @@ class _ItemColorDelegate(QStyledItemDelegate):
             QStyle.StateFlag.State_Selected,
             QStyle.StateFlag.State_MouseOver,
         ):
-            if option.state & flag and not (
+            if cast(QStyle.StateFlag, option.state) & flag and not (
                 has_custom_hover_background
                 and flag
                 in (QStyle.StateFlag.State_Selected, QStyle.StateFlag.State_MouseOver)
             ):
                 state |= flag
 
-        item_option.state = state
+        item_option.state = state  # pyrefly: ignore [bad-assignment]
         foreground: Optional[QBrush] = self.__get_brush(
             index.data(Qt.ItemDataRole.ForegroundRole)
         )
         text_option = QStyleOptionViewItem(item_option)
 
         if foreground is not None:
-            item_option.text = ""
+            item_option.text = ""  # pyrefly: ignore [bad-assignment]
 
         style: QStyle = (
-            item_option.widget.style() if item_option.widget else QApplication.style()
+            cast(QWidget, item_option.widget).style()
+            if item_option.widget
+            else QApplication.style()
         )
         style.drawControl(
             QStyle.ControlElement.CE_ItemViewItem,
             item_option,
             painter,
-            item_option.widget,
+            cast(QWidget, item_option.widget),
         )
 
         if foreground is not None:
@@ -684,21 +687,30 @@ class _ItemColorDelegate(QStyledItemDelegate):
         if not option.text:
             return
 
-        style: QStyle = option.widget.style() if option.widget else QApplication.style()
-        text_rect = style.subElementRect(
-            QStyle.SubElement.SE_ItemViewItemText, option, option.widget
+        style: QStyle = (
+            cast(QWidget, option.widget).style()
+            if cast(QWidget, option.widget)
+            else QApplication.style()
         )
-        text: str = QFontMetrics(option.font).elidedText(
-            option.text,
-            option.textElideMode,
+        text_rect = style.subElementRect(
+            QStyle.SubElement.SE_ItemViewItemText, option, cast(QWidget, option.widget)
+        )
+        text: str = QFontMetrics(cast(QFont, option.font)).elidedText(
+            cast(str, option.text),
+            cast(Qt.TextElideMode, option.textElideMode),
             text_rect.width(),
             int(Qt.TextFlag.TextSingleLine),
         )
 
         painter.save()
-        painter.setFont(option.font)
+        painter.setFont(cast(QFont, option.font))
         painter.setPen(QPen(foreground, 1))
         painter.drawText(
-            text_rect, int(option.displayAlignment | Qt.AlignmentFlag.AlignVCenter), text
+            text_rect,
+            int(
+                cast(Qt.AlignmentFlag, option.displayAlignment)
+                | Qt.AlignmentFlag.AlignVCenter
+            ),
+            text,
         )
         painter.restore()

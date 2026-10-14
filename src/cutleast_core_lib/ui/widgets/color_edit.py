@@ -30,7 +30,7 @@ class ColorLineEdit(QLineEdit):
             **kwargs (dict[str, Any]): Additional keyword arguments for QLineEdit.
         """
 
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # pyrefly: ignore [no-matching-overload]
 
         self.__preset_colors = preset_colors
 

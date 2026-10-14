@@ -27,14 +27,13 @@ if __name__ == "__main__":
     from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
 
     from cutleast_core_lib.core.multithreading.progress import ProgressUpdate
-    from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
-    from cutleast_core_lib.ui.utilities.ui_mode import UIMode
+    from cutleast_core_lib.ui.theme.manager import ThemeManager
 
     from .taskbar import TaskbarProgressDisplay
     from .widget import ProgressWidget
 
     app = QApplication(sys.argv)
-    IconProvider(UIMode.Dark, "#ffffff")
+    ThemeManager(app, "#4411aa")
 
     MainProgressCoordinator()
     window = QWidget()

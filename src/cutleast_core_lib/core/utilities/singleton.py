@@ -2,13 +2,14 @@
 Copyright (c) Cutleast
 """
 
-from abc import ABCMeta
 from typing import ClassVar, Optional, Self, final
 
 from PySide6.QtCore import QObject
 
+from .typing_utils import AbstractBase
 
-class Singleton(metaclass=ABCMeta):
+
+class Singleton(AbstractBase):
     """
     Base class providing singleton functionality:
     - only one instance of the class can exist at a time
@@ -80,13 +81,19 @@ class Singleton(metaclass=ABCMeta):
         return cls.__instance
 
 
-class SingletonQtMeta(type(QObject), type(Singleton)):  # pyright: ignore[reportGeneralTypeIssues]
-    """
-    Combined metaclass for Singleton + PySide6 Qt types to avoid metaclass conflicts.
-    """
+# class SingletonQtMeta(type(QObject), type(Singleton)):  # pyright: ignore[reportGeneralTypeIssues]
+#     """
+#     Combined metaclass for Singleton + PySide6 Qt types to avoid metaclass conflicts.
+#     """
 
 
-class SingletonQObject(QObject, Singleton, metaclass=SingletonQtMeta):
+# class SingletonQObject(QObject, Singleton, metaclass=SingletonQtMeta):
+#     """
+#     Base class for all QObjects subclasses that should be singletons.
+#     """
+
+
+class SingletonQObject(QObject, Singleton):
     """
     Base class for all QObjects subclasses that should be singletons.
     """

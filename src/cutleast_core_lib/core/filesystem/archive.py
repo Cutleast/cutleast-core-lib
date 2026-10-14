@@ -16,6 +16,7 @@ from typing import Any, BinaryIO, Literal, Optional, cast, override
 
 from cutleast_core_lib.core.utilities.exe_info import get_current_path
 from cutleast_core_lib.core.utilities.process_runner import run_process
+from cutleast_core_lib.core.utilities.typing_utils import not_none
 
 from .file import File
 from .utils import glob
@@ -53,12 +54,12 @@ class Archive:
 
     class _EntryStream(RawIOBase):
         def __init__(self, entry: Any) -> None:
-            import libarchive
+            import libarchive  # pyrefly: ignore [missing-import]
 
             if not isinstance(entry, libarchive.ArchiveEntry):
                 raise TypeError(f"Expected libarchive.ArchiveEntry, got {type(entry)}")
 
-            self.__blocks: Generator[bytes, None, None] = entry.get_blocks()
+            self.__blocks: Generator[bytes] = entry.get_blocks()
             self.__buffer: bytes = b""
 
         @override
@@ -381,7 +382,7 @@ class Archive:
 
     def iter_file_streams(
         self,
-    ) -> Generator[tuple[File, BinaryIO], None, None]:
+    ) -> Generator[tuple[File, BinaryIO]]:
         r"""
         Iterates over all files in the archive, yielding a stream for each.
 
@@ -399,7 +400,7 @@ class Archive:
 
         os.environ.setdefault("LIBARCHIVE", str(Archive.LIBARCHIVE_DLL_PATH))
 
-        import libarchive
+        import libarchive  # pyrefly: ignore [missing-import]
 
         file_paths: dict[Path, File] = {f.path: f for f in self.files}
 
@@ -408,7 +409,7 @@ class Archive:
                 if entry.isdir:
                     continue
 
-                file: Optional[File] = file_paths.get(Path(entry.pathname))  # pyright: ignore[reportArgumentType]
+                file: Optional[File] = file_paths.get(Path(not_none(entry.pathname)))
                 if file is None:
                     continue
 

@@ -6,7 +6,7 @@ from functools import reduce
 from threading import Lock
 from typing import Optional, override
 
-from PySide6.QtCore import QObject, QTimerEvent
+from PySide6.QtCore import QObject, QTimerEvent, SignalInstance
 
 from cutleast_core_lib.core.multithreading.progress import ProgressUpdate, UpdateCallback
 
@@ -127,21 +127,24 @@ class ProgressCoordinator(ProgressDisplay, QObject):
         for display in self.__displays:
             display.clearProgressBars()
 
+    @override
+    def cancelled(self) -> SignalInstance:
+        raise RuntimeError("A coordinator does not provide a cancelled signal.")
+
 
 if __name__ == "__main__":
     import sys
 
     from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
 
-    from cutleast_core_lib.ui.utilities.icon_provider import IconProvider
-    from cutleast_core_lib.ui.utilities.ui_mode import UIMode
+    from cutleast_core_lib.ui.theme.manager import ThemeManager
 
     from .bar import ProgressBarWidget
     from .taskbar import TaskbarProgressDisplay
     from .widget import ProgressWidget
 
     app = QApplication(sys.argv)
-    IconProvider(UIMode.Dark, "#ffffff")
+    ThemeManager(app, "#4411aa")
 
     coordinator = ProgressCoordinator()
     window = QWidget()

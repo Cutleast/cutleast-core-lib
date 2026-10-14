@@ -21,7 +21,7 @@ class UrlEdit(QLineEdit):
 
     @override
     def __init__(self, *args: Any, **kwargs: dict[str, Any]) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # pyrefly: ignore [no-matching-overload]
 
         hlayout = QHBoxLayout()
         hlayout.setContentsMargins(0, 0, 0, 0)

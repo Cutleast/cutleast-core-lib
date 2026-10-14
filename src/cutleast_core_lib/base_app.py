@@ -5,7 +5,7 @@ Copyright (c) Cutleast
 import logging
 import platform
 import time
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from argparse import Namespace
 from pathlib import Path
 from typing import Optional, override
@@ -14,6 +14,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QMainWindow
 
 from cutleast_core_lib.core.config.manager import ConfigManager
+from cutleast_core_lib.core.utilities.typing_utils import AbstractBase
 
 from .core.config.app_config import AppConfig
 from .core.utilities.exception_handler import ExceptionHandler
@@ -26,13 +27,7 @@ from .ui.utilities.window_manager import WindowManager
 from .ui.widgets.stylesheet_editor import StylesheetEditorWidget
 
 
-class ABCQtMeta(type(QApplication), ABCMeta):  # pyright: ignore[reportGeneralTypeIssues]
-    """
-    Combined metaclass for ABC + PySide6 Qt types to avoid metaclass conflicts.
-    """
-
-
-class BaseApp(QApplication, metaclass=ABCQtMeta):  # pyright: ignore[reportImplicitAbstractClass]
+class BaseApp(QApplication, AbstractBase):
     """
     Abstract base class for the main application.
     """

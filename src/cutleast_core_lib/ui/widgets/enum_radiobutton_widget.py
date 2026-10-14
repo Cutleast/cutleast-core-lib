@@ -2,7 +2,7 @@
 Copyright (c) Cutleast
 """
 
-from typing import Optional, override
+from typing import Optional, cast, override
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout, QRadioButton, QVBoxLayout, QWidget
@@ -71,7 +71,7 @@ class EnumRadiobuttonsWidget(EnumSelector[E]):
             for enum_value in self._enum_type:
                 radio_button = QRadioButton(enum_value.get_localized_name())
                 radio_button.setToolTip(enum_value.get_localized_description())
-                self.__enum_items[enum_value] = radio_button
+                self.__enum_items[cast(E, enum_value)] = radio_button
                 self.__layout.addWidget(radio_button)
         else:
             for enum_value in self._enum_type:

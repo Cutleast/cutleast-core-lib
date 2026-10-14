@@ -27,10 +27,9 @@ jobs:
           uv run ruff check src
           uv run ruff check tests
 
-      - name: Run Pyright
+      - name: Run Pyrefly
         run: |
-          uv run pyright --warnings src
-          uv run pyright --warnings tests
+          uv run pyrefly check --min-severity warn
 
       - name: Run Pytest
         run: |

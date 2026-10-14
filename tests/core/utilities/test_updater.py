@@ -3,12 +3,11 @@ Copyright (c) Cutleast
 """
 
 import pytest
-from requests_mock import Mocker as RequestsMocker
-
 from cutleast_core_lib.core.utilities.exceptions import Non200HttpError
 from cutleast_core_lib.core.utilities.updater import Updater
 from cutleast_core_lib.test.base_test import BaseTest
 from cutleast_core_lib.test.utils import Utils
+from requests_mock import Mocker as RequestsMocker
 
 
 class TestUpdater(BaseTest):

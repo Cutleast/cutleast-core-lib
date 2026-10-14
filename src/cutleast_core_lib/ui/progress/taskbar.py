@@ -20,6 +20,7 @@ if sys.platform == "win32":
 
         cc.GetModule(tlb_path)
 
+        # pyrefly: ignore [missing-import]
         import comtypes.gen.TaskbarLib as tbl  # noqa: E402, RUF100
 
         tlb = cc.CreateObject(

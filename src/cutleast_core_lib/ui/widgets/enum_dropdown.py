@@ -2,7 +2,7 @@
 Copyright (c) Cutleast
 """
 
-from typing import override
+from typing import cast, override
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget
@@ -46,7 +46,9 @@ class EnumDropdown(EnumSelector[E]):
     @override
     def getCurrentValue(self) -> E:
         if issubclass(self._enum_type, LocalizedEnum):
-            return self._enum_type.get_by_localized_name(self.__dropdown.currentText())
+            return cast(
+                E, self._enum_type.get_by_localized_name(self.__dropdown.currentText())
+            )
         else:
             return self._enum_type[self.__dropdown.currentText()]
 

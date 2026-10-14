@@ -41,6 +41,9 @@ def resolve(
         return cast(_StringOrPath, Path(*parts))
 
     else:
-        return substitute_advanced(
-            str_or_path, replacer, f"{sep[0]}([a-zA-Z0-9_]*){sep[1]}"
+        return cast(
+            _StringOrPath,
+            substitute_advanced(
+                str_or_path, replacer, f"{sep[0]}([a-zA-Z0-9_]*){sep[1]}"
+            ),
         )

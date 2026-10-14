@@ -414,7 +414,7 @@ class StackedWidget(QStackedWidget):
                 value (object): Current animation progress value.
             """
 
-            self.__overlay.setProgress(float(value))  # pyright: ignore[reportArgumentType]
+            self.__overlay.setProgress(float(value))  # pyrefly: ignore [bad-argument-type]
 
         def on_anim_finished() -> None:
             if self.__animation is not animation:
