@@ -58,8 +58,8 @@ def get_diff(start_time: str, end_time: str, str_format: str = "%H:%M:%S") -> st
     """
 
     return str(
-        datetime.strptime(end_time, str_format)  # noqa: DTZ007
-        - datetime.strptime(start_time, str_format)  # noqa: DTZ007
+        datetime.strptime(end_time, str_format)
+        - datetime.strptime(start_time, str_format)
     )
 
 

@@ -90,3 +90,33 @@ pythonpath = ["src", "tests"]
 log_cli = true
 log_cli_level = "DEBUG"
 log_cli_format = "[%(asctime)s.%(msecs)03d][%(levelname)s][%(name)s.%(funcName)s]: %(message)s"
+
+[tool.ruff]
+line-length = 89
+exclude = [
+    "scripts"
+]
+
+[tool.ruff.lint]
+extend-select = ["D"]
+ignore = [
+    "D105",  # Missing docstring in magic method
+    "D200",  # One-line docstring should fit on one line
+    "D202",  # No blank line before function
+    "D205",  # 1 blank line required between summary line and description
+    "D212",  # Multi-line docstring summary should start at the second line
+    "D415",  # First line should end with a period
+    "DTZ007",  # Naive datetime construction
+    "PLC0414",  # Import alias does not rename original package
+    "RUF012",  # Mutable default values on class-level
+    "UP040",  # type MyTypeAlias instead of MyTypeAlias: TypeAlias (still incompatible with Nuitka)
+    "UP045",  # T | None instead of Optional[T]
+    "UP046",  # New type-parameter syntax for generic classes (still incompatible with Nuitka, see https://github.com/Nuitka/Nuitka/issues/2930)
+    "UP047",  # New type-parameter syntax for generic functions (still incompatible with Nuitka, see https://github.com/Nuitka/Nuitka/issues/2930)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"resources_rc.py" = ["D100", "D103"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

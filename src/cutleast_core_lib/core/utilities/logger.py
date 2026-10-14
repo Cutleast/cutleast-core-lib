@@ -143,7 +143,7 @@ class Logger(logging.Logger, Singleton):
             if file.is_file()
             and re.match(log_filename_pattern, file.name, re.IGNORECASE)
         ]
-        log_files.sort(key=lambda name: datetime.strptime(name.name, basename))  # noqa: DTZ007
+        log_files.sort(key=lambda name: datetime.strptime(name.name, basename))
 
         while len(log_files) > num_of_files:
             os.remove(log_files.pop(0))

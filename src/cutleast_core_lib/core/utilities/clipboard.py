@@ -62,12 +62,9 @@ class Clipboard:
             return False
 
         data: bytes = cast(bytes, mime_data.data(cls._mime_type).data())
-        payload = cls.ClipboardPayload.model_validate_json(data)
+        payload: cls.ClipboardPayload = cls.ClipboardPayload.model_validate_json(data)
 
-        if payload.type != obj_cls.__qualname__:
-            return False
-
-        return True
+        return payload.type == obj_cls.__qualname__
 
     @classmethod
     def paste(cls, obj_cls: type[T]) -> T:
@@ -91,7 +88,7 @@ class Clipboard:
             )
 
         data: bytes = cast(bytes, mime_data.data(cls._mime_type).data())
-        payload = cls.ClipboardPayload.model_validate_json(data)
+        payload: cls.ClipboardPayload = cls.ClipboardPayload.model_validate_json(data)
 
         if payload.type != obj_cls.__qualname__:
             raise ValueError(

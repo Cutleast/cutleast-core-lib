@@ -158,7 +158,7 @@ class Archive(metaclass=ABCMeta):
         return matches
 
     @staticmethod
-    def load_archive(archive_path: Path) -> "Archive":
+    def load_archive(archive_path: Path) -> Archive:
         """
         Loads archive with fitting handler class.
 

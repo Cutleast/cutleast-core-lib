@@ -270,9 +270,12 @@ class Popup(QWidget):
 
     @override
     def eventFilter(self, object: QObject, event: QEvent) -> bool:
-        if object is self.parentWidget() and event.type() == QEvent.Type.Resize:
-            if self.isVisible():
-                target, _ = self.__compute_geometry()
-                self.move(target)
+        if (
+            object is self.parentWidget()
+            and event.type() == QEvent.Type.Resize
+            and self.isVisible()
+        ):
+            target, _ = self.__compute_geometry()
+            self.move(target)
 
         return super().eventFilter(object, event)

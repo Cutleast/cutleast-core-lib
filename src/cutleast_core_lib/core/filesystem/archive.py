@@ -166,7 +166,7 @@ class Archive:
                         # 7z timestamps may include sub-seconds; truncate
                         # to "YYYY-MM-DD HH:MM:SS"
                         date_part: str = raw_modified[:19]
-                        dt = datetime.datetime.strptime(date_part, Archive.DATE_FORMAT)  # noqa: DTZ007
+                        dt = datetime.datetime.strptime(date_part, Archive.DATE_FORMAT)
                         ts = int(time.mktime(dt.timetuple()))
                         raw_size: str = current.get(Archive.SIZE_KEY, "0")
                         entries.append(
