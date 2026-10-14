@@ -3,11 +3,12 @@ Copyright (c) Cutleast
 """
 
 import pytest
+from PySide6.QtWidgets import QLabel, QTabWidget, QVBoxLayout, QWidget
+from pytestqt.qtbot import QtBot
+
 from cutleast_core_lib.test.base_test import BaseTest
 from cutleast_core_lib.test.utils import Utils
 from cutleast_core_lib.ui.widgets.stacked_widget import StackedWidget
-from PySide6.QtWidgets import QLabel, QTabWidget, QVBoxLayout, QWidget
-from pytestqt.qtbot import QtBot
 
 
 class TestStackedWidget(BaseTest):

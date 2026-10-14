@@ -2,10 +2,11 @@
 Copyright (c) Cutleast
 """
 
-from cutleast_core_lib.ui.widgets.flow_layout import FlowLayout
 from PySide6.QtCore import QRect, QSize, Qt
 from PySide6.QtWidgets import QPushButton, QWidget
 from pytestqt.qtbot import QtBot
+
+from cutleast_core_lib.ui.widgets.flow_layout import FlowLayout
 
 
 class TestFlowLayout:

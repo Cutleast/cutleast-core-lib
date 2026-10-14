@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 import pytest
+
 from cutleast_core_lib.core.utilities.env_resolver import resolve
 
 

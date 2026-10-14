@@ -3,12 +3,13 @@ Copyright (c) Cutleast
 """
 
 import pytest
-from cutleast_core_lib.test.base_test import BaseTest
-from cutleast_core_lib.test.utils import Utils
-from cutleast_core_lib.ui.widgets.search_bar import SearchBar
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QPushButton
 from pytestqt.qtbot import QtBot
+
+from cutleast_core_lib.test.base_test import BaseTest
+from cutleast_core_lib.test.utils import Utils
+from cutleast_core_lib.ui.widgets.search_bar import SearchBar
 
 
 class TestSearchBar(BaseTest):

@@ -6,6 +6,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
+
 from cutleast_core_lib.core.utilities.ini_file import IniData, IniFile, IniValue
 from cutleast_core_lib.test.utils import Utils
 

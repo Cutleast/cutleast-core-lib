@@ -2,10 +2,11 @@
 Copyright (c) Cutleast
 """
 
+from PySide6.QtCore import QFile
+
 from cutleast_core_lib.ui import resources_rc
 from cutleast_core_lib.ui.theme.generator import ThemeGenerator
 from cutleast_core_lib.ui.theme.manager import ThemeManager
-from PySide6.QtCore import QFile
 
 
 class TestResources:

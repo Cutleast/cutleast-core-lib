@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import override
 
 import pytest
+
 from cutleast_core_lib.core.utilities.reference_dict import ReferenceDict
 
 

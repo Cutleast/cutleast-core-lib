@@ -7,10 +7,6 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
-from cutleast_core_lib.test.utils import Utils
-from cutleast_core_lib.ui.theme.manager import ThemeManager
-from cutleast_core_lib.ui.utilities.tooltip_manager import TooltipManager
-from cutleast_core_lib.ui.widgets.tooltip_popup import TooltipPopup
 from PySide6.QtCore import QEvent, QObject, QPoint, QRect, Signal
 from PySide6.QtGui import QHelpEvent
 from PySide6.QtWidgets import (
@@ -22,6 +18,11 @@ from PySide6.QtWidgets import (
     QTreeWidgetItem,
 )
 from pytestqt.qtbot import QtBot
+
+from cutleast_core_lib.test.utils import Utils
+from cutleast_core_lib.ui.theme.manager import ThemeManager
+from cutleast_core_lib.ui.utilities.tooltip_manager import TooltipManager
+from cutleast_core_lib.ui.widgets.tooltip_popup import TooltipPopup
 
 
 def _hide_immediately_type() -> None:

@@ -5,11 +5,12 @@ Copyright (c) Cutleast
 from pathlib import Path
 from typing import override
 
+from pydantic import Field
+from pytestqt.qtbot import QtBot
+
 from cutleast_core_lib.core.config.base_config import BaseConfig
 from cutleast_core_lib.core.config.manager import ConfigManager
 from cutleast_core_lib.test.base_test import BaseTest
-from pydantic import Field
-from pytestqt.qtbot import QtBot
 
 
 class TestConfigManager(BaseTest):

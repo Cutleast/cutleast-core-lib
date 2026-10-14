@@ -3,10 +3,11 @@ Copyright (c) Cutleast
 """
 
 import pytest
-from cutleast_core_lib.test.base_test import BaseTest
-from cutleast_core_lib.ui.utilities.tree_widget import are_children_visible
 from PySide6.QtWidgets import QTreeWidget, QTreeWidgetItem
 from pytestqt.qtbot import QtBot
+
+from cutleast_core_lib.test.base_test import BaseTest
+from cutleast_core_lib.ui.utilities.tree_widget import are_children_visible
 
 
 class TestTreeWidgetUtils(BaseTest):

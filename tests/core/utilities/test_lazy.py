@@ -5,6 +5,7 @@ Copyright (c) Cutleast
 from unittest.mock import Mock
 
 import pytest
+
 from cutleast_core_lib.core.utilities.lazy import Lazy
 
 

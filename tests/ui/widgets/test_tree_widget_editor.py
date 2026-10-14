@@ -5,17 +5,18 @@ Copyright (c) Cutleast
 from collections.abc import Callable
 
 import pytest
+from pydantic import BaseModel
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QAction, QShortcut
+from PySide6.QtWidgets import QTreeWidgetItem
+from pytestqt.qtbot import QtBot
+
 from cutleast_core_lib.core.utilities.clipboard import Clipboard
 from cutleast_core_lib.core.utilities.reference_dict import ReferenceDict
 from cutleast_core_lib.test.base_test import BaseTest
 from cutleast_core_lib.test.setup.clipboard_mock import ClipboardMock
 from cutleast_core_lib.test.utils import Utils
 from cutleast_core_lib.ui.widgets.tree_widget_editor import TreeWidgetEditor
-from pydantic import BaseModel
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QShortcut
-from PySide6.QtWidgets import QTreeWidgetItem
-from pytestqt.qtbot import QtBot
 
 
 class TestTreeWidgetEditor(BaseTest):

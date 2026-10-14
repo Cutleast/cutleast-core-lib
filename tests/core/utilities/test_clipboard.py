@@ -6,11 +6,12 @@ from collections.abc import Generator
 from typing import Optional, cast
 
 import pytest
+from pydantic import BaseModel
+from PySide6.QtCore import QMimeData
+
 from cutleast_core_lib.core.utilities.clipboard import Clipboard
 from cutleast_core_lib.test.base_test import BaseTest
 from cutleast_core_lib.test.setup.clipboard_mock import ClipboardMock
-from pydantic import BaseModel
-from PySide6.QtCore import QMimeData
 
 
 class _SampleModel(BaseModel):
@@ -39,7 +40,7 @@ class TestClipboard(BaseTest):
     """The default MIME type used by `Clipboard`."""
 
     @pytest.fixture(autouse=True)
-    def reset_mime_type(self) -> Generator[None, None, None]:
+    def reset_mime_type(self) -> Generator[None]:
         """
         Resets the Clipboard MIME type to its default value after each test
         to prevent state leakage between tests.
