@@ -143,7 +143,7 @@ class _DebouncedCallable(Generic[P, R]):
             Callable[..., None]: Debounced callable with the appropriate binding.
         """
 
-        @wraps(self.__callback)
+        @wraps(self.__callback)  # pyrefly: ignore [no-access]
         def unbound(target: T, *args: Q.args, **kwargs: Q.kwargs) -> None:
             """
             Schedules the wrapped method for the specified instance.
@@ -154,8 +154,8 @@ class _DebouncedCallable(Generic[P, R]):
                 **kwargs (Q.kwargs): Keyword arguments for the wrapped method.
             """
 
-            state: _DebounceState = self.__get_method_state(target)
-            state.schedule(partial(self.__callback, target, *args, **kwargs))
+            state: _DebounceState = self.__get_method_state(target)  # pyrefly: ignore [no-access]
+            state.schedule(partial(self.__callback, target, *args, **kwargs))  # pyrefly: ignore [no-access]
 
         if instance is None:
             return unbound
