@@ -67,6 +67,27 @@ def not_none(value: Optional[_T]) -> _T:
     return value
 
 
+def coalesce(*values: Optional[_T]) -> _T:
+    """
+    Returns the first non-`None` value from the specified values.
+
+    Args:
+        *values (Optional[_T]): Values to check.
+
+    Raises:
+        ValueError: If all values are `None`.
+
+    Returns:
+        _T: The first non-`None` value.
+    """
+
+    for value in values:
+        if value is not None:
+            return value
+
+    raise ValueError("All values are None")
+
+
 class Comparable(Protocol):
     """Protocol for annotating comparable types."""
 
