@@ -7,7 +7,6 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "comtypes ; sys_platform == 'win32'",
-    "darkdetect",
     "jstyleson",
     "material-color-utilities",
     "py7zr",
@@ -19,6 +18,12 @@ dependencies = [
     "semantic-version",
     "virtual-glob",
 ]
+
+[project.optional-dependencies]
+native-titlebar = [
+    "pyside6-native-titlebar",
+]
+all = ["cutleast-core-lib[native-titlebar]"]
 
 [build-system]
 requires = ["hatchling", "pyside6"]

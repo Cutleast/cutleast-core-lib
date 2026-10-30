@@ -109,3 +109,16 @@ QDialog:disabled,
 QWidget#root:disabled {
     background-color: ${colors.bg_base};
 }
+
+ExtendedMainWindow > TitleBar > QLabel#title_bar_title {
+    color: ${texts.secondary.color};
+    font-family: '${texts.title.family}';
+    font-weight: ${texts.title.weight};
+    font-size: ${texts.text.size};
+}
+ExtendedMainWindow > TitleBar > QLabel#title_bar_title[active=true] {
+    color: ${texts.title.color};
+}
+ExtendedMainWindow > TitleBar > QPushButton {
+    margin-top: ${metrics.spacing_xs};
+}

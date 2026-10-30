@@ -94,7 +94,12 @@ class ElidedLabel(QLabel):
 
         text_rect: QRect = metrics.boundingRect(self.__full_text)
 
-        width: int = text_rect.width() + margins.left() + margins.right()
+        # The text is only displayed in full if there is enough space for both its
+        # advance and its bounding width (see __update_elided_text()).
+        text_width: int = max(
+            text_rect.width(), metrics.horizontalAdvance(self.__full_text)
+        )
+        width: int = text_width + margins.left() + margins.right()
         height: int = metrics.height() + margins.top() + margins.bottom()
 
         return QSize(min(width, self.maximumWidth()), height)
