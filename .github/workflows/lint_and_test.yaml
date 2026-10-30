@@ -20,7 +20,7 @@ jobs:
 
       - name: Set up virtual environment with uv
         run: |
-          uv sync
+          uv sync --all-extras
 
       - name: Run Ruff
         run: |
