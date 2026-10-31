@@ -6,10 +6,17 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from enum import Enum
-from typing import Optional, cast, override
+from typing import Optional, override
 
 from PySide6.QtCore import QEasingCurve, QPoint, Qt, QVariantAnimation
-from PySide6.QtGui import QMouseEvent, QPainter, QPaintEvent, QPalette, QPixmap
+from PySide6.QtGui import (
+    QMouseEvent,
+    QPainter,
+    QPaintEvent,
+    QPalette,
+    QPixmap,
+    QResizeEvent,
+)
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtWidgets import QStackedWidget, QStyle, QStyleOption, QWidget
 
@@ -128,10 +135,15 @@ class StackedWidget(QStackedWidget):
 
         @override
         def paintGL(self) -> None:
+            painter = QPainter(self)
+            painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Source)
+            painter.fillRect(self.rect(), Qt.GlobalColor.transparent)
+            painter.setCompositionMode(
+                QPainter.CompositionMode.CompositionMode_SourceOver
+            )
+
             if self.__current_pixmap is None or self.__next_pixmap is None:
                 return
-
-            painter = QPainter(self)
 
             match self.__transition:
                 case StackedWidget.Transition.Slide:
@@ -329,18 +341,23 @@ class StackedWidget(QStackedWidget):
         if self._active:
             self.cancelAnimation()
 
-        self._active = True
         current_index: int = self.currentIndex()
         next_index: int = self.indexOf(nextWidget)
-        current_widget: QWidget = cast(QWidget, self.currentWidget())
+        current_widget: Optional[QWidget] = self.currentWidget()
         next_widget: QWidget = nextWidget
 
         if current_index == next_index:
-            self._active = False
             return
+
+        if current_widget is None or not self.isVisible() or self.frameRect().isEmpty():
+            self.setCurrentIndex(next_index)
+            return
+
+        self._active = True
 
         x_offset: int = self.frameRect().width()
         y_offset: int = self.frameRect().height()
+        current_widget.setGeometry(0, 0, x_offset, y_offset)
         next_widget.setGeometry(0, 0, x_offset, y_offset)
         next_widget.ensurePolished()
         next_widget.show()
@@ -451,6 +468,15 @@ class StackedWidget(QStackedWidget):
         self.slideInIndex(
             self.currentIndex() - 1 if self.currentIndex() > 0 else self.count() - 1
         )
+
+    @override
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+
+        if self._active:
+            self.cancelAnimation()
+
+        self.__overlay.setGeometry(self.rect())
 
     @override
     def mousePressEvent(self, event: QMouseEvent) -> None:

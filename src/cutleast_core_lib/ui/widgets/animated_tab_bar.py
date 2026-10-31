@@ -12,6 +12,7 @@ from PySide6.QtCore import (
     QPointF,
     QRect,
     QRectF,
+    QSize,
     QSizeF,
     Qt,
     QVariantAnimation,
@@ -69,6 +70,7 @@ class AnimatedTabBar(QTabBar):
     __drag: Optional[QDrag]
     __destination: Optional[int]
     __animation: QVariantAnimation
+    __layout_hint: QSize
 
     dragStarted = Signal(int, QDrag)
     """
@@ -148,6 +150,7 @@ class AnimatedTabBar(QTabBar):
         self.__native_press_position = None
         self.__press_index = -1
         self.__destination = None
+        self.__layout_hint = QSize()
 
         super().__init__(parent)
 
@@ -175,7 +178,7 @@ class AnimatedTabBar(QTabBar):
 
         if extent <= 0:
             raise ValueError("The dragged tab extent must be positive.")
-        
+
         if source_index is not None and (
             not 0 <= source_index < self.count() or not self.isTabVisible(source_index)
         ):
@@ -490,6 +493,55 @@ class AnimatedTabBar(QTabBar):
 
         return super().event(event)
 
+    def __is_vertical(self) -> bool:
+        """
+        Returns:
+            bool: Whether the tabs are stacked vertically.
+        """
+
+        return self.shape() in (
+            QTabBar.Shape.RoundedWest,
+            QTabBar.Shape.RoundedEast,
+            QTabBar.Shape.TriangularWest,
+            QTabBar.Shape.TriangularEast,
+        )
+
+    @override
+    def sizeHint(self) -> QSize:
+        hint: QSize = super().sizeHint()
+
+        tab_hints: list[QSize] = [
+            self.tabSizeHint(index)
+            for index in range(self.count())
+            if self.isTabVisible(index)
+        ]
+        if not tab_hints:
+            return hint
+
+        if self.__is_vertical():
+            return QSize(hint.width(), sum(tab_hint.height() for tab_hint in tab_hints))
+
+        return QSize(sum(tab_hint.width() for tab_hint in tab_hints), hint.height())
+
+    @override
+    def minimumSizeHint(self) -> QSize:
+        minimum: QSize = super().minimumSizeHint()
+        hint: QSize = self.sizeHint()
+
+        if self.__is_vertical():
+            return QSize(minimum.width(), min(minimum.height(), hint.height()))
+
+        return QSize(min(minimum.width(), hint.width()), minimum.height())
+
+    @override
+    def tabLayoutChange(self) -> None:
+        super().tabLayoutChange()
+
+        size_hint: QSize = self.sizeHint()
+        if size_hint != self.__layout_hint:
+            self.__layout_hint = size_hint
+            self.updateGeometry()
+
     @override
     def tabInserted(self, index: int) -> None:
         self.__cancel_preview()
@@ -510,7 +562,8 @@ class AnimatedTabBar(QTabBar):
 
         self.__rectangles = [
             QRectF(
-                start.topLeft() + (end.topLeft() - start.topLeft()) * progress, end.size()
+                start.topLeft() + (end.topLeft() - start.topLeft()) * progress,
+                end.size(),
             )
             for start, end in zip(self.__start, self.__end, strict=True)
         ]
@@ -533,7 +586,7 @@ class AnimatedTabBar(QTabBar):
         painter.setClipRegion(QRegion(self.rect()) - self.__scroll_region)
         for rectangle, pixmap in zip(self.__rectangles, self.__pixmaps, strict=True):
             painter.drawPixmap(rectangle.topLeft(), pixmap)
-            
+
         if not self.__scroll_region.isEmpty():
             painter.setClipRegion(self.__scroll_region)
             painter.drawPixmap(QPoint(), self.__scroll_pixmap)

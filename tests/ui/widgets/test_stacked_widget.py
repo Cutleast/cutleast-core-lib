@@ -134,3 +134,51 @@ class TestStackedWidget(BaseTest):
         qtbot.waitUntil(lambda: nested_page.size().isValid())
         assert nested_page.width() > 0
         assert nested_page.height() > 0
+
+    def test_hidden_stacked_widget_switches_without_transition(
+        self, qtbot: QtBot
+    ) -> None:
+        """
+        Tests that a stacked widget that isn't shown switches its page immediately,
+        because snapshots of pages that were never shown have a wrong size.
+
+        Args:
+            qtbot (QtBot): Fixture for managing Qt widgets.
+        """
+
+        # given
+        stacked_widget = StackedWidget()
+        stacked_widget.addWidget(QLabel("First page"))
+        stacked_widget.addWidget(QLabel("Second page"))
+        qtbot.addWidget(stacked_widget)
+
+        # when
+        stacked_widget.slideInIndex(1)
+
+        # then
+        assert stacked_widget.currentIndex() == 1
+        assert not stacked_widget._active
+
+    def test_resizing_cancels_running_transition(
+        self, stacked_widget: StackedWidget, qtbot: QtBot
+    ) -> None:
+        """
+        Tests that resizing the stacked widget completes a running transition, as its
+        snapshots have the previous size.
+
+        Args:
+            stacked_widget (StackedWidget): Stacked widget under test.
+            qtbot (QtBot): Fixture for waiting on asynchronous Qt work.
+        """
+
+        # given
+        stacked_widget.setDuration(5000)
+        stacked_widget.slideInIndex(1)
+        assert stacked_widget._active
+
+        # when
+        stacked_widget.resize(500, 350)
+
+        # then
+        qtbot.waitUntil(lambda: not stacked_widget._active)
+        assert stacked_widget.currentIndex() == 1

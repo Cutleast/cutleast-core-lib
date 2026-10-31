@@ -42,16 +42,16 @@ QTabBar::tab:top,
 QTabBar::tab:bottom {
     padding: ${metrics.spacing_ms} ${metrics.spacing_l};
 }
-QTabBar::tab:top:!last,
-QTabBar::tab:bottom:!last {
+QTabBar::tab:top:!last:!only-one,
+QTabBar::tab:bottom:!last:!only-one {
     margin-right: 0px;
 }
 QTabBar::tab:left,
 QTabBar::tab:right {
     padding: ${metrics.spacing_l} ${metrics.spacing_ms};
 }
-QTabBar::tab:left:!last,
-QTabBar::tab:right:!last {
+QTabBar::tab:left:!last:!only-one,
+QTabBar::tab:right:!last:!only-one {
     margin-bottom: 0px;
 }
 QTabBar::close-button {
