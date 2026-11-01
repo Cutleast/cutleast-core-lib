@@ -40,6 +40,12 @@ class Cache(Singleton):
     __cache_version_file: Path
     """Path to the file specifying the cache's version."""
 
+    __file_contents: dict[Path, Any] = {}
+    """
+    In-memory contents of the cache files by their full path, which are updated when
+    a cache file is overwritten.
+    """
+
     log: logging.Logger = logging.getLogger("Cache")
 
     def __init__(self, cache_path: Path, app_version: str) -> None:
@@ -80,13 +86,16 @@ class Cache(Singleton):
         """
 
         shutil.rmtree(self.path, ignore_errors=True)
+        Cache.__file_contents.clear()
         self.log.info("Caches cleared.")
 
     @classmethod
-    @FunctionCache.cache
     def __read_file(cls, file_path: Path) -> Any:
-        with file_path.open("rb") as file:
-            return pickle.load(file)
+        if file_path not in cls.__file_contents:
+            with file_path.open("rb") as file:
+                cls.__file_contents[file_path] = pickle.load(file)
+
+        return cls.__file_contents[file_path]
 
     @classmethod
     def get_from_cache(
@@ -128,6 +137,7 @@ class Cache(Singleton):
             and (time.time() - cache_file_path.stat().st_mtime) > max_age
         ):
             cache_file_path.unlink()
+            cls.__file_contents.pop(cache_file_path, None)
             cls.log.debug(f"Deleted old cache file: {cache_file_path}")
 
         if not cache_file_path.is_file() and default is not _Undefined:
@@ -164,6 +174,8 @@ class Cache(Singleton):
         cache_file_path.parent.mkdir(parents=True, exist_ok=True)
         with cache_file_path.open("wb") as file:
             pickle.dump(data, file)
+
+        cls.__file_contents[cache_file_path] = data
 
     @classmethod
     def persistent_cache(

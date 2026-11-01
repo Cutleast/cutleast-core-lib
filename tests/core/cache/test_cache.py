@@ -102,3 +102,20 @@ class TestCache(BaseTest):
 
         with pytest.raises(RuntimeError, match="Cache is already initialized!"):
             Cache(Path("test_cache"), "development")
+
+    def test_overwritten_cache_file_returns_new_data(self, cache: Cache) -> None:
+        """
+        Tests that reading a cache file after overwriting it returns the new data, even
+        if the file was read before.
+        """
+
+        # given
+        cache_file_path = Path("test_overwrite") / "entry.cache"
+        Cache.save_to_cache(cache_file_path, "old")
+        Cache.get_from_cache(cache_file_path)
+
+        # when
+        Cache.save_to_cache(cache_file_path, "new")
+
+        # then
+        assert Cache.get_from_cache(cache_file_path) == "new"
