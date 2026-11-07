@@ -864,7 +864,7 @@ wheels = [
 
 [[package]]
 name = "pyside6-native-titlebar"
-version = "3.1.0"
+version = "3.1.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyside6" },
@@ -873,9 +873,9 @@ dependencies = [
     { name = "winui3-microsoft-ui-windowing", extra = ["all"], marker = "sys_platform == 'win32'" },
     { name = "winui3-microsoft-windows-applicationmodel-dynamicdependency-bootstrap", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/01/39/aafc913791c4d7f82a3cf8f61399605610a493df3a343a2762454d974b1a/pyside6_native_titlebar-3.1.0.tar.gz", hash = "sha256:ae6a90dfc5e89cbad4a2d195ecd43e44592cc892c5304fcc234aaf7cf6c7f0b8", size = 133883, upload-time = "2026-10-30T12:20:01.183Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ce/fa/3dc0885d98cd3a8db0d44887dc08234243d2a6c0f8afa9d80f38c7b298a3/pyside6_native_titlebar-3.1.2.tar.gz", hash = "sha256:69c3d2e7243074d1b602f780e839c810830b21183bae214e622042777b6d64e3", size = 131787, upload-time = "2026-11-03T19:54:36.372Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/af/c9/04aa946586a5a188f3c4c0a5a0dbffbaf2cda739c102d5e86d905c61391e/pyside6_native_titlebar-3.1.0-py3-none-any.whl", hash = "sha256:6733eb974d9ab1930b9ea51f348b69570993a41ede46b00732d859fc13146700", size = 32871, upload-time = "2026-10-30T12:19:59.717Z" },
+    { url = "https://files.pythonhosted.org/packages/6f/1f/19d180a3fe88bd02c26c7c17007e6924274658f6a63282de5709f1087adf/pyside6_native_titlebar-3.1.2-py3-none-any.whl", hash = "sha256:5442f2a655462cede360dcd3669df140b4f539c3871e4689e17415416d54a6d3", size = 32848, upload-time = "2026-11-03T19:54:34.497Z" },
 ]
 
 [[package]]
