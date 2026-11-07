@@ -12,7 +12,7 @@ def unique(
     iterable: Iterable[T], key: Optional[Callable[[T], Hashable]] = None
 ) -> list[T]:
     """
-    Removes all duplicates from an iterable.
+    Removes all duplicates from an iterable in a last-wins order.
 
     Args:
         iterable (Iterable[T]): Iterable with duplicates.

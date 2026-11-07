@@ -12,7 +12,7 @@ import shutil
 import time
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Optional, ParamSpec, TypeAlias, TypeVar
+from typing import Any, Optional, ParamSpec, TypeAlias, TypeVar, cast
 
 from semantic_version import Version
 
@@ -182,7 +182,7 @@ class Cache(Singleton):
         cls,
         *,
         cache_subfolder: Optional[Path] = None,
-        id_generator: Optional[Callable[..., str]] = None,
+        id_generator: Optional[Callable[P, str]] = None,
         max_age: Optional[float] = None,
     ) -> Callable[[Callable[P, R]], Callable[P, R]]:
         """
@@ -193,7 +193,7 @@ class Cache(Singleton):
             cache_subfolder (Optional[Path]):
                 The subfolder within the cache folder to store the cache files.
                 Defaults to None.
-            id_generator (Optional[Callable[..., str]]):
+            id_generator (Optional[Callable[P, str]]):
                 A function that generates a unique identifier for the cache file.
                 The function is called with the same arguments as the original function.
                 Defaults to `Cache.get_func_identifier()`.
@@ -239,6 +239,6 @@ class Cache(Singleton):
 
                 return result
 
-            return wrapper
+            return cast(Callable[P, R], wrapper)
 
         return decorator

@@ -3,7 +3,17 @@ Copyright (c) Cutleast
 """
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Optional, Protocol, Self, TypeVar, cast, get_origin
+from typing import (
+    TYPE_CHECKING,
+    Literal,
+    Optional,
+    Protocol,
+    Self,
+    TypeVar,
+    cast,
+    get_origin,
+    overload,
+)
 
 _T = TypeVar("_T")
 
@@ -67,23 +77,43 @@ def not_none(value: Optional[_T]) -> _T:
     return value
 
 
-def coalesce(*values: Optional[_T]) -> _T:
+@overload
+def coalesce(*values: Optional[_T], optional: Literal[False] = False) -> _T: ...
+
+
+@overload
+def coalesce(*values: Optional[_T], optional: Literal[True]) -> Optional[_T]: ...
+
+
+@overload
+def coalesce(*values: Optional[_T], optional: bool) -> Optional[_T]: ...
+
+
+def coalesce(*values: Optional[_T], optional: bool = False) -> Optional[_T]:
     """
     Returns the first non-`None` value from the specified values.
 
     Args:
         *values (Optional[_T]): Values to check.
+        optional (bool, optional):
+            Whether to return `None` instead of raising an exception if all values are
+            `None`. Defaults to False.
 
     Raises:
-        ValueError: If all values are `None`.
+        ValueError: If all values are `None` and `optional` is False.
 
     Returns:
-        _T: The first non-`None` value.
+        Optional[_T]:
+            The first non-`None` value, or `None` if no value was found and `optional`
+            is True.
     """
 
     for value in values:
         if value is not None:
             return value
+
+    if optional:
+        return None
 
     raise ValueError("All values are None")
 
