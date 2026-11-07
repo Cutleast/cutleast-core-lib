@@ -61,24 +61,6 @@ QTreeView[no_header=true] > * > QScrollBar:vertical {
     margin-bottom: 0;
 }
 
-/* TreeWidgetEditor */
-TreeWidgetEditor > QToolBar {
-    padding: 0px;
-    background-color: ${colors.surface};
-}
-TreeWidgetEditor > QToolBar,
-TreeWidgetEditor > QToolBar:disabled,
-TreeWidgetEditor > QToolBar > QToolButton:disabled {
-    background-color: ${colors.surface};
-}
-TreeWidgetEditor > QToolBar > QToolButton {
-    margin: ${metrics.spacing_xs};
-    border-radius: ${metrics.radius};
-}
-TreeWidgetEditor > QToolBar > QToolButton:disabled {
-    border-color: ${colors.surface};
-}
-
 /* Header View */
 QHeaderView {
     background-color: ${colors.surface};
