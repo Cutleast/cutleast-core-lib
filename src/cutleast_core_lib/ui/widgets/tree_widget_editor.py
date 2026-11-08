@@ -11,7 +11,6 @@ from pydantic import BaseModel
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QAction, QCursor, QDropEvent, QShortcut
 from PySide6.QtWidgets import (
-    QMenu,
     QToolBar,
     QTreeWidget,
     QTreeWidgetItem,
@@ -29,7 +28,9 @@ from cutleast_core_lib.ui.utilities.tree_widget import (
     get_item_text,
     iter_toplevel_items,
 )
-from cutleast_core_lib.ui.widgets.search_bar import SearchBar
+
+from .menu import Menu
+from .search_bar import SearchBar
 
 T = TypeVar("T", bound=BaseModel)
 M = TypeVar("M", bound=BaseModel)
@@ -56,7 +57,7 @@ class TreeWidgetEditor(QWidget, Generic[T]):
             super().dropEvent(event)
             self.itemMoved.emit()
 
-    class ContextMenu(QMenu, Generic[M]):
+    class ContextMenu(Menu, Generic[M]):
         """
         Context menu for the tree widget.
         """
@@ -99,7 +100,7 @@ class TreeWidgetEditor(QWidget, Generic[T]):
                     Optional parent widget. Defaults to None.
             """
 
-            super().__init__(parent)
+            super().__init__(parent=parent)
 
             self.__model_cls = model_cls
 

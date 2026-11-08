@@ -3,10 +3,15 @@ Copyright (c) Cutleast
 """
 
 from enum import Enum
+from typing import Optional, override
 
 import pytest
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import QComboBox
 from pytestqt.qtbot import QtBot
 
+from cutleast_core_lib.core.utilities.colored_enum import ColoredEnum
 from cutleast_core_lib.test.base_test import BaseTest
 from cutleast_core_lib.ui.widgets.enum_placeholder_dropdown import (
     EnumPlaceholderDropdown,
@@ -24,6 +29,31 @@ class TestEnumPlaceholderDropdown(BaseTest):
         Item1 = 1
         Item2 = 2
         Item3 = 3
+
+    class _ColoredTestEnum(ColoredEnum):
+        """Colored test enum."""
+
+        Red = 1
+        Plain = 2
+
+        @override
+        def get_base_color(self) -> Optional[QColor]:
+            return None
+
+        @override
+        def get_bg_color(self) -> Optional[QColor]:
+            return None
+
+        @override
+        def get_highlighted_bg_color(self) -> Optional[QColor]:
+            return None
+
+        @override
+        def get_fg_color(self) -> Optional[QColor]:
+            if self.name == "Red":
+                return QColor(255, 0, 0)
+
+            return None
 
     @pytest.fixture
     def widget(self, qtbot: QtBot) -> EnumPlaceholderDropdown[_TestEnum]:
@@ -70,3 +100,37 @@ class TestEnumPlaceholderDropdown(BaseTest):
         # then
         assert signal.args == [TestEnumPlaceholderDropdown._TestEnum.Item3]
         assert widget.getCurrentValue() == TestEnumPlaceholderDropdown._TestEnum.Item3
+
+    def test_colored_enum_item_colors(self, qtbot: QtBot) -> None:
+        """
+        Tests that the foreground colors of a colored enum are applied to the items and
+        to the closed dropdown, while the placeholder stays uncolored.
+        """
+
+        # given
+        widget = EnumPlaceholderDropdown(TestEnumPlaceholderDropdown._ColoredTestEnum)
+        qtbot.addWidget(widget)
+
+        # then
+        assert (
+            QComboBox.itemData(widget, 0, Qt.ItemDataRole.ForegroundRole) is None
+        )  # placeholder
+        assert QComboBox.itemData(widget, 1, Qt.ItemDataRole.ForegroundRole) == QColor(
+            255, 0, 0
+        )
+        assert QComboBox.itemData(widget, 2, Qt.ItemDataRole.ForegroundRole) is None
+        assert widget.styleSheet() == ""
+
+        # when
+        widget.setCurrentValue(TestEnumPlaceholderDropdown._ColoredTestEnum.Red)
+
+        # then
+        assert (
+            widget.styleSheet() == "QComboBox:enabled { color: rgba(255, 0, 0, 255); }"
+        )
+
+        # when
+        widget.setCurrentValue(None)
+
+        # then
+        assert widget.styleSheet() == ""

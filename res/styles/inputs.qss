@@ -107,14 +107,8 @@ QComboBox QAbstractItemView::item {
     border-radius: ${metrics.radius_ms};
     padding: ${metrics.spacing_ms} ${metrics.spacing};
 }
-QComboBox QAbstractItemView::item:selected {
-    color: ${texts.text.color};
-}
 QComboBox QAbstractItemView::item:hover {
     background-color: ${colors.surface_hover};
-}
-QComboBox QAbstractItemView::item:hover:!selected {
-    color: ${texts.text.color};
 }
 
 /* Spinboxes */
