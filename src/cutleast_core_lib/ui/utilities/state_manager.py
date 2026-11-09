@@ -10,7 +10,7 @@ from typing import ClassVar, Optional, Protocol, cast, override
 
 from pydantic import BaseModel, ConfigDict
 from PySide6.QtCore import QByteArray, QEvent, QObject, Signal
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QCheckBox, QWidget
 
 from cutleast_core_lib.core.utilities.singleton import SingletonQObject
 
@@ -167,6 +167,22 @@ class WidgetStateManager(SingletonQObject):
             self, state_id, widget.saveState, cast(QObject, widget)
         )
         self.save_requested.connect(registration.save_state)
+
+    def register_checkbox(self, widget_id: str, widget: QCheckBox) -> None:
+        """
+        Registers the check state of a checkbox for state management.
+
+        Args:
+            widget_id (str): The unique identifier for the widget.
+            widget (QCheckBox): The checkbox to be registered.
+        """
+
+        self.register_custom(
+            widget_id,
+            lambda: QByteArray(bytes(widget.isChecked())),
+            lambda state: widget.setChecked(bool(state)),
+            widget,
+        )
 
     def register_custom(
         self,
