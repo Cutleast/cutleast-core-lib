@@ -64,7 +64,7 @@ class BaseEnum(Enum):
 
         try:
             return cls(value)
-        except KeyError:
+        except ValueError:
             return default
 
     @override
