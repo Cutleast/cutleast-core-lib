@@ -35,7 +35,6 @@ class WidgetStateManager(SingletonQObject):
         __manager: WidgetStateManager
         __widget_id: str
         __state_getter: Callable[[], QByteArray]
-        __save_on_hide: bool
 
         def __init__(
             self,
@@ -57,12 +56,18 @@ class WidgetStateManager(SingletonQObject):
             self.__manager = manager
             self.__widget_id = widget_id
             self.__state_getter = state_getter
-            self.__save_on_hide = False
+
+            parent.installEventFilter(self)
+            manager.save_requested.connect(self.save_state)
 
         @override
         def eventFilter(self, watched: QObject, event: QEvent) -> bool:
             """
-            Saves the state when the registered window was successfully closed.
+            Saves the state whenever the registered widget is hidden.
+
+            Hide events are used instead of close events because `QDialog.done()`
+            swallows the close event with an internal event filter. Hide events are also
+            propagated to all visible descendants of a hidden window.
 
             Args:
                 watched (QObject): Object receiving the event.
@@ -72,11 +77,8 @@ class WidgetStateManager(SingletonQObject):
                 bool: Whether the event was handled.
             """
 
-            if event.type() == QEvent.Type.Close:
-                self.__save_on_hide = True
-            elif event.type() == QEvent.Type.Hide and self.__save_on_hide:
+            if event.type() == QEvent.Type.Hide:
                 self.save_state()
-                self.__save_on_hide = False
 
             return super().eventFilter(watched, event)
 
@@ -140,11 +142,9 @@ class WidgetStateManager(SingletonQObject):
         if state is not None:
             widget.restoreGeometry(state)
 
-        registration = WidgetStateManager._StateRegistration(
+        WidgetStateManager._StateRegistration(
             self, state_id, widget.saveGeometry, widget
         )
-        widget.installEventFilter(registration)
-        self.save_requested.connect(registration.save_state)
 
     def register_state(self, widget_id: str, widget: _HasStateWidget) -> None:
         """
@@ -163,10 +163,9 @@ class WidgetStateManager(SingletonQObject):
         if state is not None:
             widget.restoreState(state)
 
-        registration = WidgetStateManager._StateRegistration(
+        WidgetStateManager._StateRegistration(
             self, state_id, widget.saveState, cast(QObject, widget)
         )
-        self.save_requested.connect(registration.save_state)
 
     def register_checkbox(self, widget_id: str, widget: QCheckBox) -> None:
         """
@@ -210,10 +209,7 @@ class WidgetStateManager(SingletonQObject):
         if state is not None:
             state_setter(state)
 
-        registration = WidgetStateManager._StateRegistration(
-            self, state_id, state_getter, widget
-        )
-        self.save_requested.connect(registration.save_state)
+        WidgetStateManager._StateRegistration(self, state_id, state_getter, widget)
 
     def get_state(self, widget_id: str) -> Optional[QByteArray]:
         """
