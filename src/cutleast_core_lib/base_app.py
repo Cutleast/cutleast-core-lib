@@ -16,8 +16,11 @@ from PySide6.QtWidgets import QApplication, QMainWindow
 from cutleast_core_lib.core.config.manager import ConfigManager
 from cutleast_core_lib.core.utilities.typing_utils import AbstractBase
 
+from .core.alerts.alert import Alert
+from .core.alerts.manager import AlertManager
 from .core.config.app_config import AppConfig
 from .core.utilities.exception_handler import ExceptionHandler
+from .core.utilities.exceptions import format_exception
 from .core.utilities.exe_info import get_current_path, get_execution_info
 from .core.utilities.logger import Logger
 from .core.utilities.updater import Updater
@@ -74,6 +77,12 @@ class BaseApp(QApplication, AbstractBase):
     state_manager: WidgetStateManager
     """The widget state manager for saving and restoring widget states."""
 
+    alert_manager: AlertManager
+    """
+    The alert manager for managing app-wide alerts like notices, warnings and errors from
+    background operations.
+    """
+
     def __init__(self, args: Namespace) -> None:
         """
         Args:
@@ -84,6 +93,7 @@ class BaseApp(QApplication, AbstractBase):
 
         self.args = args
         self.state_manager = WidgetStateManager(self.data_path)
+        self.alert_manager = AlertManager()
 
         self._init()
 
@@ -191,6 +201,13 @@ class BaseApp(QApplication, AbstractBase):
             Updater(repo_name, repo_branch, repo_owner, self.applicationVersion()).run()
         except Exception as ex:
             self.log.warning(f"Failed to check for updates: {ex}", exc_info=ex)
+            AlertManager.get().add_alert(
+                Alert(
+                    severity=Alert.Severity.Warning,
+                    title=self.tr("Failed to check for updates"),
+                    details=format_exception(ex),
+                )
+            )
 
     @override
     def exec(self, show_main_window: bool = True) -> int:  # type: ignore
