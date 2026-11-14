@@ -41,6 +41,7 @@ class WindowManager(SingletonQObject):
             window.destroyed.connect(lambda *_: self.__windows.pop(window_id, None))
 
         window.show()
+        window.activateWindow()
 
     def close_all(self) -> bool:
         """
