@@ -30,7 +30,7 @@ class AlertButton(QPushButton):
     def __update_icon(self) -> None:
         highest_severity: Optional[Alert.Severity] = max(
             [alert.severity for alert in AlertManager.get().alerts],
-            key=lambda severity: cast(Alert.Severity, severity.value),
+            key=lambda severity: cast(Alert.Severity, severity).value,
             default=None,
         )
         num_alerts: int = len(AlertManager.get().alerts)
