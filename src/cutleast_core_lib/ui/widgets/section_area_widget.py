@@ -128,7 +128,9 @@ class SectionAreaWidget(QWidget):
         self.__toggle_icon = IconProvider.bind_custom_icon(
             self.__toggle_button,
             self.__toggle_button.setIcon,
-            lambda: IconProvider.get_qta_icon(get_icon_name()),
+            lambda: IconProvider.get_qta_icon(
+                get_icon_name(), color_on=IconProvider.Color.Text
+            ),
         )
         self.__toggle_button.setObjectName("toggle_button")
         self.__toggle_button.setCheckable(True)
