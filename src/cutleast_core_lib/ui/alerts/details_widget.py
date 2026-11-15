@@ -191,6 +191,7 @@ class AlertDetailsWidget(SmoothScrollArea):
             self.__alert_context_glayout.addWidget(property_label, p, 0)
 
             value_label = QLabel(value)
+            value_label.setWordWrap(True)
             value_label.setProperty("emphasized", True)
             value_label.setTextInteractionFlags(
                 Qt.TextInteractionFlag.TextSelectableByMouse
