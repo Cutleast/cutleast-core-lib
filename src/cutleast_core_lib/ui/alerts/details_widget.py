@@ -6,6 +6,7 @@ from typing import Optional, override
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
+    QApplication,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -42,7 +43,7 @@ class AlertDetailsWidget(SmoothScrollArea):
     __dismiss_alert_button: QPushButton
     __alert_summary_label: QLabel
     __alert_details_box: QPlainTextEdit
-    __alert_copy_details_button: QPushButton
+    __alert_copy_details_button: CopyButton
     __alert_context_glayout: QGridLayout
 
     @override
@@ -52,6 +53,7 @@ class AlertDetailsWidget(SmoothScrollArea):
         self.__init_ui()
 
         self.__dismiss_alert_button.clicked.connect(self.remove_requested.emit)
+        self.__alert_copy_details_button.copyClicked.connect(self.__copy_details)
 
         self.set_alert(None)
 
@@ -148,6 +150,9 @@ class AlertDetailsWidget(SmoothScrollArea):
         WidgetStateManager.get().register_state(
             "alert_details/context_section", context_section
         )
+
+    def __copy_details(self) -> None:
+        QApplication.clipboard().setText(self.__alert_details_box.toPlainText())
 
     def set_alert(self, alert: Optional[Alert]) -> None:
         """
