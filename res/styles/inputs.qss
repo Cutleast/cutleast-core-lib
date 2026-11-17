@@ -69,7 +69,9 @@ BrowseLineEdit,
 ColorLineEdit,
 CopyLineEdit,
 PasteLineEdit,
-KeyLineEdit {
+KeyLineEdit,
+QTextEdit[has_button=true],
+QPlainTextEdit[has_button=true] {
     padding-right: 38px;
 }
 SearchBar {
