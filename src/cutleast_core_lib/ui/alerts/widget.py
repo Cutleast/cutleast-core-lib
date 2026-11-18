@@ -22,6 +22,7 @@ from cutleast_core_lib.core.alerts.alert import Alert
 from cutleast_core_lib.core.alerts.manager import AlertManager
 from cutleast_core_lib.core.utilities.datetime import fmt_timestamp
 from cutleast_core_lib.core.utilities.filter import matches_filter
+from cutleast_core_lib.core.utilities.reference_dict import ReferenceDict
 from cutleast_core_lib.core.utilities.typing_utils import checked_cast
 from cutleast_core_lib.ui.alerts.toolbar import AlertsToolBar
 from cutleast_core_lib.ui.theme.manager import ThemeManager
@@ -76,7 +77,7 @@ class AlertWidget(QWidget):
             display_text_getter=lambda alert: alert.title,
         )
 
-    __alert_items: dict[Alert, TreeItem[Alert]]
+    __alert_items: ReferenceDict[Alert, TreeItem[Alert]]
 
     __vlayout: QVBoxLayout
     __splitter: QSplitter
@@ -92,7 +93,7 @@ class AlertWidget(QWidget):
     def __init__(self) -> None:
         super().__init__()
 
-        self.__alert_items = {}
+        self.__alert_items = ReferenceDict()
 
         self.__init_ui()
 
@@ -224,12 +225,14 @@ class AlertWidget(QWidget):
         self.__update_list()
 
     def __remove_alert(self, alert: Alert) -> None:
-        alert_item: Optional[TreeItem[Alert]] = self.__alert_items.pop(alert, None)
-        if alert_item is not None:
-            self.__tree_widget.takeTopLevelItem(
-                self.__tree_widget.indexOfTopLevelItem(alert_item)
-            )
-            self.__update_list()
+        if alert not in self.__alert_items:
+            return
+
+        alert_item: TreeItem[Alert] = self.__alert_items.pop(alert)
+        self.__tree_widget.takeTopLevelItem(
+            self.__tree_widget.indexOfTopLevelItem(alert_item)
+        )
+        self.__update_list()
 
     def __dismiss_current_alert(self) -> None:
         current_item: Optional[QTreeWidgetItem] = self.__tree_widget.currentItem()

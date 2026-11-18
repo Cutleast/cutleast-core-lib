@@ -179,5 +179,25 @@ class Alert(BaseModel, frozen=True):
     """Additional context in the form of localized property names and values."""
 
     @override
+    def __eq__(self, other: object) -> bool:
+        """
+        Compares this alert to another object. Alerts are considered equal if all of
+        their attributes except for the timestamp are equal.
+
+        Args:
+            other (object): The object to compare to.
+
+        Returns:
+            bool: Whether the other object is an equal alert.
+        """
+
+        if not isinstance(other, Alert):
+            return NotImplemented
+
+        return self.model_dump(exclude={"timestamp"}) == other.model_dump(
+            exclude={"timestamp"}
+        )
+
+    @override
     def __hash__(self) -> int:
-        return hash(self.model_dump_json())
+        return hash(self.model_dump_json(exclude={"timestamp"}))

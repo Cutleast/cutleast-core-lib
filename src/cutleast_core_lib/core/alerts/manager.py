@@ -45,14 +45,14 @@ class AlertManager(QObject, Singleton):
 
     def add_alert(self, alert: Alert) -> None:
         """
-        Adds an alert to this manager. Does nothing if the alert was already added.
+        Adds an alert to this manager. An equal alert that was already added is replaced
+        by the new one.
 
         Args:
             alert (Alert): The alert to add.
         """
 
-        if alert in self.__alerts:
-            return
+        self.remove_alert(alert)
 
         self.__alerts.append(alert)
         self.alert_added.emit(alert)
@@ -68,5 +68,6 @@ class AlertManager(QObject, Singleton):
         if alert not in self.__alerts:
             return
 
-        self.__alerts.remove(alert)
-        self.alert_removed.emit(alert)
+        # Emit the stored instance, since listeners may track alerts by identity.
+        existing_alert: Alert = self.__alerts.pop(self.__alerts.index(alert))
+        self.alert_removed.emit(existing_alert)
