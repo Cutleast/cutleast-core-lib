@@ -30,20 +30,21 @@ def create_folder_list(folder: Path) -> list[Path]:
 
 def get_file_identifier(file_path: os.PathLike) -> str:
     """
-    Creates a blake2b hash of the file path and last modification timestamp and returns
-    first 8 characters of the hash.
+    Creates an identifier for a file from its path, last modification timestamp and
+    size. The identifier changes when the file is moved, modified or replaced by a file
+    of a different size.
 
     Args:
-        file_path (os.PathLike): Path to file to hash.
+        file_path (os.PathLike): Path to file to identify.
 
     Returns:
-        str: First 8 characters of hash.
+        str: 64-bit blake2b digest as 16 hexadecimal characters.
     """
 
-    mtime = os.path.getmtime(file_path)
-    data = f"{file_path}-{mtime}".encode()
-    digest = hashlib.blake2b(data, digest_size=8).hexdigest()
-    return digest[:8]
+    stat: os.stat_result = os.stat(file_path)
+    data: bytes = f"{file_path}|{stat.st_mtime_ns}|{stat.st_size}".encode()
+
+    return hashlib.blake2b(data, digest_size=8).hexdigest()
 
 
 def clean_fs_name(folder_or_file_name: str) -> str:

@@ -2,9 +2,11 @@
 Copyright (c) Cutleast
 """
 
+import os
+from pathlib import Path
 from typing import TypeVar
 
-from cutleast_core_lib.core.filesystem.utils import str_glob
+from cutleast_core_lib.core.filesystem.utils import get_file_identifier, str_glob
 
 T = TypeVar("T")
 
@@ -76,3 +78,61 @@ class TestFilesystemUtils:
 
         # then
         assert TestFilesystemUtils.compare_lists(real_output, expected_output)
+
+    def test_get_file_identifier_is_stable(self, tmp_path: Path) -> None:
+        """
+        Tests that `get_file_identifier()` returns the same full-length identifier for
+        an unchanged file.
+        """
+
+        # given
+        file_path: Path = tmp_path / "file.txt"
+        file_path.write_text("content", encoding="utf-8")
+
+        # when
+        first_identifier: str = get_file_identifier(file_path)
+        second_identifier: str = get_file_identifier(file_path)
+
+        # then
+        assert first_identifier == second_identifier
+        assert len(first_identifier) == 16
+
+    def test_get_file_identifier_includes_size(self, tmp_path: Path) -> None:
+        """
+        Tests that `get_file_identifier()` changes when the size of a file changes
+        while its modification timestamp stays the same.
+        """
+
+        # given
+        file_path: Path = tmp_path / "file.txt"
+        file_path.write_text("content", encoding="utf-8")
+        stat: os.stat_result = file_path.stat()
+        original_identifier: str = get_file_identifier(file_path)
+
+        # when
+        file_path.write_text("different content", encoding="utf-8")
+        os.utime(file_path, ns=(stat.st_atime_ns, stat.st_mtime_ns))
+        changed_identifier: str = get_file_identifier(file_path)
+
+        # then
+        assert file_path.stat().st_mtime_ns == stat.st_mtime_ns
+        assert changed_identifier != original_identifier
+
+    def test_get_file_identifier_includes_mtime(self, tmp_path: Path) -> None:
+        """
+        Tests that `get_file_identifier()` changes when the modification timestamp of a
+        file changes while its size stays the same.
+        """
+
+        # given
+        file_path: Path = tmp_path / "file.txt"
+        file_path.write_text("content", encoding="utf-8")
+        stat: os.stat_result = file_path.stat()
+        original_identifier: str = get_file_identifier(file_path)
+
+        # when
+        os.utime(file_path, ns=(stat.st_atime_ns, stat.st_mtime_ns + 1_000_000_000))
+        changed_identifier: str = get_file_identifier(file_path)
+
+        # then
+        assert changed_identifier != original_identifier
